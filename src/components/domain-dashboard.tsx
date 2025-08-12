@@ -203,10 +203,6 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
   return (
     <>
       <div className="mb-4 flex items-center justify-end gap-2">
-        <Button onClick={() => setAddDomainOpen(true)}>
-          <Plus className="ml-2 h-4 w-4" />
-          إضافة نطاق
-        </Button>
         <Button onClick={openReminderDialog} disabled={selectedDomainIds.size === 0}>
           <Send className="ml-2 h-4 w-4" />
           إنشاء تذكيرات ({selectedDomainIds.size})
@@ -281,6 +277,14 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
           </TableBody>
         </Table>
       </div>
+
+      <Button 
+        onClick={() => setAddDomainOpen(true)} 
+        className="fixed bottom-8 left-8 z-50 h-14 w-14 rounded-full shadow-lg"
+        size="icon"
+      >
+        <Plus className="h-6 w-6" />
+      </Button>
 
       {/* Generate Reminders Dialog */}
       <Dialog open={isReminderOpen} onOpenChange={setReminderOpen}>
