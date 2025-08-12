@@ -1,6 +1,6 @@
 import { db } from '@/lib/firebase';
 import type { Domain } from '@/lib/types';
-import { collection, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 
 const domainsCollectionRef = collection(db, 'domains');
 
@@ -17,4 +17,9 @@ export const addDomain = async (domain: Omit<Domain, 'id'>): Promise<Domain> => 
 export const deleteDomain = async (id: string): Promise<void> => {
   const domainDoc = doc(db, 'domains', id);
   await deleteDoc(domainDoc);
+};
+
+export const updateDomain = async (id: string, updatedDomain: Partial<Omit<Domain, 'id'>>): Promise<void> => {
+  const domainDoc = doc(db, 'domains', id);
+  await updateDoc(domainDoc, updatedDomain);
 };

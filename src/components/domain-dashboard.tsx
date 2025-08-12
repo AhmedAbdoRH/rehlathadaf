@@ -27,12 +27,12 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import type { Domain } from '@/lib/types';
 import { format, parseISO, formatISO, differenceInDays, subYears } from 'date-fns';
-import { Plus, Trash2, Calendar as CalendarIcon, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Calendar as CalendarIcon, Loader2, Pencil } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Calendar } from './ui/calendar';
 import { Progress } from './ui/progress';
 import { Card, CardContent } from './ui/card';
-import { getDomains, addDomain, deleteDomain } from '@/services/domainService';
+import { getDomains, addDomain, deleteDomain, updateDomain } from '@/services/domainService';
 import { cn } from "@/lib/utils"
 
 const USD_TO_EGP_RATE = 47.5; // سعر الصرف التقريبي
@@ -41,6 +41,8 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
   const [domains, setDomains] = React.useState<Domain[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [isAddDomainOpen, setAddDomainOpen] = React.useState(false);
+  const [isEditDomainOpen, setEditDomainOpen] = React.useState(false);
+  const [domainToEdit, setDomainToEdit] = React.useState<Domain | null>(null);
   const { toast } = useToast();
 
   React.useEffect(() => {
@@ -67,7 +69,6 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
     registrar: '',
     renewalDate: new Date(),
     clientEmail: '',
-    outstandingBalance: 0,
     renewalCostClient: 0,
     renewalCostOffice: 0,
   });
@@ -83,12 +84,11 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
       return;
     }
 
-    const newDomainEntry: Omit<Domain, 'id'> = {
+    const newDomainEntry: Omit<Domain, 'id' | 'outstandingBalance'> = {
       domainName: newDomain.domainName,
       registrar: newDomain.registrar,
       renewalDate: formatISO(newDomain.renewalDate),
       clientEmail: newDomain.clientEmail,
-      outstandingBalance: Number(newDomain.outstandingBalance) || 0,
       renewalCostClient: Number(newDomain.renewalCostClient) || 0,
       renewalCostOffice: Number(newDomain.renewalCostOffice) || 0,
       status: 'active',
@@ -108,7 +108,6 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
           registrar: '',
           renewalDate: new Date(),
           clientEmail: '',
-          outstandingBalance: 0,
           renewalCostClient: 0,
           renewalCostOffice: 0,
       });
@@ -141,6 +140,44 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
           variant: "destructive",
       });
     }
+  };
+
+  const handleUpdateDomain = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!domainToEdit || !domainToEdit.id) return;
+
+    const { id, ...updatedData } = domainToEdit;
+
+    // Ensure renewalDate is in ISO format string before updating
+    if (typeof updatedData.renewalDate !== 'string') {
+        updatedData.renewalDate = formatISO(updatedData.renewalDate as Date);
+    }
+     
+    try {
+      await updateDomain(id, updatedData);
+      setDomains(prevDomains => prevDomains.map(d => d.id === id ? domainToEdit : d));
+      toast({
+        title: "تم تحديث النطاق",
+        description: `تم تحديث ${domainToEdit.domainName} بنجاح.`,
+      });
+      setEditDomainOpen(false);
+      setDomainToEdit(null);
+    } catch (error) {
+      console.error("Error updating domain:", error);
+      toast({
+        title: "خطأ",
+        description: "فشل في تحديث النطاق.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const openEditDialog = (domain: Domain) => {
+    setDomainToEdit({
+        ...domain,
+        renewalDate: parseISO(domain.renewalDate), // Convert ISO string to Date object for the calendar
+    });
+    setEditDomainOpen(true);
   };
   
   const getRenewalProgress = (renewalDate: string) => {
@@ -200,8 +237,11 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                     <div>${domain.renewalCostOffice.toFixed(2)}</div>
                     <div className="text-xs text-muted-foreground">{(domain.renewalCostOffice * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
                 </TableCell>
-                <TableCell className="text-left">
-                <AlertDialog>
+                <TableCell className="text-left flex items-center">
+                  <Button variant="ghost" size="icon" onClick={() => openEditDialog(domain)}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="ghost" size="icon" disabled={!domain.id}>
                         <Trash2 className="h-4 w-4 text-destructive" />
@@ -241,28 +281,33 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                   <div className="text-sm text-muted-foreground">{domain.registrar}</div>
                   <div className="text-sm text-muted-foreground">{domain.clientEmail}</div>
                 </div>
-                <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon" disabled={!domain.id}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف النطاق بشكل دائم
-                          <span className="font-bold"> {domain.domainName}</span>.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>إلغاء</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDeleteDomain(domain.id!)}>
-                          متابعة
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                <div className="flex items-center">
+                   <Button variant="ghost" size="icon" onClick={() => openEditDialog(domain)}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="icon" disabled={!domain.id}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف النطاق بشكل دائم
+                            <span className="font-bold"> {domain.domainName}</span>.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDeleteDomain(domain.id!)}>
+                            متابعة
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                </div>
               </div>
               <div className='mt-4'>
                 <div>{format(parseISO(domain.renewalDate), 'yyyy/MM/dd')}</div>
@@ -284,7 +329,6 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
           </Card>
         ))}
       </div>
-
 
       <Button 
         onClick={() => setAddDomainOpen(true)} 
@@ -368,8 +412,83 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
             </form>
         </DialogContent>
       </Dialog>
+      
+      {/* Edit Domain Dialog */}
+      <Dialog open={isEditDomainOpen} onOpenChange={setEditDomainOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>تعديل النطاق</DialogTitle>
+            <DialogDescription>
+              قم بتحديث تفاصيل النطاق المحدد.
+            </DialogDescription>
+          </DialogHeader>
+          {domainToEdit && (
+            <form onSubmit={handleUpdateDomain}>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="editDomainName" className="text-right">النطاق</Label>
+                  <Input id="editDomainName" value={domainToEdit.domainName} onChange={(e) => setDomainToEdit({ ...domainToEdit, domainName: e.target.value })} className="col-span-3" required />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="editRegistrar" className="text-right">الإدارة</Label>
+                  <Input id="editRegistrar" value={domainToEdit.registrar} onChange={(e) => setDomainToEdit({ ...domainToEdit, registrar: e.target.value })} className="col-span-3" required />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="editClientEmail" className="text-right">بريد العميل</Label>
+                  <Input id="editClientEmail" type="email" value={domainToEdit.clientEmail} onChange={(e) => setDomainToEdit({ ...domainToEdit, clientEmail: e.target.value })} className="col-span-3" required />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="editRenewalCostClient">تكلفة العميل (بالدولار)</Label>
+                    <div className="relative">
+                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">$</span>
+                      <Input id="editRenewalCostClient" type="number" value={domainToEdit.renewalCostClient} onChange={(e) => setDomainToEdit({ ...domainToEdit, renewalCostClient: Number(e.target.value) })} className="pl-7" required />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="editRenewalCostOffice">تكلفة المكتب (بالدولار)</Label>
+                    <div className="relative">
+                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">$</span>
+                      <Input id="editRenewalCostOffice" type="number" value={domainToEdit.renewalCostOffice} onChange={(e) => setDomainToEdit({ ...domainToEdit, renewalCostOffice: Number(e.target.value) })} className="pl-7" required />
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">تاريخ التجديد</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "col-span-3 justify-start text-left font-normal",
+                          !domainToEdit.renewalDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="ml-2 h-4 w-4" />
+                        {domainToEdit.renewalDate ? format(domainToEdit.renewalDate as Date, "yyyy/MM/dd") : <span>اختر تاريخًا</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={domainToEdit.renewalDate as Date}
+                        onSelect={(date) => setDomainToEdit({ ...domainToEdit, renewalDate: date || new Date() })}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button type="button" variant="outline" onClick={() => setEditDomainOpen(false)}>إلغاء</Button>
+                </DialogClose>
+                <Button type="submit">حفظ التغييرات</Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
-
-    
