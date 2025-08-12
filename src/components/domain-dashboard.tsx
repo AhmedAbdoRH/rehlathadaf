@@ -49,7 +49,8 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
     const fetchDomains = async () => {
       try {
         const domainsFromDb = await getDomains();
-        setDomains(domainsFromDb);
+        const sortedDomains = domainsFromDb.sort((a, b) => differenceInDays(parseISO(a.renewalDate as string), new Date()) - differenceInDays(parseISO(b.renewalDate as string), new Date()));
+        setDomains(sortedDomains);
       } catch (error) {
         console.error("Error fetching domains:", error);
         toast({
@@ -64,21 +65,28 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
     fetchDomains();
   }, [toast]);
 
-  const [newDomain, setNewDomain] = React.useState({
+  const [newDomain, setNewDomain] = React.useState<{
+    domainName: string;
+    registrar: string;
+    renewalDate: Date;
+    clientEmail: string;
+    renewalCostClient: number | '';
+    renewalCostOffice: number | '';
+  }>({
     domainName: '',
     registrar: '',
     renewalDate: new Date(),
     clientEmail: '',
-    renewalCostClient: 0,
-    renewalCostOffice: 0,
+    renewalCostClient: '',
+    renewalCostOffice: '',
   });
 
   const handleAddDomain = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newDomain.domainName || !newDomain.registrar || !newDomain.clientEmail) {
+    if (!newDomain.domainName || !newDomain.registrar) {
       toast({
         title: "خطأ",
-        description: "يرجى ملء جميع الحقول المطلوبة.",
+        description: "يرجى ملء حقول اسم النطاق والإدارة.",
         variant: "destructive",
       });
       return;
@@ -108,8 +116,8 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
           registrar: '',
           renewalDate: new Date(),
           clientEmail: '',
-          renewalCostClient: 0,
-          renewalCostOffice: 0,
+          renewalCostClient: '',
+          renewalCostOffice: '',
       });
     } catch (error) {
        console.error("Error adding domain:", error);
@@ -153,8 +161,14 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
     }
      
     try {
-      await updateDomain(id, updatedData);
-      setDomains(prevDomains => prevDomains.map(d => d.id === id ? { ...d, ...domainToEdit, renewalDate: updatedData.renewalDate } : d));
+      const finalData = {
+          ...updatedData,
+          renewalCostClient: Number(updatedData.renewalCostClient) || 0,
+          renewalCostOffice: Number(updatedData.renewalCostOffice) || 0,
+      };
+
+      await updateDomain(id, finalData);
+      setDomains(prevDomains => prevDomains.map(d => d.id === id ? { ...d, ...domainToEdit, renewalDate: finalData.renewalDate, renewalCostClient: finalData.renewalCostClient, renewalCostOffice: finalData.renewalCostOffice } : d).sort((a, b) => differenceInDays(parseISO(a.renewalDate as string), new Date()) - differenceInDays(parseISO(b.renewalDate as string), new Date())));
       toast({
         title: "تم تحديث النطاق",
         description: `تم تحديث ${domainToEdit.domainName} بنجاح.`,
@@ -183,7 +197,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
         setDomains(prevDomains =>
             prevDomains.map(d =>
                 d.id === domain.id ? { ...d, renewalDate: nextRenewalDateISO } : d
-            )
+            ).sort((a, b) => differenceInDays(parseISO(a.renewalDate as string), new Date()) - differenceInDays(parseISO(b.renewalDate as string), new Date()))
         );
         toast({
             title: "تم تجديد النطاق",
@@ -204,6 +218,8 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
     setDomainToEdit({
         ...domain,
         renewalDate: parseISO(domain.renewalDate as string),
+        renewalCostClient: domain.renewalCostClient || '',
+        renewalCostOffice: domain.renewalCostOffice || '',
     });
     setEditDomainOpen(true);
   };
@@ -211,16 +227,21 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
   const getRenewalProgress = (renewalDate: string) => {
     const renewal = parseISO(renewalDate);
     const today = new Date();
-    const lastRenewal = subYears(renewal, 1);
-
-    const totalDays = differenceInDays(renewal, lastRenewal);
-    const elapsedDays = differenceInDays(today, lastRenewal);
-
-    if (totalDays <= 0) {
+    
+    // If renewal date is in the past, progress is 100%
+    if (differenceInDays(renewal, today) <= 0) {
       return 100;
     }
 
-    const progress = Math.max(0, Math.min(100, (elapsedDays / totalDays) * 100));
+    const lastRenewal = subYears(renewal, 1);
+    const totalDaysInYear = differenceInDays(renewal, lastRenewal);
+    const daysRemaining = differenceInDays(renewal, today);
+
+    if (totalDaysInYear <= 0) {
+      return 0;
+    }
+
+    const progress = Math.max(0, Math.min(100, ((totalDaysInYear - daysRemaining) / totalDaysInYear) * 100));
     return progress;
   };
 
@@ -258,12 +279,12 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                   </div>
                 </TableCell>
                 <TableCell>
-                    <div>${domain.renewalCostClient.toFixed(2)}</div>
-                    <div className="text-xs text-muted-foreground">{(domain.renewalCostClient * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
+                    <div>${Number(domain.renewalCostClient).toFixed(2)}</div>
+                    <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
                 </TableCell>
                 <TableCell>
-                    <div>${domain.renewalCostOffice.toFixed(2)}</div>
-                    <div className="text-xs text-muted-foreground">{(domain.renewalCostOffice * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
+                    <div>${Number(domain.renewalCostOffice).toFixed(2)}</div>
+                    <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostOffice) * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
                 </TableCell>
                 <TableCell className="text-left flex items-center">
                    <AlertDialog>
@@ -390,13 +411,13 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
               <div className="mt-4 grid grid-cols-2 gap-4 text-center">
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">تكلفة العميل</div>
-                  <div>${domain.renewalCostClient.toFixed(2)}</div>
-                  <div className="text-xs text-muted-foreground">{(domain.renewalCostClient * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
+                  <div>${Number(domain.renewalCostClient).toFixed(2)}</div>
+                  <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
                 </div>
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">تكلفة المكتب</div>
-                   <div>${domain.renewalCostOffice.toFixed(2)}</div>
-                   <div className="text-xs text-muted-foreground">{(domain.renewalCostOffice * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
+                   <div>${Number(domain.renewalCostOffice).toFixed(2)}</div>
+                   <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostOffice) * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
                 </div>
               </div>
             </CardContent>
@@ -433,21 +454,21 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                     </div>
                      <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="clientEmail" className="text-right">بريد العميل</Label>
-                        <Input id="clientEmail" type="email" value={newDomain.clientEmail} onChange={(e) => setNewDomain({...newDomain, clientEmail: e.target.value})} className="col-span-3" required />
+                        <Input id="clientEmail" type="email" value={newDomain.clientEmail} onChange={(e) => setNewDomain({...newDomain, clientEmail: e.target.value})} className="col-span-3" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                            <Label htmlFor="renewalCostClient">تكلفة العميل (بالدولار)</Label>
                            <div className="relative">
                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">$</span>
-                               <Input id="renewalCostClient" type="number" value={newDomain.renewalCostClient} onChange={(e) => setNewDomain({...newDomain, renewalCostClient: Number(e.target.value)})} className="pl-7" required />
+                               <Input id="renewalCostClient" type="number" placeholder="0.00" value={newDomain.renewalCostClient} onChange={(e) => setNewDomain({...newDomain, renewalCostClient: e.target.value === '' ? '' : Number(e.target.value)})} className="pl-7" />
                            </div>
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="renewalCostOffice">تكلفة المكتب (بالدولار)</Label>
                             <div className="relative">
                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">$</span>
-                               <Input id="renewalCostOffice" type="number" value={newDomain.renewalCostOffice} onChange={(e) => setNewDomain({...newDomain, renewalCostOffice: Number(e.target.value)})} className="pl-7" required />
+                               <Input id="renewalCostOffice" type="number" placeholder="0.00" value={newDomain.renewalCostOffice} onChange={(e) => setNewDomain({...newDomain, renewalCostOffice: e.target.value === '' ? '' : Number(e.target.value)})} className="pl-7" />
                            </div>
                         </div>
                     </div>
@@ -509,21 +530,21 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="editClientEmail" className="text-right">بريد العميل</Label>
-                  <Input id="editClientEmail" type="email" value={domainToEdit.clientEmail} onChange={(e) => setDomainToEdit({ ...domainToEdit, clientEmail: e.target.value })} className="col-span-3" required />
+                  <Input id="editClientEmail" type="email" value={domainToEdit.clientEmail} onChange={(e) => setDomainToEdit({ ...domainToEdit, clientEmail: e.target.value })} className="col-span-3" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="editRenewalCostClient">تكلفة العميل (بالدولار)</Label>
                     <div className="relative">
                       <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">$</span>
-                      <Input id="editRenewalCostClient" type="number" value={domainToEdit.renewalCostClient} onChange={(e) => setDomainToEdit({ ...domainToEdit, renewalCostClient: Number(e.target.value) })} className="pl-7" required />
+                      <Input id="editRenewalCostClient" type="number" placeholder="0.00" value={domainToEdit.renewalCostClient} onChange={(e) => setDomainToEdit({ ...domainToEdit, renewalCostClient: e.target.value === '' ? '' : Number(e.target.value) })} className="pl-7" />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="editRenewalCostOffice">تكلفة المكتب (بالدولار)</Label>
                     <div className="relative">
                       <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">$</span>
-                      <Input id="editRenewalCostOffice" type="number" value={domainToEdit.renewalCostOffice} onChange={(e) => setDomainToEdit({ ...domainToEdit, renewalCostOffice: Number(e.target.value) })} className="pl-7" required />
+                      <Input id="editRenewalCostOffice" type="number" placeholder="0.00" value={domainToEdit.renewalCostOffice} onChange={(e) => setDomainToEdit({ ...domainToEdit, renewalCostOffice: e.target.value === '' ? '' : Number(e.target.value) })} className="pl-7" />
                     </div>
                   </div>
                 </div>
@@ -566,5 +587,3 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
     </>
   );
 }
-
-    

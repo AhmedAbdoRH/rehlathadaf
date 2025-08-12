@@ -7,6 +7,6 @@ export type Domain = {
   clientEmail: string;
   registrar: string;
   outstandingBalance?: number;
-  renewalCostClient: number;
-  renewalCostOffice: number;
+  renewalCostClient: number | '';
+  renewalCostOffice: number | '';
 };
