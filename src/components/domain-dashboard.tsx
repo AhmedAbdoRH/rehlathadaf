@@ -131,7 +131,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                   <div className="text-sm text-muted-foreground">{domain.registrar}</div>
                   <div className="text-sm text-muted-foreground">{domain.clientEmail}</div>
                   <div className='mt-2'>
-                    <div>{format(parseISO(domain.renewalDate), 'dd/MM/yyyy')}</div>
+                    <div>{format(parseISO(domain.renewalDate), 'yyyy/MM/dd')}</div>
                     <Progress value={getRenewalProgress(domain.renewalDate, domain.collectionDate)} className="h-2 mt-1" />
                   </div>
                 </TableCell>
@@ -228,7 +228,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                                     )}
                                 >
                                     <CalendarIcon className="ml-2 h-4 w-4" />
-                                    {newDomain.renewalDate ? format(newDomain.renewalDate, "PPP") : <span>اختر تاريخًا</span>}
+                                    {newDomain.renewalDate ? format(newDomain.renewalDate, "yyyy/MM/dd") : <span>اختر تاريخًا</span>}
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0">
