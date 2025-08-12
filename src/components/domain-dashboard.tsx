@@ -96,9 +96,10 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
       status: 'active',
       collectionDate: formatISO(new Date()),
     };
+    
     try {
       const addedDomain = await addDomain(newDomainEntry);
-      setDomains([...domains, addedDomain]);
+      setDomains(prevDomains => [...prevDomains, addedDomain]);
       toast({
           title: "تمت إضافة النطاق",
           description: `تمت إضافة ${newDomain.domainName} بنجاح.`,
@@ -369,3 +370,5 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
     </>
   );
 }
+
+    
