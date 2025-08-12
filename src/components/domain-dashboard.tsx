@@ -228,7 +228,6 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
               <TableHead>تكلفة العميل</TableHead>
               <TableHead>تكلفة المكتب</TableHead>
               <TableHead>تاريخ التجديد</TableHead>
-              <TableHead>الايميل</TableHead>
               <TableHead className="text-left">إجراءات</TableHead>
             </TableRow>
           </TableHeader>
@@ -245,6 +244,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                 <TableCell>
                   <div className="font-medium text-primary">{domain.domainName}</div>
                   <div className="text-sm text-muted-foreground">{domain.registrar}</div>
+                  <div className="text-sm text-muted-foreground">{domain.clientEmail}</div>
                 </TableCell>
                 <TableCell>${domain.renewalCostClient.toFixed(2)}</TableCell>
                 <TableCell>${domain.renewalCostOffice.toFixed(2)}</TableCell>
@@ -252,7 +252,6 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                   <div>{format(parseISO(domain.renewalDate), 'd MMM, yyyy')}</div>
                   <Progress value={getRenewalProgress(domain.renewalDate, domain.collectionDate)} className="h-2 mt-1" />
                 </TableCell>
-                <TableCell>{domain.clientEmail}</TableCell>
                 <TableCell className="text-left">
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
