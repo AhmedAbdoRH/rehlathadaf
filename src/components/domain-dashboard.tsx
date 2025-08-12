@@ -33,6 +33,7 @@ import { Calendar } from './ui/calendar';
 import { Progress } from './ui/progress';
 import { Card, CardContent } from './ui/card';
 import { getDomains, addDomain, deleteDomain } from '@/services/domainService';
+import { cn } from "@/lib/utils"
 
 const USD_TO_EGP_RATE = 47.5; // سعر الصرف التقريبي
 
@@ -74,6 +75,15 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
 
   const handleAddDomain = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!newDomain.domainName || !newDomain.registrar || !newDomain.clientName || !newDomain.clientEmail) {
+      toast({
+        title: "خطأ",
+        description: "يرجى ملء جميع الحقول المطلوبة.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const newDomainEntry: Omit<Domain, 'id'> = {
       domainName: newDomain.domainName,
       registrar: newDomain.registrar,
@@ -105,6 +115,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
           renewalCostOffice: 0,
       });
     } catch (error) {
+       console.error("Error adding domain:", error);
        toast({
           title: "خطأ",
           description: `فشل في إضافة النطاق.`,
@@ -357,8 +368,4 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
       </Dialog>
     </>
   );
-}
-
-function cn(...inputs: (string | undefined | null | false)[]): string {
-    return inputs.filter(Boolean).join(' ');
 }
