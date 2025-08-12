@@ -120,7 +120,6 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
               <TableHead>النطاق والإدارة</TableHead>
               <TableHead>تكلفة العميل</TableHead>
               <TableHead>تكلفة المكتب</TableHead>
-              <TableHead>تاريخ التجديد</TableHead>
               <TableHead className="text-left">إجراءات</TableHead>
             </TableRow>
           </TableHeader>
@@ -131,6 +130,10 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                   <div className="font-medium text-lg text-primary">{domain.domainName}</div>
                   <div className="text-sm text-muted-foreground">{domain.registrar}</div>
                   <div className="text-sm text-muted-foreground">{domain.clientEmail}</div>
+                  <div className='mt-2'>
+                    <div>{format(parseISO(domain.renewalDate), 'd MMM')}</div>
+                    <Progress value={getRenewalProgress(domain.renewalDate, domain.collectionDate)} className="h-2 mt-1" />
+                  </div>
                 </TableCell>
                 <TableCell>
                     <div>${domain.renewalCostClient.toFixed(2)}</div>
@@ -139,10 +142,6 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                 <TableCell>
                     <div>${domain.renewalCostOffice.toFixed(2)}</div>
                     <div className="text-xs text-muted-foreground">{(domain.renewalCostOffice * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
-                </TableCell>
-                <TableCell>
-                  <div>{format(parseISO(domain.renewalDate), 'd MMM, yyyy')}</div>
-                  <Progress value={getRenewalProgress(domain.renewalDate, domain.collectionDate)} className="h-2 mt-1" />
                 </TableCell>
                 <TableCell className="text-left">
                 <AlertDialog>
