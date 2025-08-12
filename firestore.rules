@@ -1,10 +1,9 @@
-
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow public read and write access to the domains collection
     match /domains/{domainId} {
+      // السماح بالقراءة والكتابة لأي مستخدم أثناء التطوير
+      // في بيئة الإنتاج، يجب تقييد هذا الوصول للمستخدمين المصادق عليهم فقط
       allow read, write: if true;
     }
   }
