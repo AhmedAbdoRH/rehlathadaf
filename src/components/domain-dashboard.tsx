@@ -66,7 +66,6 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
     domainName: '',
     registrar: '',
     renewalDate: new Date(),
-    clientName: '',
     clientEmail: '',
     outstandingBalance: 0,
     renewalCostClient: 0,
@@ -75,7 +74,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
 
   const handleAddDomain = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newDomain.domainName || !newDomain.registrar || !newDomain.clientName || !newDomain.clientEmail) {
+    if (!newDomain.domainName || !newDomain.registrar || !newDomain.clientEmail) {
       toast({
         title: "خطأ",
         description: "يرجى ملء جميع الحقول المطلوبة.",
@@ -88,7 +87,6 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
       domainName: newDomain.domainName,
       registrar: newDomain.registrar,
       renewalDate: formatISO(newDomain.renewalDate),
-      clientName: newDomain.clientName,
       clientEmail: newDomain.clientEmail,
       outstandingBalance: Number(newDomain.outstandingBalance) || 0,
       renewalCostClient: Number(newDomain.renewalCostClient) || 0,
@@ -109,7 +107,6 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
           domainName: '',
           registrar: '',
           renewalDate: new Date(),
-          clientName: '',
           clientEmail: '',
           outstandingBalance: 0,
           renewalCostClient: 0,
@@ -317,10 +314,6 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                         <Input id="registrar" value={newDomain.registrar} onChange={(e) => setNewDomain({...newDomain, registrar: e.target.value})} className="col-span-3" required />
                     </div>
                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="clientName" className="text-right">اسم العميل</Label>
-                        <Input id="clientName" value={newDomain.clientName} onChange={(e) => setNewDomain({...newDomain, clientName: e.target.value})} className="col-span-3" required />
-                    </div>
-                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="clientEmail" className="text-right">بريد العميل</Label>
                         <Input id="clientEmail" type="email" value={newDomain.clientEmail} onChange={(e) => setNewDomain({...newDomain, clientEmail: e.target.value})} className="col-span-3" required />
                     </div>
@@ -378,3 +371,5 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
     </>
   );
 }
+
+    
