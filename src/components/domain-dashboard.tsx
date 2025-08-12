@@ -324,13 +324,21 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                         <Label htmlFor="clientEmail" className="text-right">بريد العميل</Label>
                         <Input id="clientEmail" type="email" value={newDomain.clientEmail} onChange={(e) => setNewDomain({...newDomain, clientEmail: e.target.value})} className="col-span-3" required />
                     </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="renewalCostClient" className="text-right">تكلفة العميل</Label>
-                        <Input id="renewalCostClient" type="number" value={newDomain.renewalCostClient} onChange={(e) => setNewDomain({...newDomain, renewalCostClient: Number(e.target.value)})} className="col-span-3" required />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="renewalCostOffice" className="text-right">تكلفة المكتب</Label>
-                        <Input id="renewalCostOffice" type="number" value={newDomain.renewalCostOffice} onChange={(e) => setNewDomain({...newDomain, renewalCostOffice: Number(e.target.value)})} className="col-span-3" required />
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                           <Label htmlFor="renewalCostClient">تكلفة العميل (بالدولار)</Label>
+                           <div className="relative">
+                               <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">$</span>
+                               <Input id="renewalCostClient" type="number" value={newDomain.renewalCostClient} onChange={(e) => setNewDomain({...newDomain, renewalCostClient: Number(e.target.value)})} className="pl-7" required />
+                           </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="renewalCostOffice">تكلفة المكتب (بالدولار)</Label>
+                            <div className="relative">
+                               <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">$</span>
+                               <Input id="renewalCostOffice" type="number" value={newDomain.renewalCostOffice} onChange={(e) => setNewDomain({...newDomain, renewalCostOffice: Number(e.target.value)})} className="pl-7" required />
+                           </div>
+                        </div>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label className="text-right">تاريخ التجديد</Label>
@@ -370,5 +378,3 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
     </>
   );
 }
-
-    
