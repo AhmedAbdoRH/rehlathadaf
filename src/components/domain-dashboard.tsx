@@ -26,7 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import type { Domain } from '@/lib/types';
-import { format, parseISO, formatISO, differenceInDays } from 'date-fns';
+import { format, parseISO, formatISO, differenceInDays, subYears } from 'date-fns';
 import { Plus, Trash2, Calendar as CalendarIcon } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Calendar } from './ui/calendar';
@@ -95,13 +95,13 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
     }
   };
   
-  const getRenewalProgress = (renewalDate: string, collectionDate: string) => {
+  const getRenewalProgress = (renewalDate: string) => {
     const renewal = parseISO(renewalDate);
-    const collection = parseISO(collectionDate);
     const today = new Date();
+    const lastRenewal = subYears(renewal, 1);
 
-    const totalDays = differenceInDays(renewal, collection);
-    const elapsedDays = differenceInDays(today, collection);
+    const totalDays = differenceInDays(renewal, lastRenewal);
+    const elapsedDays = differenceInDays(today, lastRenewal);
 
     if (totalDays <= 0) {
       return 100;
@@ -132,7 +132,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                   <div className="text-sm text-muted-foreground">{domain.clientEmail}</div>
                   <div className='mt-2'>
                     <div>{format(parseISO(domain.renewalDate), 'yyyy/MM/dd')}</div>
-                    <Progress value={getRenewalProgress(domain.renewalDate, domain.collectionDate)} className="h-2 mt-1" />
+                    <Progress value={getRenewalProgress(domain.renewalDate)} className="h-2 mt-1" />
                   </div>
                 </TableCell>
                 <TableCell>
