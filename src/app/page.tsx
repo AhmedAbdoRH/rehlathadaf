@@ -1,4 +1,3 @@
-import { domains } from '@/lib/data';
 import { DomainDashboard } from '@/components/domain-dashboard';
 import { Icons } from '@/components/icons';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,7 +20,7 @@ export default function Home() {
             <CardHeader>
             </CardHeader>
             <CardContent>
-              <DomainDashboard initialDomains={domains} />
+              <DomainDashboard initialDomains={[]} />
             </CardContent>
           </Card>
         </main>

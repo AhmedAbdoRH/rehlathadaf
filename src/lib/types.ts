@@ -1,5 +1,5 @@
 export type Domain = {
-  id: number;
+  id?: string; // Firestore uses string IDs
   domainName: string;
   status: 'active' | 'inactive';
   collectionDate: string; // ISO 8601 format

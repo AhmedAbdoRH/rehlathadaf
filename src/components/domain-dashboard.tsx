@@ -27,19 +27,39 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import type { Domain } from '@/lib/types';
 import { format, parseISO, formatISO, differenceInDays, subYears } from 'date-fns';
-import { Plus, Trash2, Calendar as CalendarIcon, MoreVertical } from 'lucide-react';
+import { Plus, Trash2, Calendar as CalendarIcon, Loader2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Calendar } from './ui/calendar';
 import { Progress } from './ui/progress';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Card, CardContent } from './ui/card';
+import { getDomains, addDomain, deleteDomain } from '@/services/domainService';
 
 const USD_TO_EGP_RATE = 47.5; // سعر الصرف التقريبي
 
 export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }) {
-  const [domains, setDomains] = React.useState<Domain[]>(initialDomains);
+  const [domains, setDomains] = React.useState<Domain[]>([]);
+  const [loading, setLoading] = React.useState(true);
   const [isAddDomainOpen, setAddDomainOpen] = React.useState(false);
   const { toast } = useToast();
+
+  React.useEffect(() => {
+    const fetchDomains = async () => {
+      try {
+        const domainsFromDb = await getDomains();
+        setDomains(domainsFromDb);
+      } catch (error) {
+        console.error("Error fetching domains:", error);
+        toast({
+          title: "خطأ",
+          description: "فشل في تحميل النطاقات من قاعدة البيانات.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDomains();
+  }, [toast]);
 
   const [newDomain, setNewDomain] = React.useState({
     domainName: '',
@@ -52,10 +72,9 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
     renewalCostOffice: 0,
   });
 
-  const handleAddDomain = (e: React.FormEvent) => {
+  const handleAddDomain = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newDomainEntry: Domain = {
-      id: Math.max(0, ...domains.map(d => d.id)) + 1,
+    const newDomainEntry: Omit<Domain, 'id'> = {
       domainName: newDomain.domainName,
       registrar: newDomain.registrar,
       renewalDate: formatISO(newDomain.renewalDate),
@@ -67,33 +86,51 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
       status: 'active',
       collectionDate: formatISO(new Date()),
     };
-    setDomains([...domains, newDomainEntry]);
-    toast({
-        title: "تمت إضافة النطاق",
-        description: `تمت إضافة ${newDomain.domainName} بنجاح.`,
-    });
-    setAddDomainOpen(false);
-    setNewDomain({
-        domainName: '',
-        registrar: '',
-        renewalDate: new Date(),
-        clientName: '',
-        clientEmail: '',
-        outstandingBalance: 0,
-        renewalCostClient: 0,
-        renewalCostOffice: 0,
-    });
+    try {
+      const addedDomain = await addDomain(newDomainEntry);
+      setDomains([...domains, addedDomain]);
+      toast({
+          title: "تمت إضافة النطاق",
+          description: `تمت إضافة ${newDomain.domainName} بنجاح.`,
+      });
+      setAddDomainOpen(false);
+      setNewDomain({
+          domainName: '',
+          registrar: '',
+          renewalDate: new Date(),
+          clientName: '',
+          clientEmail: '',
+          outstandingBalance: 0,
+          renewalCostClient: 0,
+          renewalCostOffice: 0,
+      });
+    } catch (error) {
+       toast({
+          title: "خطأ",
+          description: `فشل في إضافة النطاق.`,
+          variant: "destructive",
+      });
+    }
   };
 
-  const handleDeleteDomain = (domainId: number) => {
+  const handleDeleteDomain = async (domainId: string) => {
     const domainToDelete = domains.find(d => d.id === domainId);
-    setDomains(domains.filter(d => d.id !== domainId));
-    if (domainToDelete) {
-        toast({
-            title: "تم حذف النطاق",
-            description: `تم حذف ${domainToDelete.domainName} بنجاح.`,
-            variant: "destructive"
-        });
+    if (!domainToDelete) return;
+
+    try {
+      await deleteDomain(domainId);
+      setDomains(domains.filter(d => d.id !== domainId));
+      toast({
+          title: "تم حذف النطاق",
+          description: `تم حذف ${domainToDelete.domainName} بنجاح.`,
+          variant: "destructive"
+      });
+    } catch (error) {
+       toast({
+          title: "خطأ",
+          description: `فشل في حذف النطاق.`,
+          variant: "destructive",
+      });
     }
   };
   
@@ -112,6 +149,14 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
     const progress = Math.max(0, Math.min(100, (elapsedDays / totalDays) * 100));
     return progress;
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -149,7 +194,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                 <TableCell className="text-left">
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" disabled={!domain.id}>
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </AlertDialogTrigger>
@@ -163,7 +208,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>إلغاء</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDeleteDomain(domain.id)}>
+                        <AlertDialogAction onClick={() => handleDeleteDomain(domain.id!)}>
                           متابعة
                         </AlertDialogAction>
                       </AlertDialogFooter>
@@ -189,7 +234,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                 </div>
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" disabled={!domain.id}>
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </AlertDialogTrigger>
@@ -203,7 +248,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>إلغاء</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDeleteDomain(domain.id)}>
+                        <AlertDialogAction onClick={() => handleDeleteDomain(domain.id!)}>
                           متابعة
                         </AlertDialogAction>
                       </AlertDialogFooter>
@@ -317,5 +362,3 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
 function cn(...inputs: (string | undefined | null | false)[]): string {
     return inputs.filter(Boolean).join(' ');
 }
-
-    
