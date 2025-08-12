@@ -27,10 +27,12 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import type { Domain } from '@/lib/types';
 import { format, parseISO, formatISO, differenceInDays, subYears } from 'date-fns';
-import { Plus, Trash2, Calendar as CalendarIcon } from 'lucide-react';
+import { Plus, Trash2, Calendar as CalendarIcon, MoreVertical } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Calendar } from './ui/calendar';
 import { Progress } from './ui/progress';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
+import { Card, CardContent } from './ui/card';
 
 const USD_TO_EGP_RATE = 47.5; // سعر الصرف التقريبي
 
@@ -113,7 +115,8 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
 
   return (
     <>
-      <div className="rounded-md border">
+      {/* Desktop Table */}
+      <div className="hidden md:block rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -172,6 +175,62 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
           </TableBody>
         </Table>
       </div>
+
+      {/* Mobile Cards */}
+      <div className="md:hidden grid grid-cols-1 gap-4">
+        {domains.map(domain => (
+          <Card key={domain.id} className="w-full">
+            <CardContent className="p-4">
+              <div className="flex justify-between items-start">
+                <div>
+                  <div className="font-medium text-lg text-primary">{domain.domainName}</div>
+                  <div className="text-sm text-muted-foreground">{domain.registrar}</div>
+                  <div className="text-sm text-muted-foreground">{domain.clientEmail}</div>
+                </div>
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف النطاق بشكل دائم
+                          <span className="font-bold"> {domain.domainName}</span>.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDeleteDomain(domain.id)}>
+                          متابعة
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+              </div>
+              <div className='mt-4'>
+                <div>{format(parseISO(domain.renewalDate), 'yyyy/MM/dd')}</div>
+                <Progress value={getRenewalProgress(domain.renewalDate)} className="h-2 mt-1" />
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-4 text-center">
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">تكلفة العميل</div>
+                  <div>${domain.renewalCostClient.toFixed(2)}</div>
+                  <div className="text-xs text-muted-foreground">{(domain.renewalCostClient * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">تكلفة المكتب</div>
+                   <div>${domain.renewalCostOffice.toFixed(2)}</div>
+                   <div className="text-xs text-muted-foreground">{(domain.renewalCostOffice * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
 
       <Button 
         onClick={() => setAddDomainOpen(true)} 
@@ -258,3 +317,5 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
 function cn(...inputs: (string | undefined | null | false)[]): string {
     return inputs.filter(Boolean).join(' ');
 }
+
+    
