@@ -11,15 +11,30 @@ import {
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { generateRenewalReminders, type GenerateRenewalRemindersInput, type GenerateRenewalRemindersOutput } from '@/ai/flows/generate-renewal-reminders';
 import type { Domain } from '@/lib/types';
-import { format, parseISO } from 'date-fns';
-import { Send, Clipboard, Info, CheckCircle, AlertCircle } from 'lucide-react';
+import { format, parseISO, formatISO } from 'date-fns';
+import { Send, Clipboard, Info, CheckCircle, Plus, Trash2, Calendar as CalendarIcon } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { Calendar } from './ui/calendar';
 
 const StatusIndicator = ({ status }: { status: 'active' | 'inactive' }) => {
   const isActive = status === 'active';
@@ -32,12 +47,22 @@ const StatusIndicator = ({ status }: { status: 'active' | 'inactive' }) => {
 };
 
 export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }) {
-  const [domains] = React.useState<Domain[]>(initialDomains);
+  const [domains, setDomains] = React.useState<Domain[]>(initialDomains);
   const [selectedDomainIds, setSelectedDomainIds] = React.useState<Set<number>>(new Set());
   const [isReminderOpen, setReminderOpen] = React.useState(false);
+  const [isAddDomainOpen, setAddDomainOpen] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [reminders, setReminders] = React.useState<GenerateRenewalRemindersOutput | null>(null);
   const { toast } = useToast();
+
+  const [newDomain, setNewDomain] = React.useState({
+    domainName: '',
+    registrar: '',
+    renewalDate: new Date(),
+    clientName: '',
+    clientEmail: '',
+    outstandingBalance: 0,
+  });
 
   const selectedDomains = React.useMemo(() => {
     return domains.filter(d => selectedDomainIds.has(d.id));
@@ -107,12 +132,57 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
     });
   };
 
+  const handleAddDomain = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newDomainEntry: Domain = {
+      id: Math.max(0, ...domains.map(d => d.id)) + 1,
+      domainName: newDomain.domainName,
+      registrar: newDomain.registrar,
+      renewalDate: formatISO(newDomain.renewalDate),
+      clientName: newDomain.clientName,
+      clientEmail: newDomain.clientEmail,
+      outstandingBalance: Number(newDomain.outstandingBalance) || 0,
+      status: 'active',
+      collectionDate: formatISO(new Date()),
+    };
+    setDomains([...domains, newDomainEntry]);
+    toast({
+        title: "Domain Added",
+        description: `${newDomain.domainName} has been successfully added.`,
+    });
+    setAddDomainOpen(false);
+    setNewDomain({
+        domainName: '',
+        registrar: '',
+        renewalDate: new Date(),
+        clientName: '',
+        clientEmail: '',
+        outstandingBalance: 0,
+    });
+  };
+
+  const handleDeleteDomain = (domainId: number) => {
+    const domainToDelete = domains.find(d => d.id === domainId);
+    setDomains(domains.filter(d => d.id !== domainId));
+    if (domainToDelete) {
+        toast({
+            title: "Domain Deleted",
+            description: `${domainToDelete.domainName} has been successfully deleted.`,
+            variant: "destructive"
+        });
+    }
+  };
+
   const isAllSelected = selectedDomainIds.size > 0 && selectedDomainIds.size === domains.length;
   const isIndeterminate = selectedDomainIds.size > 0 && selectedDomainIds.size < domains.length;
 
   return (
     <>
-      <div className="mb-4 flex items-center justify-end">
+      <div className="mb-4 flex items-center justify-end gap-2">
+        <Button onClick={() => setAddDomainOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add Domain
+        </Button>
         <Button onClick={openReminderDialog} disabled={selectedDomainIds.size === 0}>
           <Send className="mr-2 h-4 w-4" />
           Generate Reminders ({selectedDomainIds.size})
@@ -135,6 +205,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
               <TableHead>Collection Date</TableHead>
               <TableHead>Renewal Date</TableHead>
               <TableHead>Client Email</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -157,12 +228,37 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                 <TableCell>{format(parseISO(domain.collectionDate), 'MMM d, yyyy')}</TableCell>
                 <TableCell>{format(parseISO(domain.renewalDate), 'MMM d, yyyy')}</TableCell>
                 <TableCell>{domain.clientEmail}</TableCell>
+                <TableCell className="text-right">
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently delete the domain
+                          <span className="font-bold"> {domain.domainName}</span>.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDeleteDomain(domain.id)}>
+                          Continue
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </div>
 
+      {/* Generate Reminders Dialog */}
       <Dialog open={isReminderOpen} onOpenChange={setReminderOpen}>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
@@ -237,6 +333,73 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
           )}
         </DialogContent>
       </Dialog>
+      
+      {/* Add Domain Dialog */}
+      <Dialog open={isAddDomainOpen} onOpenChange={setAddDomainOpen}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Add a New Domain</DialogTitle>
+                <DialogDescription>
+                    Enter the details for the new domain you want to manage.
+                </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleAddDomain}>
+                <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="domainName" className="text-right">Domain</Label>
+                        <Input id="domainName" value={newDomain.domainName} onChange={(e) => setNewDomain({...newDomain, domainName: e.target.value})} className="col-span-3" required />
+                    </div>
+                     <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="registrar" className="text-right">Registrar</Label>
+                        <Input id="registrar" value={newDomain.registrar} onChange={(e) => setNewDomain({...newDomain, registrar: e.target.value})} className="col-span-3" required />
+                    </div>
+                     <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="clientName" className="text-right">Client Name</Label>
+                        <Input id="clientName" value={newDomain.clientName} onChange={(e) => setNewDomain({...newDomain, clientName: e.target.value})} className="col-span-3" required />
+                    </div>
+                     <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="clientEmail" className="text-right">Client Email</Label>
+                        <Input id="clientEmail" type="email" value={newDomain.clientEmail} onChange={(e) => setNewDomain({...newDomain, clientEmail: e.target.value})} className="col-span-3" required />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="outstandingBalance" className="text-right">Balance</Label>
+                        <Input id="outstandingBalance" type="number" value={newDomain.outstandingBalance} onChange={(e) => setNewDomain({...newDomain, outstandingBalance: Number(e.target.value)})} className="col-span-3" required />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right">Renewal Date</Label>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                        "col-span-3 justify-start text-left font-normal",
+                                        !newDomain.renewalDate && "text-muted-foreground"
+                                    )}
+                                >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {newDomain.renewalDate ? format(newDomain.renewalDate, "PPP") : <span>Pick a date</span>}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                                <Calendar
+                                    mode="single"
+                                    selected={newDomain.renewalDate}
+                                    onSelect={(date) => setNewDomain({...newDomain, renewalDate: date || new Date()})}
+                                    initialFocus
+                                />
+                            </PopoverContent>
+                        </Popover>
+                    </div>
+                </div>
+                 <DialogFooter>
+                    <DialogClose asChild>
+                        <Button type="button" variant="outline">Cancel</Button>
+                    </DialogClose>
+                    <Button type="submit">Add Domain</Button>
+                </DialogFooter>
+            </form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
@@ -244,3 +407,5 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
 function cn(...inputs: (string | undefined | null | false)[]): string {
     return inputs.filter(Boolean).join(' ');
 }
+
+    
