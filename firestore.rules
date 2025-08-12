@@ -1,0 +1,11 @@
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow public read and write access to the domains collection
+    match /domains/{domainId} {
+      allow read, write: if true;
+    }
+  }
+}
