@@ -131,7 +131,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                   <div className="text-sm text-muted-foreground">{domain.registrar}</div>
                   <div className="text-sm text-muted-foreground">{domain.clientEmail}</div>
                   <div className='mt-2'>
-                    <div>{format(parseISO(domain.renewalDate), 'PPP')}</div>
+                    <div>{format(parseISO(domain.renewalDate), 'dd/MM/yyyy')}</div>
                     <Progress value={getRenewalProgress(domain.renewalDate, domain.collectionDate)} className="h-2 mt-1" />
                   </div>
                 </TableCell>
