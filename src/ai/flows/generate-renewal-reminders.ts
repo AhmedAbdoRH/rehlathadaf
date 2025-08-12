@@ -44,29 +44,29 @@ const prompt = ai.definePrompt({
   name: 'generateRenewalRemindersPrompt',
   input: {schema: GenerateRenewalRemindersInputSchema},
   output: {schema: GenerateRenewalRemindersOutputSchema},
-  prompt: `You are an AI assistant specializing in generating personalized email reminders for domain renewals.
+  prompt: `أنت مساعد ذكاء اصطناعي متخصص في إنشاء رسائل تذكير شخصية عبر البريد الإلكتروني لتجديد النطاقات.
 
-  Given the following list of domains and their renewal information, create a personalized email reminder for each domain.
-  Each email should include the client's name, domain name, renewal date, outstanding balance (if any), and a friendly reminder to renew their domain.
-  If a domain is past due, the reminder should also mention the overdue status and urge the client to take immediate action.
+  بالنظر إلى القائمة التالية من النطاقات ومعلومات تجديدها، قم بإنشاء تذكير شخصي عبر البريد الإلكتروني لكل نطاق.
+  يجب أن تتضمن كل رسالة بريد إلكتروني اسم العميل واسم النطاق وتاريخ التجديد والرصيد المستحق (إن وجد) وتذكيرًا ودودًا بتجديد نطاقهم.
+  إذا كان النطاق متأخرًا عن السداد، فيجب أن يذكر التذكير أيضًا حالة التأخير ويحث العميل على اتخاذ إجراء فوري.
 
-  Here's the domain and client information:
+  إليك معلومات النطاق والعميل:
   {{#each domains}}
-  Domain Name: {{{domainName}}}
-  Renewal Date: {{{renewalDate}}}
-  Client Name: {{{clientName}}}
-  Client Email: {{{clientEmail}}}
-  Outstanding Balance: {{{outstandingBalance}}}
-  Past Due: {{#if isPastDue}}Yes{{else}}No{{/if}}
+  اسم النطاق: {{{domainName}}}
+  تاريخ التجديد: {{{renewalDate}}}
+  اسم العميل: {{{clientName}}}
+  البريد الإلكتروني للعميل: {{{clientEmail}}}
+  الرصيد المستحق: {{{outstandingBalance}}}
+  متأخر عن السداد: {{#if isPastDue}}نعم{{else}}لا{{/if}}
   \n
   {{/each}}
 
-  Generate personalized email reminders for each domain, tailored to the client and domain specifics.
-  The reminder messages should be concise, professional, and action-oriented.
-  Make sure to include all necessary information in a friendly and helpful manner.
+  قم بإنشاء تذكيرات بريد إلكتروني مخصصة لكل نطاق، مصممة خصيصًا للعميل وتفاصيل النطاق.
+  يجب أن تكون رسائل التذكير موجزة ومهنية وموجهة نحو الإجراء.
+  تأكد من تضمين جميع المعلومات الضرورية بطريقة ودية ومفيدة.
 
-  Output should be a JSON array of objects, where each object contains the domainName, clientEmail, and reminderMessage.
-  Make sure the reminderMessage is compelling and includes all the information described above.
+  يجب أن يكون الإخراج عبارة عن مصفوفة JSON من الكائنات، حيث يحتوي كل كائن على domainName و clientEmail و reminderMessage.
+  تأكد من أن reminderMessage مقنعة وتتضمن جميع المعلومات الموضحة أعلاه.
   `, 
 });
 

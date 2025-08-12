@@ -38,10 +38,11 @@ import { Calendar } from './ui/calendar';
 
 const StatusIndicator = ({ status }: { status: 'active' | 'inactive' }) => {
   const isActive = status === 'active';
+  const statusText = isActive ? 'نشط' : 'غير نشط';
   return (
     <div className="flex items-center gap-2">
       <span className={cn('h-2.5 w-2.5 rounded-full', isActive ? 'bg-green-500' : 'bg-red-500')} />
-      <span className="capitalize text-sm">{status}</span>
+      <span className="capitalize text-sm">{statusText}</span>
     </div>
   );
 };
@@ -116,8 +117,8 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
       console.error("Failed to generate reminders:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to generate reminders. Please try again.",
+        title: "خطأ",
+        description: "فشل في إنشاء التذكيرات. يرجى المحاولة مرة أخرى.",
       });
     } finally {
       setIsLoading(false);
@@ -127,8 +128,8 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
-      title: "Copied to clipboard!",
-      description: "The reminder message has been copied.",
+      title: "تم النسخ إلى الحافظة!",
+      description: "تم نسخ رسالة التذكير.",
     });
   };
 
@@ -147,8 +148,8 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
     };
     setDomains([...domains, newDomainEntry]);
     toast({
-        title: "Domain Added",
-        description: `${newDomain.domainName} has been successfully added.`,
+        title: "تمت إضافة النطاق",
+        description: `تمت إضافة ${newDomain.domainName} بنجاح.`,
     });
     setAddDomainOpen(false);
     setNewDomain({
@@ -166,8 +167,8 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
     setDomains(domains.filter(d => d.id !== domainId));
     if (domainToDelete) {
         toast({
-            title: "Domain Deleted",
-            description: `${domainToDelete.domainName} has been successfully deleted.`,
+            title: "تم حذف النطاق",
+            description: `تم حذف ${domainToDelete.domainName} بنجاح.`,
             variant: "destructive"
         });
     }
@@ -180,12 +181,12 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
     <>
       <div className="mb-4 flex items-center justify-end gap-2">
         <Button onClick={() => setAddDomainOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Domain
+          <Plus className="ml-2 h-4 w-4" />
+          إضافة نطاق
         </Button>
         <Button onClick={openReminderDialog} disabled={selectedDomainIds.size === 0}>
-          <Send className="mr-2 h-4 w-4" />
-          Generate Reminders ({selectedDomainIds.size})
+          <Send className="ml-2 h-4 w-4" />
+          إنشاء تذكيرات ({selectedDomainIds.size})
         </Button>
       </div>
 
@@ -197,15 +198,15 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                 <Checkbox
                   onCheckedChange={handleSelectAll}
                   checked={isAllSelected ? true : isIndeterminate ? 'indeterminate' : false}
-                  aria-label="Select all rows"
+                  aria-label="تحديد كل الصفوف"
                 />
               </TableHead>
-              <TableHead>Domain & Registrar</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Collection Date</TableHead>
-              <TableHead>Renewal Date</TableHead>
-              <TableHead>Client Email</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>النطاق والمسجل</TableHead>
+              <TableHead>الحالة</TableHead>
+              <TableHead>تاريخ التحصيل</TableHead>
+              <TableHead>تاريخ التجديد</TableHead>
+              <TableHead>بريد العميل الإلكتروني</TableHead>
+              <TableHead className="text-left">إجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -215,7 +216,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                   <Checkbox
                     onCheckedChange={(checked) => handleSelectRow(domain.id, !!checked)}
                     checked={selectedDomainIds.has(domain.id)}
-                    aria-label={`Select row for ${domain.domainName}`}
+                    aria-label={`تحديد صف لـ ${domain.domainName}`}
                   />
                 </TableCell>
                 <TableCell>
@@ -225,10 +226,10 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                 <TableCell>
                   <StatusIndicator status={domain.status} />
                 </TableCell>
-                <TableCell>{format(parseISO(domain.collectionDate), 'MMM d, yyyy')}</TableCell>
-                <TableCell>{format(parseISO(domain.renewalDate), 'MMM d, yyyy')}</TableCell>
+                <TableCell>{format(parseISO(domain.collectionDate), 'd MMM, yyyy')}</TableCell>
+                <TableCell>{format(parseISO(domain.renewalDate), 'd MMM, yyyy')}</TableCell>
                 <TableCell>{domain.clientEmail}</TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-left">
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="ghost" size="icon">
@@ -237,16 +238,16 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
                         <AlertDialogDescription>
-                          This action cannot be undone. This will permanently delete the domain
+                          لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف النطاق بشكل دائم
                           <span className="font-bold"> {domain.domainName}</span>.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>إلغاء</AlertDialogCancel>
                         <AlertDialogAction onClick={() => handleDeleteDomain(domain.id)}>
-                          Continue
+                          متابعة
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -262,9 +263,9 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
       <Dialog open={isReminderOpen} onOpenChange={setReminderOpen}>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Generate Renewal Reminders</DialogTitle>
+            <DialogTitle>إنشاء تذكيرات التجديد</DialogTitle>
             <DialogDescription>
-              AI will generate personalized reminder emails for the selected domains.
+              سيقوم الذكاء الاصطناعي بإنشاء رسائل تذكير شخصية عبر البريد الإلكتروني للنطاقات المحددة.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
@@ -284,9 +285,9 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
               <div>
                 <Alert variant="default" className="mb-4 bg-teal-50 border-teal-200 text-teal-800 dark:bg-teal-950 dark:border-teal-800 dark:text-teal-200">
                   <CheckCircle className="h-4 w-4 !text-teal-600 dark:!text-teal-400" />
-                  <AlertTitle>Generation Complete</AlertTitle>
+                  <AlertTitle>اكتمل الإنشاء</AlertTitle>
                   <AlertDescription>
-                    Review the generated reminders below. You can copy them to your clipboard.
+                    راجع التذكيرات التي تم إنشاؤها أدناه. يمكنك نسخها إلى الحافظة الخاصة بك.
                   </AlertDescription>
                 </Alert>
                 <Accordion type="single" collapsible className="w-full">
@@ -298,8 +299,8 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                           {r.reminderMessage}
                         </div>
                         <Button variant="ghost" size="sm" className="mt-2 text-accent" onClick={() => copyToClipboard(r.reminderMessage)}>
-                          <Clipboard className="mr-2 h-4 w-4" />
-                          Copy Message
+                          <Clipboard className="ml-2 h-4 w-4" />
+                          نسخ الرسالة
                         </Button>
                       </AccordionContent>
                     </AccordionItem>
@@ -310,9 +311,9 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
               <div>
                 <Alert className="mb-4">
                   <Info className="h-4 w-4" />
-                  <AlertTitle>Confirm Selection</AlertTitle>
+                  <AlertTitle>تأكيد الاختيار</AlertTitle>
                   <AlertDescription>
-                    You are about to generate reminders for {selectedDomains.length} domain(s).
+                    أنت على وشك إنشاء تذكيرات لـ {selectedDomains.length} نطاق (نطاقات).
                   </AlertDescription>
                 </Alert>
                 <ul className="max-h-60 overflow-y-auto space-y-2 rounded-md border p-4">
@@ -325,9 +326,9 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
           </div>
           {!reminders && (
              <DialogFooter>
-               <Button variant="outline" onClick={() => setReminderOpen(false)}>Cancel</Button>
+               <Button variant="outline" onClick={() => setReminderOpen(false)}>إلغاء</Button>
               <Button onClick={handleGenerate} disabled={isLoading}>
-                {isLoading ? 'Generating...' : `Generate ${selectedDomains.length} Reminders`}
+                {isLoading ? 'جارٍ الإنشاء...' : `إنشاء ${selectedDomains.length} تذكيرات`}
               </Button>
             </DialogFooter>
           )}
@@ -338,35 +339,35 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
       <Dialog open={isAddDomainOpen} onOpenChange={setAddDomainOpen}>
         <DialogContent>
             <DialogHeader>
-                <DialogTitle>Add a New Domain</DialogTitle>
+                <DialogTitle>إضافة نطاق جديد</DialogTitle>
                 <DialogDescription>
-                    Enter the details for the new domain you want to manage.
+                    أدخل تفاصيل النطاق الجديد الذي تريد إدارته.
                 </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleAddDomain}>
                 <div className="grid gap-4 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="domainName" className="text-right">Domain</Label>
+                        <Label htmlFor="domainName" className="text-right">النطاق</Label>
                         <Input id="domainName" value={newDomain.domainName} onChange={(e) => setNewDomain({...newDomain, domainName: e.target.value})} className="col-span-3" required />
                     </div>
                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="registrar" className="text-right">Registrar</Label>
+                        <Label htmlFor="registrar" className="text-right">المسجل</Label>
                         <Input id="registrar" value={newDomain.registrar} onChange={(e) => setNewDomain({...newDomain, registrar: e.target.value})} className="col-span-3" required />
                     </div>
                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="clientName" className="text-right">Client Name</Label>
+                        <Label htmlFor="clientName" className="text-right">اسم العميل</Label>
                         <Input id="clientName" value={newDomain.clientName} onChange={(e) => setNewDomain({...newDomain, clientName: e.target.value})} className="col-span-3" required />
                     </div>
                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="clientEmail" className="text-right">Client Email</Label>
+                        <Label htmlFor="clientEmail" className="text-right">بريد العميل</Label>
                         <Input id="clientEmail" type="email" value={newDomain.clientEmail} onChange={(e) => setNewDomain({...newDomain, clientEmail: e.target.value})} className="col-span-3" required />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="outstandingBalance" className="text-right">Balance</Label>
+                        <Label htmlFor="outstandingBalance" className="text-right">الرصيد</Label>
                         <Input id="outstandingBalance" type="number" value={newDomain.outstandingBalance} onChange={(e) => setNewDomain({...newDomain, outstandingBalance: Number(e.target.value)})} className="col-span-3" required />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label className="text-right">Renewal Date</Label>
+                        <Label className="text-right">تاريخ التجديد</Label>
                         <Popover>
                             <PopoverTrigger asChild>
                                 <Button
@@ -376,8 +377,8 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                                         !newDomain.renewalDate && "text-muted-foreground"
                                     )}
                                 >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {newDomain.renewalDate ? format(newDomain.renewalDate, "PPP") : <span>Pick a date</span>}
+                                    <CalendarIcon className="ml-2 h-4 w-4" />
+                                    {newDomain.renewalDate ? format(newDomain.renewalDate, "PPP") : <span>اختر تاريخًا</span>}
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0">
@@ -393,9 +394,9 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                 </div>
                  <DialogFooter>
                     <DialogClose asChild>
-                        <Button type="button" variant="outline">Cancel</Button>
+                        <Button type="button" variant="outline">إلغاء</Button>
                     </DialogClose>
-                    <Button type="submit">Add Domain</Button>
+                    <Button type="submit">إضافة نطاق</Button>
                 </DialogFooter>
             </form>
         </DialogContent>
@@ -407,5 +408,3 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
 function cn(...inputs: (string | undefined | null | false)[]): string {
     return inputs.filter(Boolean).join(' ');
 }
-
-    

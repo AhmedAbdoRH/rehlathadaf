@@ -12,16 +12,16 @@ export default function Home() {
             <Icons.logo className="h-8 w-8 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-foreground">DomainView</h1>
-            <p className="text-muted-foreground">A comprehensive overview of your domains.</p>
+            <h1 className="text-3xl font-bold text-foreground">عرض النطاق</h1>
+            <p className="text-muted-foreground">نظرة شاملة على نطاقاتك.</p>
           </div>
         </header>
         <main>
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle>Managed Domains</CardTitle>
+              <CardTitle>النطاقات المدارة</CardTitle>
               <CardDescription>
-                View, manage, and generate renewal reminders for your client domains.
+                عرض وإدارة وإنشاء تذكيرات التجديد لنطاقات عملائك.
               </CardDescription>
             </CardHeader>
             <CardContent>
