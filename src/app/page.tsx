@@ -1,7 +1,7 @@
 import { domains } from '@/lib/data';
 import { DomainDashboard } from '@/components/domain-dashboard';
 import { Icons } from '@/components/icons';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function Home() {
   return (
@@ -19,9 +19,6 @@ export default function Home() {
         <main>
           <Card className="shadow-lg">
             <CardHeader>
-              <CardDescription>
-                عرض وإدارة وإنشاء تذكيرات التجديد لنطاقات عملائك.
-              </CardDescription>
             </CardHeader>
             <CardContent>
               <DomainDashboard initialDomains={domains} />
