@@ -31,10 +31,11 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { generateRenewalReminders, type GenerateRenewalRemindersInput, type GenerateRenewalRemindersOutput } from '@/ai/flows/generate-renewal-reminders';
 import type { Domain } from '@/lib/types';
-import { format, parseISO, formatISO } from 'date-fns';
+import { format, parseISO, formatISO, differenceInDays } from 'date-fns';
 import { Send, Clipboard, Info, CheckCircle, Plus, Trash2, Calendar as CalendarIcon } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Calendar } from './ui/calendar';
+import { Progress } from './ui/progress';
 
 const StatusIndicator = ({ status }: { status: 'active' | 'inactive' }) => {
   const isActive = status === 'active';
@@ -179,6 +180,22 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
         });
     }
   };
+  
+  const getRenewalProgress = (renewalDate: string, collectionDate: string) => {
+    const renewal = parseISO(renewalDate);
+    const collection = parseISO(collectionDate);
+    const today = new Date();
+
+    const totalDays = differenceInDays(renewal, collection);
+    const elapsedDays = differenceInDays(today, collection);
+
+    if (totalDays <= 0) {
+      return 100;
+    }
+
+    const progress = Math.max(0, Math.min(100, (elapsedDays / totalDays) * 100));
+    return progress;
+  };
 
   const isAllSelected = selectedDomainIds.size > 0 && selectedDomainIds.size === domains.length;
   const isIndeterminate = selectedDomainIds.size > 0 && selectedDomainIds.size < domains.length;
@@ -207,11 +224,11 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                   aria-label="تحديد كل الصفوف"
                 />
               </TableHead>
-              <TableHead>النطاق والمسجل</TableHead>
+              <TableHead>النطاق والإدارة</TableHead>
               <TableHead>تكلفة العميل</TableHead>
               <TableHead>تكلفة المكتب</TableHead>
               <TableHead>تاريخ التجديد</TableHead>
-              <TableHead>بريد العميل الإلكتروني</TableHead>
+              <TableHead>الايميل</TableHead>
               <TableHead className="text-left">إجراءات</TableHead>
             </TableRow>
           </TableHeader>
@@ -231,7 +248,10 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                 </TableCell>
                 <TableCell>${domain.renewalCostClient.toFixed(2)}</TableCell>
                 <TableCell>${domain.renewalCostOffice.toFixed(2)}</TableCell>
-                <TableCell>{format(parseISO(domain.renewalDate), 'd MMM, yyyy')}</TableCell>
+                <TableCell>
+                  <div>{format(parseISO(domain.renewalDate), 'd MMM, yyyy')}</div>
+                  <Progress value={getRenewalProgress(domain.renewalDate, domain.collectionDate)} className="h-2 mt-1" />
+                </TableCell>
                 <TableCell>{domain.clientEmail}</TableCell>
                 <TableCell className="text-left">
                 <AlertDialog>
@@ -355,7 +375,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                         <Input id="domainName" value={newDomain.domainName} onChange={(e) => setNewDomain({...newDomain, domainName: e.target.value})} className="col-span-3" required />
                     </div>
                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="registrar" className="text-right">المسجل</Label>
+                        <Label htmlFor="registrar" className="text-right">الإدارة</Label>
                         <Input id="registrar" value={newDomain.registrar} onChange={(e) => setNewDomain({...newDomain, registrar: e.target.value})} className="col-span-3" required />
                     </div>
                      <div className="grid grid-cols-4 items-center gap-4">
