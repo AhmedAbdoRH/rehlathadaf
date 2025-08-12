@@ -19,7 +19,6 @@ export default function Home() {
         <main>
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle>النطاقات المدارة</CardTitle>
               <CardDescription>
                 عرض وإدارة وإنشاء تذكيرات التجديد لنطاقات عملائك.
               </CardDescription>
