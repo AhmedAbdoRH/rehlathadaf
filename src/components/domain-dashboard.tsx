@@ -32,6 +32,8 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Calendar } from './ui/calendar';
 import { Progress } from './ui/progress';
 
+const USD_TO_EGP_RATE = 47.5; // سعر الصرف التقريبي
+
 export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }) {
   const [domains, setDomains] = React.useState<Domain[]>(initialDomains);
   const [isAddDomainOpen, setAddDomainOpen] = React.useState(false);
@@ -130,8 +132,14 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                   <div className="text-sm text-muted-foreground">{domain.registrar}</div>
                   <div className="text-sm text-muted-foreground">{domain.clientEmail}</div>
                 </TableCell>
-                <TableCell>${domain.renewalCostClient.toFixed(2)}</TableCell>
-                <TableCell>${domain.renewalCostOffice.toFixed(2)}</TableCell>
+                <TableCell>
+                    <div>${domain.renewalCostClient.toFixed(2)}</div>
+                    <div className="text-xs text-muted-foreground">{(domain.renewalCostClient * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
+                </TableCell>
+                <TableCell>
+                    <div>${domain.renewalCostOffice.toFixed(2)}</div>
+                    <div className="text-xs text-muted-foreground">{(domain.renewalCostOffice * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
+                </TableCell>
                 <TableCell>
                   <div>{format(parseISO(domain.renewalDate), 'd MMM, yyyy')}</div>
                   <Progress value={getRenewalProgress(domain.renewalDate, domain.collectionDate)} className="h-2 mt-1" />
