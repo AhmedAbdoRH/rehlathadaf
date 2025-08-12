@@ -63,6 +63,8 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
     clientName: '',
     clientEmail: '',
     outstandingBalance: 0,
+    renewalCostClient: 0,
+    renewalCostOffice: 0,
   });
 
   const selectedDomains = React.useMemo(() => {
@@ -143,6 +145,8 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
       clientName: newDomain.clientName,
       clientEmail: newDomain.clientEmail,
       outstandingBalance: Number(newDomain.outstandingBalance) || 0,
+      renewalCostClient: Number(newDomain.renewalCostClient) || 0,
+      renewalCostOffice: Number(newDomain.renewalCostOffice) || 0,
       status: 'active',
       collectionDate: formatISO(new Date()),
     };
@@ -159,6 +163,8 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
         clientName: '',
         clientEmail: '',
         outstandingBalance: 0,
+        renewalCostClient: 0,
+        renewalCostOffice: 0,
     });
   };
 
@@ -202,8 +208,8 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                 />
               </TableHead>
               <TableHead>النطاق والمسجل</TableHead>
-              <TableHead>الحالة</TableHead>
-              <TableHead>تاريخ التحصيل</TableHead>
+              <TableHead>تكلفة العميل</TableHead>
+              <TableHead>تكلفة المكتب</TableHead>
               <TableHead>تاريخ التجديد</TableHead>
               <TableHead>بريد العميل الإلكتروني</TableHead>
               <TableHead className="text-left">إجراءات</TableHead>
@@ -223,10 +229,8 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                   <div className="font-medium text-primary">{domain.domainName}</div>
                   <div className="text-sm text-muted-foreground">{domain.registrar}</div>
                 </TableCell>
-                <TableCell>
-                  <StatusIndicator status={domain.status} />
-                </TableCell>
-                <TableCell>{format(parseISO(domain.collectionDate), 'd MMM, yyyy')}</TableCell>
+                <TableCell>${domain.renewalCostClient.toFixed(2)}</TableCell>
+                <TableCell>${domain.renewalCostOffice.toFixed(2)}</TableCell>
                 <TableCell>{format(parseISO(domain.renewalDate), 'd MMM, yyyy')}</TableCell>
                 <TableCell>{domain.clientEmail}</TableCell>
                 <TableCell className="text-left">
@@ -363,8 +367,12 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                         <Input id="clientEmail" type="email" value={newDomain.clientEmail} onChange={(e) => setNewDomain({...newDomain, clientEmail: e.target.value})} className="col-span-3" required />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="outstandingBalance" className="text-right">الرصيد</Label>
-                        <Input id="outstandingBalance" type="number" value={newDomain.outstandingBalance} onChange={(e) => setNewDomain({...newDomain, outstandingBalance: Number(e.target.value)})} className="col-span-3" required />
+                        <Label htmlFor="renewalCostClient" className="text-right">تكلفة العميل</Label>
+                        <Input id="renewalCostClient" type="number" value={newDomain.renewalCostClient} onChange={(e) => setNewDomain({...newDomain, renewalCostClient: Number(e.target.value)})} className="col-span-3" required />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="renewalCostOffice" className="text-right">تكلفة المكتب</Label>
+                        <Input id="renewalCostOffice" type="number" value={newDomain.renewalCostOffice} onChange={(e) => setNewDomain({...newDomain, renewalCostOffice: Number(e.target.value)})} className="col-span-3" required />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label className="text-right">تاريخ التجديد</Label>

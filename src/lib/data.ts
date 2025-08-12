@@ -14,6 +14,8 @@ export const domains: Domain[] = [
     clientEmail: 'alice.j@example.com',
     registrar: 'GoDaddy',
     outstandingBalance: 0,
+    renewalCostClient: 15,
+    renewalCostOffice: 10,
   },
   {
     id: 2,
@@ -25,6 +27,8 @@ export const domains: Domain[] = [
     clientEmail: 'bob.w@example.com',
     registrar: 'Namecheap',
     outstandingBalance: 50.00,
+    renewalCostClient: 20,
+    renewalCostOffice: 12,
   },
   {
     id: 3,
@@ -36,6 +40,8 @@ export const domains: Domain[] = [
     clientEmail: 'charlie.b@example.com',
     registrar: 'Google Domains',
     outstandingBalance: 25.00,
+    renewalCostClient: 30,
+    renewalCostOffice: 25,
   },
   {
     id: 4,
@@ -47,6 +53,8 @@ export const domains: Domain[] = [
     clientEmail: 'diana.p@example.com',
     registrar: 'Cloudflare',
     outstandingBalance: 0,
+    renewalCostClient: 12,
+    renewalCostOffice: 9,
   },
   {
     id: 5,
@@ -58,6 +66,8 @@ export const domains: Domain[] = [
     clientEmail: 'ethan.h@example.com',
     registrar: 'Porkbun',
     outstandingBalance: 0,
+    renewalCostClient: 18,
+    renewalCostOffice: 14,
   },
     {
     id: 6,
@@ -69,6 +79,8 @@ export const domains: Domain[] = [
     clientEmail: 'fiona.g@example.com',
     registrar: 'Namecheap',
     outstandingBalance: 0,
+    renewalCostClient: 22,
+    renewalCostOffice: 18,
   },
   {
     id: 7,
@@ -80,5 +92,7 @@ export const domains: Domain[] = [
     clientEmail: 'george.c@example.com',
     registrar: 'GoDaddy',
     outstandingBalance: 75.50,
+    renewalCostClient: 14,
+    renewalCostOffice: 11,
   },
 ];
