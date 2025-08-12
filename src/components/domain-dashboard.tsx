@@ -9,7 +9,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import {
@@ -23,38 +22,19 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { generateRenewalReminders, type GenerateRenewalRemindersInput, type GenerateRenewalRemindersOutput } from '@/ai/flows/generate-renewal-reminders';
 import type { Domain } from '@/lib/types';
 import { format, parseISO, formatISO, differenceInDays } from 'date-fns';
-import { Send, Clipboard, Info, CheckCircle, Plus, Trash2, Calendar as CalendarIcon } from 'lucide-react';
+import { Plus, Trash2, Calendar as CalendarIcon } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Calendar } from './ui/calendar';
 import { Progress } from './ui/progress';
 
-const StatusIndicator = ({ status }: { status: 'active' | 'inactive' }) => {
-  const isActive = status === 'active';
-  const statusText = isActive ? 'نشط' : 'غير نشط';
-  return (
-    <div className="flex items-center gap-2">
-      <span className={cn('h-2.5 w-2.5 rounded-full', isActive ? 'bg-green-500' : 'bg-red-500')} />
-      <span className="capitalize text-sm">{statusText}</span>
-    </div>
-  );
-};
-
 export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }) {
   const [domains, setDomains] = React.useState<Domain[]>(initialDomains);
-  const [selectedDomainIds, setSelectedDomainIds] = React.useState<Set<number>>(new Set());
-  const [isReminderOpen, setReminderOpen] = React.useState(false);
   const [isAddDomainOpen, setAddDomainOpen] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [reminders, setReminders] = React.useState<GenerateRenewalRemindersOutput | null>(null);
   const { toast } = useToast();
 
   const [newDomain, setNewDomain] = React.useState({
@@ -67,74 +47,6 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
     renewalCostClient: 0,
     renewalCostOffice: 0,
   });
-
-  const selectedDomains = React.useMemo(() => {
-    return domains.filter(d => selectedDomainIds.has(d.id));
-  }, [domains, selectedDomainIds]);
-
-  const handleSelectAll = (checked: boolean | 'indeterminate') => {
-    if (checked === true) {
-      const allIds = new Set(domains.map(d => d.id));
-      setSelectedDomainIds(allIds);
-    } else {
-      setSelectedDomainIds(new Set());
-    }
-  };
-
-  const handleSelectRow = (domainId: number, checked: boolean) => {
-    const newSelectedIds = new Set(selectedDomainIds);
-    if (checked) {
-      newSelectedIds.add(domainId);
-    } else {
-      newSelectedIds.delete(domainId);
-    }
-    setSelectedDomainIds(newSelectedIds);
-  };
-
-  const openReminderDialog = () => {
-    setReminders(null);
-    setReminderOpen(true);
-  };
-
-  const handleGenerate = async () => {
-    if (selectedDomains.length === 0) return;
-    
-    setIsLoading(true);
-    setReminders(null);
-    
-    const input: GenerateRenewalRemindersInput = {
-      domains: selectedDomains.map(d => ({
-        domainName: d.domainName,
-        renewalDate: d.renewalDate,
-        clientName: d.clientName,
-        clientEmail: d.clientEmail,
-        outstandingBalance: d.outstandingBalance,
-        isPastDue: new Date(d.renewalDate) < new Date(),
-      })),
-    };
-    
-    try {
-      const result = await generateRenewalReminders(input);
-      setReminders(result);
-    } catch (error) {
-      console.error("Failed to generate reminders:", error);
-      toast({
-        variant: "destructive",
-        title: "خطأ",
-        description: "فشل في إنشاء التذكيرات. يرجى المحاولة مرة أخرى.",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast({
-      title: "تم النسخ إلى الحافظة!",
-      description: "تم نسخ رسالة التذكير.",
-    });
-  };
 
   const handleAddDomain = (e: React.FormEvent) => {
     e.preventDefault();
@@ -197,29 +109,12 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
     return progress;
   };
 
-  const isAllSelected = selectedDomainIds.size > 0 && selectedDomainIds.size === domains.length;
-  const isIndeterminate = selectedDomainIds.size > 0 && selectedDomainIds.size < domains.length;
-
   return (
     <>
-      <div className="mb-4 flex items-center justify-end gap-2">
-        <Button onClick={openReminderDialog} disabled={selectedDomainIds.size === 0}>
-          <Send className="ml-2 h-4 w-4" />
-          إنشاء تذكيرات ({selectedDomainIds.size})
-        </Button>
-      </div>
-
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[50px]">
-                <Checkbox
-                  onCheckedChange={handleSelectAll}
-                  checked={isAllSelected ? true : isIndeterminate ? 'indeterminate' : false}
-                  aria-label="تحديد كل الصفوف"
-                />
-              </TableHead>
               <TableHead>النطاق والإدارة</TableHead>
               <TableHead>تكلفة العميل</TableHead>
               <TableHead>تكلفة المكتب</TableHead>
@@ -229,16 +124,9 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
           </TableHeader>
           <TableBody>
             {domains.map(domain => (
-              <TableRow key={domain.id} data-state={selectedDomainIds.has(domain.id) && "selected"}>
+              <TableRow key={domain.id}>
                 <TableCell>
-                  <Checkbox
-                    onCheckedChange={(checked) => handleSelectRow(domain.id, !!checked)}
-                    checked={selectedDomainIds.has(domain.id)}
-                    aria-label={`تحديد صف لـ ${domain.domainName}`}
-                  />
-                </TableCell>
-                <TableCell>
-                  <div className="font-medium text-primary">{domain.domainName}</div>
+                  <div className="font-medium text-lg text-primary">{domain.domainName}</div>
                   <div className="text-sm text-muted-foreground">{domain.registrar}</div>
                   <div className="text-sm text-muted-foreground">{domain.clientEmail}</div>
                 </TableCell>
@@ -286,82 +174,6 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
         <Plus className="h-6 w-6" />
       </Button>
 
-      {/* Generate Reminders Dialog */}
-      <Dialog open={isReminderOpen} onOpenChange={setReminderOpen}>
-        <DialogContent className="sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>إنشاء تذكيرات التجديد</DialogTitle>
-            <DialogDescription>
-              سيقوم الذكاء الاصطناعي بإنشاء رسائل تذكير شخصية عبر البريد الإلكتروني للنطاقات المحددة.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            {isLoading ? (
-              <div className="space-y-4">
-                {Array.from({ length: selectedDomains.length }).map((_, i) => (
-                   <div key={i} className="flex items-center space-x-4">
-                    <Skeleton className="h-12 w-12 rounded-full" />
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-[250px]" />
-                      <Skeleton className="h-4 w-[200px]" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : reminders ? (
-              <div>
-                <Alert variant="default" className="mb-4 bg-teal-50 border-teal-200 text-teal-800 dark:bg-teal-950 dark:border-teal-800 dark:text-teal-200">
-                  <CheckCircle className="h-4 w-4 !text-teal-600 dark:!text-teal-400" />
-                  <AlertTitle>اكتمل الإنشاء</AlertTitle>
-                  <AlertDescription>
-                    راجع التذكيرات التي تم إنشاؤها أدناه. يمكنك نسخها إلى الحافظة الخاصة بك.
-                  </AlertDescription>
-                </Alert>
-                <Accordion type="single" collapsible className="w-full">
-                  {reminders.reminders.map((r) => (
-                    <AccordionItem value={r.domainName} key={r.domainName}>
-                      <AccordionTrigger>{r.domainName}</AccordionTrigger>
-                      <AccordionContent>
-                        <div className="prose prose-sm dark:prose-invert max-w-none rounded-md border bg-muted/50 p-4 whitespace-pre-wrap font-sans">
-                          {r.reminderMessage}
-                        </div>
-                        <Button variant="ghost" size="sm" className="mt-2 text-accent" onClick={() => copyToClipboard(r.reminderMessage)}>
-                          <Clipboard className="ml-2 h-4 w-4" />
-                          نسخ الرسالة
-                        </Button>
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              </div>
-            ) : (
-              <div>
-                <Alert className="mb-4">
-                  <Info className="h-4 w-4" />
-                  <AlertTitle>تأكيد الاختيار</AlertTitle>
-                  <AlertDescription>
-                    أنت على وشك إنشاء تذكيرات لـ {selectedDomains.length} نطاق (نطاقات).
-                  </AlertDescription>
-                </Alert>
-                <ul className="max-h-60 overflow-y-auto space-y-2 rounded-md border p-4">
-                    {selectedDomains.map(d => (
-                        <li key={d.id} className="text-sm font-medium">{d.domainName} - <span className="text-muted-foreground">{d.clientName}</span></li>
-                    ))}
-                </ul>
-              </div>
-            )}
-          </div>
-          {!reminders && (
-             <DialogFooter>
-               <Button variant="outline" onClick={() => setReminderOpen(false)}>إلغاء</Button>
-              <Button onClick={handleGenerate} disabled={isLoading}>
-                {isLoading ? 'جارٍ الإنشاء...' : `إنشاء ${selectedDomains.length} تذكيرات`}
-              </Button>
-            </DialogFooter>
-          )}
-        </DialogContent>
-      </Dialog>
-      
       {/* Add Domain Dialog */}
       <Dialog open={isAddDomainOpen} onOpenChange={setAddDomainOpen}>
         <DialogContent>
