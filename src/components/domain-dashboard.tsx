@@ -44,6 +44,8 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
   const [isAddDomainOpen, setAddDomainOpen] = React.useState(false);
   const [isEditDomainOpen, setEditDomainOpen] = React.useState(false);
   const [domainToEdit, setDomainToEdit] = React.useState<Domain | null>(null);
+  const [isDataSheetOpen, setDataSheetOpen] = React.useState(false);
+  const [dataSheetContent, setDataSheetContent] = React.useState({ title: '', content: '' });
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = React.useState(false);
 
@@ -92,7 +94,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
       return;
     }
 
-    const newDomainEntry: Omit<Domain, 'id' | 'outstandingBalance'> = {
+    const newDomainEntry: Omit<Domain, 'id'> = {
       domainName: newDomain.domainName,
       dataSheet: newDomain.dataSheet,
       renewalDate: formatISO(newDomain.renewalDate),
@@ -222,6 +224,11 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
     setEditDomainOpen(true);
   };
   
+  const openDataSheetDialog = (domain: Domain) => {
+    setDataSheetContent({ title: `شيت بيانات: ${domain.domainName}`, content: domain.dataSheet });
+    setDataSheetOpen(true);
+  };
+
   const getRenewalProgress = (renewalDate: string) => {
     const renewal = parseISO(renewalDate);
     const today = new Date();
@@ -276,7 +283,6 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
               <TableRow key={domain.id}>
                 <TableCell>
                   <div className="font-medium text-lg text-primary">{domain.domainName}</div>
-                  <div className="text-sm text-muted-foreground whitespace-pre-wrap">{domain.dataSheet}</div>
                   <div className='mt-2'>
                     <div>{format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}</div>
                     <Progress value={getRenewalProgress(domain.renewalDate as string)} className="h-2 mt-1" />
@@ -291,6 +297,9 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                     <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostOffice) * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
                 </TableCell>
                 <TableCell className="text-left flex items-center">
+                   <Button variant="ghost" size="icon" onClick={() => openDataSheetDialog(domain)}>
+                     <FileText className="h-4 w-4" />
+                   </Button>
                    <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="ghost" size="icon">
@@ -354,9 +363,11 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
               <div className="flex justify-between items-start">
                 <div>
                   <div className="font-medium text-lg text-primary">{domain.domainName}</div>
-                  <div className="text-sm text-muted-foreground whitespace-pre-wrap">{domain.dataSheet}</div>
                 </div>
-                <div className="flex items-center flex-shrink-0">
+                <div className="flex items-center flex-shrink-0 -mr-2 -mt-2">
+                    <Button variant="ghost" size="icon" onClick={() => openDataSheetDialog(domain)}>
+                      <FileText className="h-4 w-4" />
+                    </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button variant="ghost" size="icon">
@@ -577,6 +588,23 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
               </DialogFooter>
             </form>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Data Sheet Dialog */}
+      <Dialog open={isDataSheetOpen} onOpenChange={setDataSheetOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{dataSheetContent.title}</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 whitespace-pre-wrap text-sm">
+            {dataSheetContent.content}
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button">إغلاق</Button>
+            </DialogClose>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
