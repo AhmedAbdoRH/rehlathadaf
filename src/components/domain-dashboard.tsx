@@ -27,13 +27,14 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import type { Domain } from '@/lib/types';
 import { format, parseISO, formatISO, differenceInDays, subYears, addYears } from 'date-fns';
-import { Plus, Trash2, Calendar as CalendarIcon, Loader2, Pencil, Check } from 'lucide-react';
+import { Plus, Trash2, Calendar as CalendarIcon, Loader2, Pencil, Check, FileText } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Calendar } from './ui/calendar';
 import { Progress } from './ui/progress';
 import { Card, CardContent } from './ui/card';
 import { getDomains, addDomain, deleteDomain, updateDomain } from '@/services/domainService';
 import { cn } from "@/lib/utils"
+import { Textarea } from './ui/textarea';
 
 const USD_TO_EGP_RATE = 47.5; // سعر الصرف التقريبي
 
@@ -44,6 +45,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
   const [isEditDomainOpen, setEditDomainOpen] = React.useState(false);
   const [domainToEdit, setDomainToEdit] = React.useState<Domain | null>(null);
   const { toast } = useToast();
+  const [isGenerating, setIsGenerating] = React.useState(false);
 
   React.useEffect(() => {
     const fetchDomains = async () => {
@@ -67,26 +69,24 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
 
   const [newDomain, setNewDomain] = React.useState<{
     domainName: string;
-    registrar: string;
+    dataSheet: string;
     renewalDate: Date;
-    clientEmail: string;
     renewalCostClient: number | '';
     renewalCostOffice: number | '';
   }>({
     domainName: '',
-    registrar: '',
+    dataSheet: '',
     renewalDate: new Date(),
-    clientEmail: '',
     renewalCostClient: '',
     renewalCostOffice: '',
   });
 
   const handleAddDomain = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newDomain.domainName || !newDomain.registrar) {
+    if (!newDomain.domainName) {
       toast({
         title: "خطأ",
-        description: "يرجى ملء حقول اسم النطاق والإدارة.",
+        description: "يرجى ملء حقل اسم النطاق.",
         variant: "destructive",
       });
       return;
@@ -94,9 +94,8 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
 
     const newDomainEntry: Omit<Domain, 'id' | 'outstandingBalance'> = {
       domainName: newDomain.domainName,
-      registrar: newDomain.registrar,
+      dataSheet: newDomain.dataSheet,
       renewalDate: formatISO(newDomain.renewalDate),
-      clientEmail: newDomain.clientEmail,
       renewalCostClient: Number(newDomain.renewalCostClient) || 0,
       renewalCostOffice: Number(newDomain.renewalCostOffice) || 0,
       status: 'active',
@@ -113,9 +112,8 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
       setAddDomainOpen(false);
       setNewDomain({
           domainName: '',
-          registrar: '',
+          dataSheet: '',
           renewalDate: new Date(),
-          clientEmail: '',
           renewalCostClient: '',
           renewalCostOffice: '',
       });
@@ -201,7 +199,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
         );
         toast({
             title: "تم تجديد النطاق",
-            description: `تم تحديث تاريخ تجديد ${domain.domainName} إلى ${format(nextRenewalDate, 'yyyy/MM/dd')}.`,
+            description: `تم تحديث تاريخ تجديد ${domain.domainName} إلى ${format(nextRenewalDate, 'dd/MM/yyyy')}.`,
         });
     } catch (error) {
         console.error("Error renewing domain:", error);
@@ -227,21 +225,21 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
   const getRenewalProgress = (renewalDate: string) => {
     const renewal = parseISO(renewalDate);
     const today = new Date();
-    
-    // If renewal date is in the past, progress is 100%
-    if (differenceInDays(renewal, today) <= 0) {
-      return 100;
+    const daysRemaining = differenceInDays(renewal, today);
+
+    // If renewal date is in the past, progress is 0% remaining
+    if (daysRemaining <= 0) {
+      return 0;
     }
 
     const lastRenewal = subYears(renewal, 1);
     const totalDaysInYear = differenceInDays(renewal, lastRenewal);
-    const daysRemaining = differenceInDays(renewal, today);
 
     if (totalDaysInYear <= 0) {
-      return 0;
+      return 100;
     }
 
-    const progress = Math.max(0, Math.min(100, ((totalDaysInYear - daysRemaining) / totalDaysInYear) * 100));
+    const progress = Math.max(0, Math.min(100, (daysRemaining / totalDaysInYear) * 100));
     return progress;
   };
 
@@ -255,12 +253,19 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
 
   return (
     <>
+      <div className="flex justify-end mb-4">
+        <Button onClick={() => {}} disabled={isGenerating}>
+          <FileText className="ml-2 h-4 w-4" />
+          {isGenerating ? "جاري الإنشاء..." : "إنشاء رسائل تذكير"}
+        </Button>
+      </div>
+
       {/* Desktop Table */}
       <div className="hidden md:block rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>النطاق والإدارة</TableHead>
+              <TableHead>النطاق وبياناته</TableHead>
               <TableHead>تكلفة العميل</TableHead>
               <TableHead>تكلفة المكتب</TableHead>
               <TableHead className="text-left">إجراءات</TableHead>
@@ -271,10 +276,9 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
               <TableRow key={domain.id}>
                 <TableCell>
                   <div className="font-medium text-lg text-primary">{domain.domainName}</div>
-                  <div className="text-sm text-muted-foreground">{domain.registrar}</div>
-                  <div className="text-sm text-muted-foreground">{domain.clientEmail}</div>
+                  <div className="text-sm text-muted-foreground whitespace-pre-wrap">{domain.dataSheet}</div>
                   <div className='mt-2'>
-                    <div>{format(parseISO(domain.renewalDate as string), 'yyyy/MM/dd')}</div>
+                    <div>{format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}</div>
                     <Progress value={getRenewalProgress(domain.renewalDate as string)} className="h-2 mt-1" />
                   </div>
                 </TableCell>
@@ -350,10 +354,9 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
               <div className="flex justify-between items-start">
                 <div>
                   <div className="font-medium text-lg text-primary">{domain.domainName}</div>
-                  <div className="text-sm text-muted-foreground">{domain.registrar}</div>
-                  <div className="text-sm text-muted-foreground">{domain.clientEmail}</div>
+                  <div className="text-sm text-muted-foreground whitespace-pre-wrap">{domain.dataSheet}</div>
                 </div>
-                <div className="flex items-center">
+                <div className="flex items-center flex-shrink-0">
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button variant="ghost" size="icon">
@@ -405,7 +408,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                 </div>
               </div>
               <div className='mt-4'>
-                <div>{format(parseISO(domain.renewalDate as string), 'yyyy/MM/dd')}</div>
+                <div>{format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}</div>
                 <Progress value={getRenewalProgress(domain.renewalDate as string)} className="h-2 mt-1" />
               </div>
               <div className="mt-4 grid grid-cols-2 gap-4 text-center">
@@ -448,13 +451,9 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                         <Label htmlFor="domainName" className="text-right">النطاق</Label>
                         <Input id="domainName" value={newDomain.domainName} onChange={(e) => setNewDomain({...newDomain, domainName: e.target.value})} className="col-span-3" required />
                     </div>
-                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="registrar" className="text-right">الإدارة</Label>
-                        <Input id="registrar" value={newDomain.registrar} onChange={(e) => setNewDomain({...newDomain, registrar: e.target.value})} className="col-span-3" required />
-                    </div>
-                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="clientEmail" className="text-right">بريد العميل</Label>
-                        <Input id="clientEmail" type="email" value={newDomain.clientEmail} onChange={(e) => setNewDomain({...newDomain, clientEmail: e.target.value})} className="col-span-3" />
+                     <div className="grid grid-cols-4 items-start gap-4">
+                        <Label htmlFor="dataSheet" className="text-right pt-2">شيت البيانات</Label>
+                        <Textarea id="dataSheet" value={newDomain.dataSheet} onChange={(e) => setNewDomain({...newDomain, dataSheet: e.target.value})} className="col-span-3" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
@@ -484,7 +483,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                                     )}
                                 >
                                     <CalendarIcon className="ml-2 h-4 w-4" />
-                                    {newDomain.renewalDate ? format(newDomain.renewalDate, "yyyy/MM/dd") : <span>اختر تاريخًا</span>}
+                                    {newDomain.renewalDate ? format(newDomain.renewalDate, "dd/MM/yyyy") : <span>اختر تاريخًا</span>}
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0">
@@ -524,13 +523,9 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                   <Label htmlFor="editDomainName" className="text-right">النطاق</Label>
                   <Input id="editDomainName" value={domainToEdit.domainName} onChange={(e) => setDomainToEdit({ ...domainToEdit, domainName: e.target.value })} className="col-span-3" required />
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="editRegistrar" className="text-right">الإدارة</Label>
-                  <Input id="editRegistrar" value={domainToEdit.registrar} onChange={(e) => setDomainToEdit({ ...domainToEdit, registrar: e.target.value })} className="col-span-3" required />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="editClientEmail" className="text-right">بريد العميل</Label>
-                  <Input id="editClientEmail" type="email" value={domainToEdit.clientEmail} onChange={(e) => setDomainToEdit({ ...domainToEdit, clientEmail: e.target.value })} className="col-span-3" />
+                <div className="grid grid-cols-4 items-start gap-4">
+                  <Label htmlFor="editDataSheet" className="text-right pt-2">شيت البيانات</Label>
+                  <Textarea id="editDataSheet" value={domainToEdit.dataSheet} onChange={(e) => setDomainToEdit({ ...domainToEdit, dataSheet: e.target.value })} className="col-span-3" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -560,7 +555,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                         )}
                       >
                         <CalendarIcon className="ml-2 h-4 w-4" />
-                        {domainToEdit.renewalDate ? format(domainToEdit.renewalDate as Date, "yyyy/MM/dd") : <span>اختر تاريخًا</span>}
+                        {domainToEdit.renewalDate ? format(domainToEdit.renewalDate as Date, "dd/MM/yyyy") : <span>اختر تاريخًا</span>}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
