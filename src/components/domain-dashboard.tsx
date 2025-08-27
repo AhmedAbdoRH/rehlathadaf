@@ -46,6 +46,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
   const [domainToEdit, setDomainToEdit] = React.useState<Domain | null>(null);
   const [isDataSheetOpen, setDataSheetOpen] = React.useState(false);
   const [dataSheetContent, setDataSheetContent] = React.useState({ title: '', content: '' });
+  const [editingDataSheetDomain, setEditingDataSheetDomain] = React.useState<Domain | null>(null);
   const { toast } = useToast();
   const [isGenerating, setIsGenerating] = React.useState(false);
 
@@ -226,8 +227,39 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
   
   const openDataSheetDialog = (domain: Domain) => {
     setDataSheetContent({ title: `شيت بيانات: ${domain.domainName}`, content: domain.dataSheet });
+    setEditingDataSheetDomain(domain);
     setDataSheetOpen(true);
   };
+
+  const handleDataSheetChange = (content: string) => {
+      setDataSheetContent(prev => ({ ...prev, content }));
+      if (editingDataSheetDomain) {
+          setEditingDataSheetDomain(prev => prev ? { ...prev, dataSheet: content } : null);
+      }
+  };
+
+  const handleSaveDataSheet = async () => {
+    if (!editingDataSheetDomain || !editingDataSheetDomain.id) return;
+
+    try {
+        await updateDomain(editingDataSheetDomain.id, { dataSheet: editingDataSheetDomain.dataSheet });
+        setDomains(prevDomains => prevDomains.map(d => d.id === editingDataSheetDomain.id ? editingDataSheetDomain : d));
+        toast({
+            title: "تم حفظ شيت البيانات",
+            description: `تم تحديث شيت بيانات ${editingDataSheetDomain.domainName}.`,
+        });
+        setDataSheetOpen(false);
+        setEditingDataSheetDomain(null);
+    } catch (error) {
+        console.error("Error saving data sheet:", error);
+        toast({
+            title: "خطأ",
+            description: "فشل في حفظ شيت البيانات.",
+            variant: "destructive",
+        });
+    }
+  };
+
 
   const getRenewalProgress = (renewalDate: string) => {
     const renewal = parseISO(renewalDate);
@@ -597,13 +629,18 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
           <DialogHeader>
             <DialogTitle>{dataSheetContent.title}</DialogTitle>
           </DialogHeader>
-          <div className="py-4 whitespace-pre-wrap text-sm">
-            {dataSheetContent.content}
+          <div className="py-4">
+            <Textarea
+              value={dataSheetContent.content}
+              onChange={(e) => handleDataSheetChange(e.target.value)}
+              className="min-h-[200px] w-full"
+            />
           </div>
           <DialogFooter>
             <DialogClose asChild>
-              <Button type="button">إغلاق</Button>
+              <Button type="button" variant="outline">إلغاء</Button>
             </DialogClose>
+            <Button type="button" onClick={handleSaveDataSheet}>حفظ</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
