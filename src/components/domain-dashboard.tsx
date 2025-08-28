@@ -566,10 +566,6 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                   <Label htmlFor="editDomainName" className="text-right">النطاق</Label>
                   <Input id="editDomainName" value={domainToEdit.domainName} onChange={(e) => setDomainToEdit({ ...domainToEdit, domainName: e.target.value })} className="col-span-3" required />
                 </div>
-                <div className="grid grid-cols-4 items-start gap-4">
-                  <Label htmlFor="editDataSheet" className="text-right pt-2">شيت البيانات</Label>
-                  <Textarea id="editDataSheet" value={domainToEdit.dataSheet} onChange={(e) => setDomainToEdit({ ...domainToEdit, dataSheet: e.target.value })} className="col-span-3" />
-                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="editRenewalCostClient">تكلفة العميل (بالدولار)</Label>
