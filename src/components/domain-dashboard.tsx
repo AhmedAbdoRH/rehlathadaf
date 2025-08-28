@@ -35,6 +35,7 @@ import { Card, CardContent } from './ui/card';
 import { getDomains, addDomain, deleteDomain, updateDomain } from '@/services/domainService';
 import { cn } from "@/lib/utils"
 import { Textarea } from './ui/textarea';
+import { generateRenewalReminders } from '@/ai/flows/generate-renewal-reminders';
 
 const USD_TO_EGP_RATE = 47.5; // سعر الصرف التقريبي
 
@@ -76,12 +77,14 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
     renewalDate: Date;
     renewalCostClient: number | '';
     renewalCostOffice: number | '';
+    clientEmail: string;
   }>({
     domainName: '',
     dataSheet: '',
     renewalDate: new Date(),
     renewalCostClient: '',
     renewalCostOffice: '',
+    clientEmail: '',
   });
 
   const handleAddDomain = async (e: React.FormEvent) => {
@@ -103,6 +106,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
       renewalCostOffice: Number(newDomain.renewalCostOffice) || 0,
       status: 'active',
       collectionDate: formatISO(new Date()),
+      clientEmail: newDomain.clientEmail
     };
     
     try {
@@ -119,6 +123,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
           renewalDate: new Date(),
           renewalCostClient: '',
           renewalCostOffice: '',
+          clientEmail: '',
       });
     } catch (error) {
        console.error("Error adding domain:", error);
@@ -214,6 +219,55 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
     }
   };
 
+  const handleGenerateReminders = async () => {
+    setIsGenerating(true);
+    try {
+      const domainsToRemind = domains
+        .filter(d => d.clientEmail)
+        .map(d => {
+            const renewalDate = parseISO(d.renewalDate as string);
+            const daysRemaining = differenceInDays(renewalDate, new Date());
+            return {
+                domainName: d.domainName,
+                renewalDate: format(renewalDate, 'yyyy-MM-dd'),
+                clientEmail: d.clientEmail as string,
+                outstandingBalance: d.renewalCostClient ? Number(d.renewalCostClient) : 0,
+                isPastDue: daysRemaining < 0
+            };
+        });
+
+      if (domainsToRemind.length === 0) {
+        toast({
+          title: "لا توجد نطاقات للتذكير",
+          description: "تأكد من وجود بريد إلكتروني للعملاء في النطاقات التي تريد إنشاء تذكيرات لها.",
+        });
+        return;
+      }
+
+      const result = await generateRenewalReminders({ domains: domainsToRemind });
+      
+      const remindersText = result.reminders.map(r => 
+        `----------------------------------------\n` +
+        `إلى: ${r.clientEmail}\n` +
+        `النطاق: ${r.domainName}\n` +
+        `الرسالة:\n${r.reminderMessage}`
+      ).join('\n\n');
+
+      setDataSheetContent({ title: 'رسائل التذكير المنشأة', content: remindersText });
+      setDataSheetOpen(true);
+
+    } catch (error) {
+      console.error("Error generating reminders:", error);
+      toast({
+        title: "خطأ في إنشاء التذكيرات",
+        description: "حدث خطأ أثناء التواصل مع الذكاء الاصطناعي.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
 
   const openEditDialog = (domain: Domain) => {
     setDomainToEdit({
@@ -221,6 +275,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
         renewalDate: parseISO(domain.renewalDate as string),
         renewalCostClient: domain.renewalCostClient || '',
         renewalCostOffice: domain.renewalCostOffice || '',
+        clientEmail: domain.clientEmail || '',
     });
     setEditDomainOpen(true);
   };
@@ -293,8 +348,8 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
   return (
     <>
       <div className="flex justify-end mb-4">
-        <Button onClick={() => {}} disabled={isGenerating}>
-          <FileText className="ml-2 h-4 w-4" />
+        <Button onClick={handleGenerateReminders} disabled={isGenerating}>
+          {isGenerating ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <FileText className="ml-2 h-4 w-4" />}
           {isGenerating ? "جاري الإنشاء..." : "إنشاء رسائل تذكير"}
         </Button>
       </div>
@@ -302,14 +357,6 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
       {/* Desktop Table */}
       <div className="hidden md:block rounded-md border">
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>النطاق وبياناته</TableHead>
-              <TableHead>تكلفة العميل</TableHead>
-              <TableHead>تكلفة المكتب</TableHead>
-              <TableHead className="text-left">إجراءات</TableHead>
-            </TableRow>
-          </TableHeader>
           <TableBody>
             {domains.map(domain => (
               <TableRow key={domain.id}>
@@ -321,11 +368,11 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                   </div>
                 </TableCell>
                 <TableCell>
-                    <div>${Number(domain.renewalCostClient).toFixed(2)}</div>
+                    <div className="text-accent font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
                     <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
                 </TableCell>
                 <TableCell>
-                    <div>${Number(domain.renewalCostOffice).toFixed(2)}</div>
+                    <div className="text-destructive font-semibold">${Number(domain.renewalCostOffice).toFixed(2)}</div>
                     <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostOffice) * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
                 </TableCell>
                 <TableCell className="text-left flex items-center">
@@ -457,12 +504,12 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
               <div className="mt-4 grid grid-cols-2 gap-4 text-center">
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">تكلفة العميل</div>
-                  <div>${Number(domain.renewalCostClient).toFixed(2)}</div>
+                  <div className="text-accent font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
                   <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
                 </div>
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">تكلفة المكتب</div>
-                   <div>${Number(domain.renewalCostOffice).toFixed(2)}</div>
+                   <div className="text-destructive font-semibold">${Number(domain.renewalCostOffice).toFixed(2)}</div>
                    <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostOffice) * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
                 </div>
               </div>
@@ -493,6 +540,10 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="domainName" className="text-right">النطاق</Label>
                         <Input id="domainName" value={newDomain.domainName} onChange={(e) => setNewDomain({...newDomain, domainName: e.target.value})} className="col-span-3" required />
+                    </div>
+                     <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="clientEmail" className="text-right">بريد العميل</Label>
+                        <Input id="clientEmail" value={newDomain.clientEmail} onChange={(e) => setNewDomain({...newDomain, clientEmail: e.target.value})} className="col-span-3" />
                     </div>
                      <div className="grid grid-cols-4 items-start gap-4">
                         <Label htmlFor="dataSheet" className="text-right pt-2">شيت البيانات</Label>
@@ -566,6 +617,10 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                   <Label htmlFor="editDomainName" className="text-right">النطاق</Label>
                   <Input id="editDomainName" value={domainToEdit.domainName} onChange={(e) => setDomainToEdit({ ...domainToEdit, domainName: e.target.value })} className="col-span-3" required />
                 </div>
+                 <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="editClientEmail" className="text-right">بريد العميل</Label>
+                    <Input id="editClientEmail" value={domainToEdit.clientEmail} onChange={(e) => setDomainToEdit({ ...domainToEdit, clientEmail: e.target.value })} className="col-span-3" />
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="editRenewalCostClient">تكلفة العميل (بالدولار)</Label>
@@ -620,7 +675,12 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
       </Dialog>
 
       {/* Data Sheet Dialog */}
-      <Dialog open={isDataSheetOpen} onOpenChange={setDataSheetOpen}>
+      <Dialog open={isDataSheetOpen} onOpenChange={(isOpen) => {
+          if (!isOpen) {
+              setEditingDataSheetDomain(null);
+          }
+          setDataSheetOpen(isOpen);
+      }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{dataSheetContent.title}</DialogTitle>
@@ -630,13 +690,14 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
               value={dataSheetContent.content}
               onChange={(e) => handleDataSheetChange(e.target.value)}
               className="min-h-[200px] w-full"
+              readOnly={!editingDataSheetDomain}
             />
           </div>
           <DialogFooter>
             <DialogClose asChild>
-              <Button type="button" variant="outline">إلغاء</Button>
+              <Button type="button" variant="outline">إغلاق</Button>
             </DialogClose>
-            <Button type="button" onClick={handleSaveDataSheet}>حفظ</Button>
+            {editingDataSheetDomain && <Button type="button" onClick={handleSaveDataSheet}>حفظ</Button>}
           </DialogFooter>
         </DialogContent>
       </Dialog>
