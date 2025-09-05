@@ -36,7 +36,9 @@ import { Textarea } from './ui/textarea';
 import { generateRenewalReminders } from '@/ai/flows/generate-renewal-reminders';
 import { Checkbox } from './ui/checkbox';
 
-const USD_TO_EGP_RATE = 47.5; // سعر الصرف التقريبي
+const USD_TO_EGP_RATE_OFFICE = 47.5; // سعر الصرف لمصاريف المكتب
+const USD_TO_EGP_RATE_CLIENT = 50; // سعر الصرف لتحصيل العميل
+
 
 const projectLabels: Record<Project, string> = {
   rehlethadaf: 'مشاريع رحلة هدف',
@@ -419,12 +421,12 @@ export function DomainDashboard({ project }: { project: Project }) {
                 </TableCell>
                 <TableCell>
                     <div className="text-accent font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
-                    <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
+                    <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
                 </TableCell>
                 {project === 'rehlethadaf' && (
                   <TableCell>
                       <div className="text-destructive font-semibold">${Number(domain.renewalCostOffice).toFixed(2)}</div>
-                      <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostOffice) * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
+                      <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostOffice) * USD_TO_EGP_RATE_OFFICE).toFixed(2)} ج.م</div>
                   </TableCell>
                 )}
                 <TableCell className="text-left flex items-center">
@@ -557,13 +559,13 @@ export function DomainDashboard({ project }: { project: Project }) {
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">تكلفة العميل</div>
                   <div className="text-accent font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
-                  <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
+                  <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
                 </div>
                 {project === 'rehlethadaf' && (
                   <div>
                     <div className="text-sm font-medium text-muted-foreground">تكلفة المكتب</div>
                      <div className="text-destructive font-semibold">${Number(domain.renewalCostOffice).toFixed(2)}</div>
-                     <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostOffice) * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
+                     <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostOffice) * USD_TO_EGP_RATE_OFFICE).toFixed(2)} ج.م</div>
                   </div>
                 )}
               </div>
@@ -791,3 +793,5 @@ export function DomainDashboard({ project }: { project: Project }) {
     </>
   );
 }
+
+    
