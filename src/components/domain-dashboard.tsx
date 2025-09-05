@@ -431,7 +431,8 @@ export function DomainDashboard({ project }: { project: Project }) {
                       <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostOffice) * USD_TO_EGP_RATE_OFFICE).toFixed(2)} ج.م</div>
                   </TableCell>
                 )}
-                <TableCell className="text-left flex items-center justify-end -space-x-2">
+                <TableCell className="text-left">
+                  <div className="flex items-center justify-end -space-x-2">
                    <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="ghost" size="icon" title="تجديد">
@@ -488,6 +489,7 @@ export function DomainDashboard({ project }: { project: Project }) {
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -499,8 +501,8 @@ export function DomainDashboard({ project }: { project: Project }) {
       <div className="md:hidden grid grid-cols-1 gap-4 mt-4">
         {filteredDomains.map(domain => (
           <Card key={domain.id} className="w-full overflow-hidden">
-             <div className="bg-muted/50 p-2 flex justify-between items-center -space-x-2">
-                <div className="flex items-center">
+             <div className="bg-muted/50 p-2 flex justify-between items-center">
+                <div className="flex items-center -space-x-2">
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <Button variant="ghost" size="icon" title="تجديد">
@@ -533,7 +535,7 @@ export function DomainDashboard({ project }: { project: Project }) {
                         </Button>
                     </a>
                 </div>
-                <div className="flex items-center">
+                <div className="flex items-center -space-x-2">
                     <Button variant="ghost" size="icon" onClick={() => openEditDialog(domain)} title="تعديل">
                         <Pencil className="h-4 w-4" />
                     </Button>
@@ -810,5 +812,3 @@ export function DomainDashboard({ project }: { project: Project }) {
     </>
   );
 }
-
-    
