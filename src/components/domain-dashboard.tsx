@@ -5,8 +5,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
-  TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -25,7 +23,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import type { Domain } from '@/lib/types';
+import type { Domain, Project } from '@/lib/types';
 import { format, parseISO, formatISO, differenceInDays, subYears, addYears } from 'date-fns';
 import { Plus, Trash2, Calendar as CalendarIcon, Loader2, Pencil, Check, FileText } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
@@ -36,10 +34,19 @@ import { getDomains, addDomain, deleteDomain, updateDomain } from '@/services/do
 import { cn } from "@/lib/utils"
 import { Textarea } from './ui/textarea';
 import { generateRenewalReminders } from '@/ai/flows/generate-renewal-reminders';
+import { Checkbox } from './ui/checkbox';
 
 const USD_TO_EGP_RATE = 47.5; // سعر الصرف التقريبي
 
-export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }) {
+const projectLabels: Record<Project, string> = {
+  rehlethadaf: 'مشاريع رحلة هدف',
+  bofa: 'مشاريع بوفا',
+  other: 'مشاريع أخرى',
+};
+const projectOptions: Project[] = ['rehlethadaf', 'bofa', 'other'];
+
+
+export function DomainDashboard({ project }: { project: Project }) {
   const [domains, setDomains] = React.useState<Domain[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [isAddDomainOpen, setAddDomainOpen] = React.useState(false);
@@ -78,6 +85,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
     renewalCostClient: number | '';
     renewalCostOffice: number | '';
     clientEmail: string;
+    projects: Project[];
   }>({
     domainName: '',
     dataSheet: '',
@@ -85,6 +93,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
     renewalCostClient: '',
     renewalCostOffice: '',
     clientEmail: '',
+    projects: [project]
   });
 
   const handleAddDomain = async (e: React.FormEvent) => {
@@ -98,6 +107,15 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
       return;
     }
 
+    if (newDomain.projects.length === 0) {
+      toast({
+        title: "خطأ",
+        description: "يرجى تحديد مشروع واحد على الأقل.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const newDomainEntry: Omit<Domain, 'id'> = {
       domainName: newDomain.domainName,
       dataSheet: newDomain.dataSheet,
@@ -106,7 +124,8 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
       renewalCostOffice: Number(newDomain.renewalCostOffice) || 0,
       status: 'active',
       collectionDate: formatISO(new Date()),
-      clientEmail: newDomain.clientEmail
+      clientEmail: newDomain.clientEmail,
+      projects: newDomain.projects
     };
     
     try {
@@ -124,6 +143,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
           renewalCostClient: '',
           renewalCostOffice: '',
           clientEmail: '',
+          projects: [project],
       });
     } catch (error) {
        console.error("Error adding domain:", error);
@@ -159,6 +179,15 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
   const handleUpdateDomain = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!domainToEdit || !domainToEdit.id) return;
+
+    if (!domainToEdit.projects || domainToEdit.projects.length === 0) {
+      toast({
+        title: "خطأ",
+        description: "يرجى تحديد مشروع واحد على الأقل.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const { id, ...updatedData } = domainToEdit;
 
@@ -222,7 +251,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
   const handleGenerateReminders = async () => {
     setIsGenerating(true);
     try {
-      const domainsToRemind = domains
+      const domainsToRemind = filteredDomains
         .filter(d => d.clientEmail)
         .map(d => {
             const renewalDate = parseISO(d.renewalDate as string);
@@ -276,6 +305,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
         renewalCostClient: domain.renewalCostClient || '',
         renewalCostOffice: domain.renewalCostOffice || '',
         clientEmail: domain.clientEmail || '',
+        projects: domain.projects || [],
     });
     setEditDomainOpen(true);
   };
@@ -337,6 +367,20 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
     return progress;
   };
 
+  const handleProjectToggle = (
+    toggledProject: Project,
+    setter: React.Dispatch<React.SetStateAction<any>>,
+    fieldName: string
+  ) => {
+    setter((prevState: any) => {
+        const currentProjects = prevState[fieldName] || [];
+        const newProjects = currentProjects.includes(toggledProject)
+            ? currentProjects.filter((p: Project) => p !== toggledProject)
+            : [...currentProjects, toggledProject];
+        return { ...prevState, [fieldName]: newProjects };
+    });
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -345,9 +389,11 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
     );
   }
 
+  const filteredDomains = domains.filter(d => d.projects?.includes(project));
+
   return (
     <>
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-end mb-4 pt-4">
         <Button onClick={handleGenerateReminders} disabled={isGenerating}>
           {isGenerating ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <FileText className="ml-2 h-4 w-4" />}
           {isGenerating ? "جاري الإنشاء..." : "إنشاء رسائل تذكير"}
@@ -358,7 +404,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
       <div className="hidden md:block rounded-md border">
         <Table>
           <TableBody>
-            {domains.map(domain => (
+            {filteredDomains.map(domain => (
               <TableRow key={domain.id}>
                 <TableCell>
                   <div className="font-medium text-lg text-primary">{domain.domainName}</div>
@@ -436,7 +482,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
 
       {/* Mobile Cards */}
       <div className="md:hidden grid grid-cols-1 gap-4">
-        {domains.map(domain => (
+        {filteredDomains.map(domain => (
           <Card key={domain.id} className="w-full">
             <CardContent className="p-4">
               <div className="flex justify-between items-start">
@@ -519,7 +565,10 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
       </div>
 
       <Button 
-        onClick={() => setAddDomainOpen(true)} 
+        onClick={() => {
+          setNewDomain(prev => ({ ...prev, projects: [project] }));
+          setAddDomainOpen(true);
+        }}
         className="fixed bottom-8 left-8 z-50 h-14 w-14 rounded-full shadow-lg"
         size="icon"
       >
@@ -589,6 +638,21 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                                 />
                             </PopoverContent>
                         </Popover>
+                    </div>
+                    <div className="grid grid-cols-4 items-start gap-4">
+                        <Label className="text-right pt-2">المشاريع</Label>
+                        <div className="col-span-3 space-y-2">
+                            {projectOptions.map(p => (
+                                <div key={p} className="flex items-center space-x-2 space-x-reverse">
+                                    <Checkbox
+                                        id={`add-${p}`}
+                                        checked={newDomain.projects.includes(p)}
+                                        onCheckedChange={() => handleProjectToggle(p, setNewDomain, 'projects')}
+                                    />
+                                    <Label htmlFor={`add-${p}`} className="font-normal">{projectLabels[p]}</Label>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
                  <DialogFooter>
@@ -662,6 +726,21 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
                     </PopoverContent>
                   </Popover>
                 </div>
+                 <div className="grid grid-cols-4 items-start gap-4">
+                    <Label className="text-right pt-2">المشاريع</Label>
+                    <div className="col-span-3 space-y-2">
+                        {projectOptions.map(p => (
+                            <div key={p} className="flex items-center space-x-2 space-x-reverse">
+                                <Checkbox
+                                    id={`edit-${p}`}
+                                    checked={domainToEdit.projects?.includes(p)}
+                                    onCheckedChange={() => handleProjectToggle(p, setDomainToEdit, 'projects')}
+                                />
+                                <Label htmlFor={`edit-${p}`} className="font-normal">{projectLabels[p]}</Label>
+                            </div>
+                        ))}
+                    </div>
+                </div>
               </div>
               <DialogFooter>
                 <DialogClose asChild>
@@ -690,7 +769,7 @@ export function DomainDashboard({ initialDomains }: { initialDomains: Domain[] }
               value={dataSheetContent.content}
               onChange={(e) => handleDataSheetChange(e.target.value)}
               className="min-h-[200px] w-full"
-              readOnly={!editingDataSheetDomain}
+              readOnly={!editingDataSheetDomain && dataSheetContent.title !== 'رسائل التذكير المنشأة'}
             />
           </div>
           <DialogFooter>

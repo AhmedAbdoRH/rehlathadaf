@@ -1,6 +1,7 @@
 import { DomainDashboard } from '@/components/domain-dashboard';
 import { Icons } from '@/components/icons';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Home() {
   return (
@@ -17,10 +18,23 @@ export default function Home() {
         </header>
         <main>
           <Card className="shadow-lg">
-            <CardHeader>
-            </CardHeader>
             <CardContent>
-              <DomainDashboard initialDomains={[]} />
+               <Tabs defaultValue="rehlethadaf" className="w-full pt-4">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="rehlethadaf">مشاريع رحلة هدف</TabsTrigger>
+                  <TabsTrigger value="bofa">مشاريع بوفا</TabsTrigger>
+                  <TabsTrigger value="other">مشاريع أخرى</TabsTrigger>
+                </TabsList>
+                <TabsContent value="rehlethadaf">
+                  <DomainDashboard project="rehlethadaf" />
+                </TabsContent>
+                <TabsContent value="bofa">
+                   <DomainDashboard project="bofa" />
+                </TabsContent>
+                <TabsContent value="other">
+                   <DomainDashboard project="other" />
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </main>

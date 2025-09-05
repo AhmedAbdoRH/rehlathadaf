@@ -1,6 +1,6 @@
 import { db } from '@/lib/firebase';
 import type { Domain } from '@/lib/types';
-import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc, query, where } from 'firebase/firestore';
 
 const domainsCollectionRef = collection(db, 'domains');
 

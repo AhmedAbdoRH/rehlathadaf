@@ -1,3 +1,5 @@
+export type Project = 'rehlethadaf' | 'bofa' | 'other';
+
 export type Domain = {
   id?: string; // Firestore uses string IDs
   domainName: string;
@@ -8,4 +10,6 @@ export type Domain = {
   outstandingBalance?: number;
   renewalCostClient: number | '';
   renewalCostOffice: number | '';
+  projects?: Project[];
+  clientEmail?: string;
 };
