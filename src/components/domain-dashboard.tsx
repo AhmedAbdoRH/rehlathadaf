@@ -25,7 +25,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import type { Domain, Project } from '@/lib/types';
 import { format, parseISO, formatISO, differenceInDays, subYears, addYears } from 'date-fns';
-import { Plus, Trash2, Calendar as CalendarIcon, Loader2, Pencil, Check, FileText } from 'lucide-react';
+import { Plus, Trash2, Calendar as CalendarIcon, Loader2, Pencil, Check, FileText, CalendarPlus } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Calendar } from './ui/calendar';
 import { Progress } from './ui/progress';
@@ -325,6 +325,18 @@ export function DomainDashboard({ project }: { project: Project }) {
     }
   };
 
+  const getGoogleCalendarLink = (domain: Domain) => {
+    const renewalDate = parseISO(domain.renewalDate as string);
+    const dateStr = format(renewalDate, 'yyyyMMdd');
+    const title = encodeURIComponent(`تذكير تجديد نطاق: ${domain.domainName}`);
+    const details = encodeURIComponent(
+      `لا تنسَ تجديد نطاق ${domain.domainName}.\n` +
+      `بريد العميل: ${domain.clientEmail || 'غير محدد'}\n` +
+      `تكلفة العميل: $${Number(domain.renewalCostClient).toFixed(2)} (${(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م)\n` +
+      (project === 'rehlethadaf' ? `تكلفة المكتب: $${Number(domain.renewalCostOffice).toFixed(2)} (${(Number(domain.renewalCostOffice) * USD_TO_EGP_RATE_OFFICE).toFixed(2)} ج.م)` : '')
+    );
+    return `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dateStr}/${dateStr}&details=${details}&sf=true&output=xml`;
+  };
 
   const getRenewalProgress = (renewalDate: string) => {
     const renewal = parseISO(renewalDate);
@@ -422,6 +434,11 @@ export function DomainDashboard({ project }: { project: Project }) {
                    <Button variant="ghost" size="icon" onClick={() => openDataSheetDialog(domain)}>
                      <FileText className="h-4 w-4" />
                    </Button>
+                   <a href={getGoogleCalendarLink(domain)} target="_blank" rel="noopener noreferrer">
+                      <Button variant="ghost" size="icon">
+                        <CalendarPlus className="h-4 w-4" />
+                      </Button>
+                    </a>
                    <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="ghost" size="icon">
@@ -486,6 +503,11 @@ export function DomainDashboard({ project }: { project: Project }) {
                   <Button variant="ghost" size="icon" onClick={() => openDataSheetDialog(domain)}>
                     <FileText className="h-4 w-4" />
                   </Button>
+                  <a href={getGoogleCalendarLink(domain)} target="_blank" rel="noopener noreferrer">
+                    <Button variant="ghost" size="icon">
+                      <CalendarPlus className="h-4 w-4" />
+                    </Button>
+                  </a>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="ghost" size="icon">
@@ -787,3 +809,5 @@ export function DomainDashboard({ project }: { project: Project }) {
     </>
   );
 }
+
+    
