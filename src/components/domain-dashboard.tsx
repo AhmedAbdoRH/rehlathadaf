@@ -375,6 +375,10 @@ export function DomainDashboard({ project }: { project: Project }) {
     return null;
   };
 
+  const getUrl = (domainName: string) => {
+    return domainName.startsWith('http') ? domainName : `https://${domainName}`;
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -396,7 +400,7 @@ export function DomainDashboard({ project }: { project: Project }) {
                 <TableCell>
                   <div className="flex items-center gap-2">
                     {domain.id && renderStatusDot(domain.id)}
-                    <div className="font-medium text-lg text-primary">{domain.domainName}</div>
+                    <a href={getUrl(domain.domainName)} target="_blank" rel="noopener noreferrer" className="font-medium text-lg text-primary hover:underline">{domain.domainName}</a>
                   </div>
                   <div className='mt-2'>
                     <div>{format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}</div>
@@ -481,7 +485,7 @@ export function DomainDashboard({ project }: { project: Project }) {
                  <div>
                   <div className="flex items-center gap-2">
                     {domain.id && renderStatusDot(domain.id)}
-                    <div className="font-medium text-lg text-primary">{domain.domainName}</div>
+                     <a href={getUrl(domain.domainName)} target="_blank" rel="noopener noreferrer" className="font-medium text-lg text-primary hover:underline">{domain.domainName}</a>
                   </div>
                 </div>
                 <div className="flex items-center flex-shrink-0 -mr-2 -mt-2">
