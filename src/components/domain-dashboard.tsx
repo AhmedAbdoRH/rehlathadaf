@@ -417,8 +417,18 @@ export function DomainDashboard({ project }: { project: Project }) {
                     <a href={getUrl(domain.domainName)} target="_blank" rel="noopener noreferrer" className="font-medium text-lg text-primary hover:underline">{domain.domainName}</a>
                   </div>
                   <div className='mt-2'>
-                    <div>{format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}</div>
+                    <div>{`تاريخ التجديد: ${format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}`}</div>
                     <Progress value={getRenewalProgress(domain.renewalDate as string)} className="h-2 mt-1" />
+                  </div>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="text-sm">
+                    <span className="font-medium">تاريخ التحصيل: </span>
+                    {domain.collectionDate ? format(parseISO(domain.collectionDate), 'dd/MM/yyyy') : 'N/A'}
+                  </div>
+                  <div className="text-sm mt-1">
+                    <span className="font-medium">موعد التجديد: </span>
+                    {format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}
                   </div>
                 </TableCell>
                 <TableCell>
@@ -570,9 +580,21 @@ export function DomainDashboard({ project }: { project: Project }) {
               </div>
               
               <div className='mt-4'>
-                <div>{format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}</div>
+                <div>{`تاريخ التجديد: ${format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}`}</div>
                 <Progress value={getRenewalProgress(domain.renewalDate as string)} className="h-2 mt-1" />
               </div>
+              
+              <div className="text-sm mt-4 text-muted-foreground">
+                  <div>
+                      <span className="font-medium">تاريخ التحصيل: </span>
+                      {domain.collectionDate ? format(parseISO(domain.collectionDate), 'dd/MM/yyyy') : 'N/A'}
+                  </div>
+                  <div className="mt-1">
+                      <span className="font-medium">موعد التجديد: </span>
+                      {format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}
+                  </div>
+              </div>
+
 
               <div className={`mt-4 grid ${project === 'rehlethadaf' ? 'grid-cols-2' : 'grid-cols-1'} gap-4 text-center`}>
                 <div>
@@ -812,5 +834,7 @@ export function DomainDashboard({ project }: { project: Project }) {
     </>
   );
 }
+
+    
 
     
