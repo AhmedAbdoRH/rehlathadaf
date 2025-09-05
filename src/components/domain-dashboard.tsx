@@ -329,21 +329,22 @@ export function DomainDashboard({ project }: { project: Project }) {
   const getRenewalProgress = (renewalDate: string) => {
     const renewal = parseISO(renewalDate);
     const today = new Date();
-    const daysRemaining = differenceInDays(renewal, today);
-
-    // If renewal date is in the past, progress is 0% remaining
-    if (daysRemaining <= 0) {
-      return 0;
+    
+    // If renewal date is in the past, progress is 100%
+    if (differenceInDays(renewal, today) <= 0) {
+      return 100;
     }
 
     const lastRenewal = subYears(renewal, 1);
     const totalDaysInYear = differenceInDays(renewal, lastRenewal);
-
+    
     if (totalDaysInYear <= 0) {
-      return 100;
+      return 0; // Or 100, depending on desired behavior for edge case
     }
+    
+    const daysPassed = differenceInDays(today, lastRenewal);
+    const progress = Math.max(0, Math.min(100, (daysPassed / totalDaysInYear) * 100));
 
-    const progress = Math.max(0, Math.min(100, (daysRemaining / totalDaysInYear) * 100));
     return progress;
   };
 
