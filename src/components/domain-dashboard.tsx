@@ -421,7 +421,7 @@ export function DomainDashboard({ project }: { project: Project }) {
                     <Progress value={getRenewalProgress(domain.renewalDate as string)} className="h-2 mt-1" />
                   </div>
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-center">
                   <div className="text-sm">
                     <span className="font-medium">تاريخ التحصيل: </span>
                     {domain.collectionDate ? format(parseISO(domain.collectionDate), 'dd/MM/yyyy') : 'N/A'}
@@ -584,18 +584,6 @@ export function DomainDashboard({ project }: { project: Project }) {
                 <Progress value={getRenewalProgress(domain.renewalDate as string)} className="h-2 mt-1" />
               </div>
               
-              <div className="text-sm mt-4 text-muted-foreground">
-                  <div>
-                      <span className="font-medium">تاريخ التحصيل: </span>
-                      {domain.collectionDate ? format(parseISO(domain.collectionDate), 'dd/MM/yyyy') : 'N/A'}
-                  </div>
-                  <div className="mt-1">
-                      <span className="font-medium">موعد التجديد: </span>
-                      {format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}
-                  </div>
-              </div>
-
-
               <div className={`mt-4 grid ${project === 'rehlethadaf' ? 'grid-cols-2' : 'grid-cols-1'} gap-4 text-center`}>
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">تكلفة العميل</div>
@@ -834,6 +822,8 @@ export function DomainDashboard({ project }: { project: Project }) {
     </>
   );
 }
+
+    
 
     
 
