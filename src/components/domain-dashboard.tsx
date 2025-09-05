@@ -34,9 +34,13 @@ import { getDomains, addDomain, deleteDomain, updateDomain } from '@/services/do
 import { cn } from "@/lib/utils"
 import { Textarea } from './ui/textarea';
 import { Checkbox } from './ui/checkbox';
+import { checkDomainStatus } from '@/ai/flows/checkDomainStatus';
+
 
 const USD_TO_EGP_RATE_OFFICE = 47.5; // سعر الصرف لمصاريف المكتب
 const USD_TO_EGP_RATE_CLIENT = 50; // سعر الصرف لتحصيل العميل
+
+type DomainStatus = 'checking' | 'online' | 'offline';
 
 
 const projectLabels: Record<Project, string> = {
@@ -56,11 +60,13 @@ export function DomainDashboard({ project }: { project: Project }) {
   const [isDataSheetOpen, setDataSheetOpen] = React.useState(false);
   const [dataSheetContent, setDataSheetContent] = React.useState({ title: '', content: '' });
   const [editingDataSheetDomain, setEditingDataSheetDomain] = React.useState<Domain | null>(null);
+  const [domainStatuses, setDomainStatuses] = React.useState<Record<string, DomainStatus>>({});
   const { toast } = useToast();
 
   React.useEffect(() => {
-    const fetchDomains = async () => {
+    const fetchDomainsAndStatuses = async () => {
       try {
+        setLoading(true);
         const domainsFromDb = await getDomains();
         const domainsWithProject = domainsFromDb.map(d => ({
           ...d,
@@ -68,6 +74,26 @@ export function DomainDashboard({ project }: { project: Project }) {
         }));
         const sortedDomains = domainsWithProject.sort((a, b) => differenceInDays(parseISO(a.renewalDate as string), new Date()) - differenceInDays(parseISO(b.renewalDate as string), new Date()));
         setDomains(sortedDomains);
+
+        // Set all to checking initially
+        const initialStatuses: Record<string, DomainStatus> = {};
+        sortedDomains.forEach(d => {
+            if (d.id) initialStatuses[d.id] = 'checking';
+        });
+        setDomainStatuses(initialStatuses);
+        
+        // Check statuses
+        sortedDomains.forEach(async (domain) => {
+          if (domain.id) {
+            try {
+              const { isOnline } = await checkDomainStatus({ domainName: domain.domainName });
+              setDomainStatuses(prev => ({ ...prev, [domain.id!]: isOnline ? 'online' : 'offline' }));
+            } catch (e) {
+               setDomainStatuses(prev => ({ ...prev, [domain.id!]: 'offline' }));
+            }
+          }
+        });
+
       } catch (error) {
         console.error("Error fetching domains:", error);
         toast({
@@ -79,7 +105,7 @@ export function DomainDashboard({ project }: { project: Project }) {
         setLoading(false);
       }
     };
-    fetchDomains();
+    fetchDomainsAndStatuses();
   }, [toast]);
 
   const [newDomain, setNewDomain] = React.useState<{
@@ -335,6 +361,18 @@ export function DomainDashboard({ project }: { project: Project }) {
     });
   };
 
+  const renderStatusDot = (domainId: string) => {
+    const status = domainStatuses[domainId];
+    if (status === 'checking') {
+      return <div className="h-2 w-2 rounded-full bg-yellow-500 animate-pulse" title="يتم التحقق..."></div>;
+    }
+    if (status === 'offline') {
+      return <div className="h-2 w-2 rounded-full bg-red-500" title="غير متصل"></div>;
+    }
+    // Render nothing for 'online'
+    return null;
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -354,7 +392,10 @@ export function DomainDashboard({ project }: { project: Project }) {
             {filteredDomains.map(domain => (
               <TableRow key={domain.id}>
                 <TableCell>
-                  <div className="font-medium text-lg text-primary">{domain.domainName}</div>
+                  <div className="flex items-center gap-2">
+                    {domain.id && renderStatusDot(domain.id)}
+                    <div className="font-medium text-lg text-primary">{domain.domainName}</div>
+                  </div>
                   <div className='mt-2'>
                     <div>{format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}</div>
                     <Progress value={getRenewalProgress(domain.renewalDate as string)} className="h-2 mt-1" />
@@ -435,8 +476,11 @@ export function DomainDashboard({ project }: { project: Project }) {
           <Card key={domain.id} className="w-full">
             <CardContent className="p-4">
               <div className="flex justify-between items-start">
-                <div>
-                  <div className="font-medium text-lg text-primary">{domain.domainName}</div>
+                 <div>
+                  <div className="flex items-center gap-2">
+                    {domain.id && renderStatusDot(domain.id)}
+                    <div className="font-medium text-lg text-primary">{domain.domainName}</div>
+                  </div>
                 </div>
                 <div className="flex items-center flex-shrink-0 -mr-2 -mt-2">
                     <Button variant="ghost" size="icon" onClick={() => openDataSheetDialog(domain)}>
