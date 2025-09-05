@@ -71,7 +71,7 @@ export function DomainDashboard({ project }: { project: Project }) {
         const domainsFromDb = await getDomains();
         const domainsWithProject = domainsFromDb.map(d => ({
           ...d,
-          projects: d.projects && d.projects.length > 0 ? d.projects : ['rehlethadaf']
+          projects: d.projects && d.projects.length > 0 ? d.projects as Project[] : ['rehlethadaf' as Project]
         }));
         const sortedDomains = domainsWithProject.sort((a, b) => differenceInDays(parseISO(a.renewalDate as string), new Date()) - differenceInDays(parseISO(b.renewalDate as string), new Date()));
         setDomains(sortedDomains);
@@ -417,7 +417,7 @@ export function DomainDashboard({ project }: { project: Project }) {
                     <a href={getUrl(domain.domainName)} target="_blank" rel="noopener noreferrer" className="font-medium text-lg text-primary hover:underline">{domain.domainName}</a>
                   </div>
                   <div className='mt-2'>
-                    <div>{`تاريخ التجديد: ${format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}`}</div>
+                    <div className="text-right">{`${format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}`}</div>
                     <Progress value={getRenewalProgress(domain.renewalDate as string)} className="h-2 mt-1" />
                   </div>
                 </TableCell>
@@ -441,10 +441,15 @@ export function DomainDashboard({ project }: { project: Project }) {
                   </TableCell>
                 )}
                 <TableCell className="text-left">
-                  <div className="flex items-center justify-end -space-x-2">
+                  <div className="flex items-center justify-end gap-2">
                    <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon" title="تجديد">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        title="تجديد"
+                        className="rounded-full w-8 h-8 bg-green-500/10 hover:bg-green-500/20 hover:scale-110 transition-all duration-300 hover:shadow-xl hover:shadow-green-500/30 border border-green-500/20 hover:border-green-500/40"
+                      >
                         <Check className="h-4 w-4 text-green-500" />
                       </Button>
                     </AlertDialogTrigger>
@@ -466,17 +471,33 @@ export function DomainDashboard({ project }: { project: Project }) {
                     </AlertDialogContent>
                   </AlertDialog>
                    <a href={getGoogleCalendarLink(domain)} target="_blank" rel="noopener noreferrer" title="إضافة للتقويم">
-                      <Button variant="ghost" size="icon">
-                        <CalendarPlus className="h-4 w-4" />
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="rounded-full w-8 h-8 bg-yellow-500/10 hover:bg-yellow-500/20 hover:scale-110 transition-all duration-300 hover:shadow-xl hover:shadow-yellow-500/30 border border-yellow-500/20 hover:border-yellow-500/40"
+                      >
+                        <CalendarPlus className="h-4 w-4 text-yellow-500" />
                       </Button>
                     </a>
-                  <Button variant="ghost" size="icon" onClick={() => openEditDialog(domain)} title="تعديل">
-                    <Pencil className="h-4 w-4" />
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => openEditDialog(domain)} 
+                    title="تعديل"
+                                            className="rounded-full w-8 h-8 bg-blue-500/10 hover:bg-blue-500/20 hover:scale-110 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/30 border border-blue-500/20 hover:border-blue-500/40"
+                  >
+                    <Pencil className="h-4 w-4 text-blue-500" />
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon" disabled={!domain.id} title="حذف">
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        disabled={!domain.id} 
+                        title="حذف"
+                        className="rounded-full w-8 h-8 bg-red-500/10 hover:bg-red-500/20 hover:scale-110 transition-all duration-300 hover:shadow-xl hover:shadow-red-500/30 border border-red-500/20 hover:border-red-500/40 disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none"
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
@@ -495,8 +516,14 @@ export function DomainDashboard({ project }: { project: Project }) {
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
-                  <Button variant="ghost" size="icon" onClick={() => openDataSheetDialog(domain)} title="عرض شيت البيانات">
-                     <FileText className="h-4 w-4" />
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => openDataSheetDialog(domain)} 
+                    title="عرض شيت البيانات"
+                                            className="rounded-full w-8 h-8 bg-purple-500/10 hover:bg-purple-500/20 hover:scale-110 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/30 border border-purple-500/20 hover:border-purple-500/40"
+                  >
+                     <FileText className="h-4 w-4 text-purple-500" />
                    </Button>
                   </div>
                 </TableCell>
@@ -511,10 +538,15 @@ export function DomainDashboard({ project }: { project: Project }) {
         {filteredDomains.map(domain => (
           <Card key={domain.id} className="w-full overflow-hidden">
              <div className="bg-muted/50 p-2 flex justify-between items-center">
-                <div className="flex items-center -space-x-2">
+                <div className="flex items-center gap-2">
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" title="تجديد">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              title="تجديد"
+                              className="rounded-full w-8 h-8 bg-green-500/10 hover:bg-green-500/20 hover:scale-110 transition-all duration-300 hover:shadow-xl hover:shadow-green-500/30 border border-green-500/20 hover:border-green-500/40"
+                            >
                                 <Check className="h-4 w-4 text-green-500" />
                             </Button>
                         </AlertDialogTrigger>
@@ -536,19 +568,35 @@ export function DomainDashboard({ project }: { project: Project }) {
                         </AlertDialogContent>
                     </AlertDialog>
                     <a href={getGoogleCalendarLink(domain)} target="_blank" rel="noopener noreferrer" title="إضافة للتقويم">
-                        <Button variant="ghost" size="icon">
-                            <CalendarPlus className="h-4 w-4" />
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          className="rounded-full w-8 h-8 bg-yellow-500/10 hover:bg-yellow-500/20 hover:scale-110 transition-all duration-300 hover:shadow-xl hover:shadow-yellow-500/30 border border-yellow-500/20 hover:border-yellow-500/40"
+                        >
+                            <CalendarPlus className="h-4 w-4 text-yellow-500" />
                         </Button>
                     </a>
                 </div>
-                <div className="flex items-center -space-x-2">
-                    <Button variant="ghost" size="icon" onClick={() => openEditDialog(domain)} title="تعديل">
-                        <Pencil className="h-4 w-4" />
+                <div className="flex items-center gap-2">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => openEditDialog(domain)} 
+                      title="تعديل"
+                                              className="rounded-full w-8 h-8 bg-blue-500/10 hover:bg-blue-500/20 hover:scale-110 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/30 border border-blue-500/20 hover:border-blue-500/40"
+                    >
+                        <Pencil className="h-4 w-4 text-blue-500" />
                     </Button>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" disabled={!domain.id} title="حذف">
-                                <Trash2 className="h-4 w-4 text-destructive" />
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              disabled={!domain.id} 
+                              title="حذف"
+                              className="rounded-full w-8 h-8 bg-red-500/10 hover:bg-red-500/20 hover:scale-110 transition-all duration-300 hover:shadow-xl hover:shadow-red-500/30 border border-red-500/20 hover:border-red-500/40 disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none"
+                            >
+                                <Trash2 className="h-4 w-4 text-red-500" />
                             </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
@@ -567,8 +615,14 @@ export function DomainDashboard({ project }: { project: Project }) {
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
-                     <Button variant="ghost" size="icon" onClick={() => openDataSheetDialog(domain)} title="عرض شيت البيانات">
-                        <FileText className="h-4 w-4" />
+                     <Button 
+                       variant="ghost" 
+                       size="icon" 
+                       onClick={() => openDataSheetDialog(domain)} 
+                       title="عرض شيت البيانات"
+                                               className="rounded-full w-8 h-8 bg-purple-500/10 hover:bg-purple-500/20 hover:scale-110 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/30 border border-purple-500/20 hover:border-purple-500/40"
+                     >
+                        <FileText className="h-4 w-4 text-purple-500" />
                     </Button>
                 </div>
               </div>
@@ -579,7 +633,7 @@ export function DomainDashboard({ project }: { project: Project }) {
               </div>
               
               <div className='mt-4'>
-                <div>{`تاريخ التجديد: ${format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}`}</div>
+                <div className="text-right">{`${format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}`}</div>
                 <Progress value={getRenewalProgress(domain.renewalDate as string)} className="h-2 mt-1" />
               </div>
               
@@ -653,7 +707,7 @@ export function DomainDashboard({ project }: { project: Project }) {
                         </div>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label className="text-right">تاريخ التجديد</Label>
+                        <Label className="text-right">التجديد</Label>
                         <Popover>
                             <PopoverTrigger asChild>
                                 <Button
@@ -695,9 +749,20 @@ export function DomainDashboard({ project }: { project: Project }) {
                 </div>
                  <DialogFooter>
                     <DialogClose asChild>
-                        <Button type="button" variant="outline">إلغاء</Button>
+                        <Button 
+                          type="button" 
+                          variant="outline"
+                          className="hover:bg-gray-100 hover:scale-105 transition-all duration-200 hover:shadow-md"
+                        >
+                          إلغاء
+                        </Button>
                     </DialogClose>
-                    <Button type="submit">إضافة نطاق</Button>
+                    <Button 
+                      type="submit"
+                      className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/25"
+                    >
+                      إضافة نطاق
+                    </Button>
                 </DialogFooter>
             </form>
         </DialogContent>
@@ -740,7 +805,7 @@ export function DomainDashboard({ project }: { project: Project }) {
                   </div>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">تاريخ التجديد</Label>
+                  <Label className="text-right">التجديد</Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -782,9 +847,21 @@ export function DomainDashboard({ project }: { project: Project }) {
               </div>
               <DialogFooter>
                 <DialogClose asChild>
-                  <Button type="button" variant="outline" onClick={() => setEditDomainOpen(false)}>إلغاء</Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setEditDomainOpen(false)}
+                    className="hover:bg-gray-100 hover:scale-105 transition-all duration-200 hover:shadow-md"
+                  >
+                    إلغاء
+                  </Button>
                 </DialogClose>
-                <Button type="submit">حفظ التغييرات</Button>
+                <Button 
+                  type="submit"
+                  className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-green-500/25"
+                >
+                  حفظ التغييرات
+                </Button>
               </DialogFooter>
             </form>
           )}
@@ -812,9 +889,23 @@ export function DomainDashboard({ project }: { project: Project }) {
           </div>
           <DialogFooter>
             <DialogClose asChild>
-              <Button type="button" variant="outline">إغلاق</Button>
+              <Button 
+                type="button" 
+                variant="outline"
+                className="hover:bg-gray-100 hover:scale-105 transition-all duration-200 hover:shadow-md"
+              >
+                إغلاق
+              </Button>
             </DialogClose>
-            {editingDataSheetDomain && <Button type="button" onClick={handleSaveDataSheet}>حفظ</Button>}
+            {editingDataSheetDomain && (
+              <Button 
+                type="button" 
+                onClick={handleSaveDataSheet}
+                className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-purple-500/25"
+              >
+                حفظ
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
