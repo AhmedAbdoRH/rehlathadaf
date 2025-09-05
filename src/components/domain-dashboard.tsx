@@ -62,7 +62,11 @@ export function DomainDashboard({ project }: { project: Project }) {
     const fetchDomains = async () => {
       try {
         const domainsFromDb = await getDomains();
-        const sortedDomains = domainsFromDb.sort((a, b) => differenceInDays(parseISO(a.renewalDate as string), new Date()) - differenceInDays(parseISO(b.renewalDate as string), new Date()));
+        const domainsWithProject = domainsFromDb.map(d => ({
+          ...d,
+          projects: d.projects && d.projects.length > 0 ? d.projects : ['rehlethadaf']
+        }));
+        const sortedDomains = domainsWithProject.sort((a, b) => differenceInDays(parseISO(a.renewalDate as string), new Date()) - differenceInDays(parseISO(b.renewalDate as string), new Date()));
         setDomains(sortedDomains);
       } catch (error) {
         console.error("Error fetching domains:", error);
