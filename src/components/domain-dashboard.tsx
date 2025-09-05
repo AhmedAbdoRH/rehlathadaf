@@ -421,10 +421,12 @@ export function DomainDashboard({ project }: { project: Project }) {
                     <div className="text-accent font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
                     <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
                 </TableCell>
-                <TableCell>
-                    <div className="text-destructive font-semibold">${Number(domain.renewalCostOffice).toFixed(2)}</div>
-                    <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostOffice) * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
-                </TableCell>
+                {project === 'bofa' && (
+                  <TableCell>
+                      <div className="text-destructive font-semibold">${Number(domain.renewalCostOffice).toFixed(2)}</div>
+                      <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostOffice) * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
+                  </TableCell>
+                )}
                 <TableCell className="text-left flex items-center">
                    <Button variant="ghost" size="icon" onClick={() => openDataSheetDialog(domain)}>
                      <FileText className="h-4 w-4" />
@@ -551,17 +553,19 @@ export function DomainDashboard({ project }: { project: Project }) {
                 <div>{format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}</div>
                 <Progress value={getRenewalProgress(domain.renewalDate as string)} className="h-2 mt-1" />
               </div>
-              <div className="mt-4 grid grid-cols-2 gap-4 text-center">
+              <div className={`mt-4 grid ${project === 'bofa' ? 'grid-cols-2' : 'grid-cols-1'} gap-4 text-center`}>
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">تكلفة العميل</div>
                   <div className="text-accent font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
                   <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
                 </div>
-                <div>
-                  <div className="text-sm font-medium text-muted-foreground">تكلفة المكتب</div>
-                   <div className="text-destructive font-semibold">${Number(domain.renewalCostOffice).toFixed(2)}</div>
-                   <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostOffice) * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
-                </div>
+                {project === 'bofa' && (
+                  <div>
+                    <div className="text-sm font-medium text-muted-foreground">تكلفة المكتب</div>
+                     <div className="text-destructive font-semibold">${Number(domain.renewalCostOffice).toFixed(2)}</div>
+                     <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostOffice) * USD_TO_EGP_RATE).toFixed(2)} ج.م</div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
