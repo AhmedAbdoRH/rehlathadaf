@@ -1,15 +1,31 @@
+"use client";
+
+import * as React from 'react';
 import { DomainDashboard } from '@/components/domain-dashboard';
 import { Icons } from '@/components/icons';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Home() {
+  const [isRehlethadafVisible, setRehlethadafVisible] = React.useState(false);
+
+  const handleSecretClick = () => {
+    setRehlethadafVisible(true);
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto p-4 sm:p-6 lg:p-8">
         <header className="mb-8 flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
-            <Icons.logo className="h-8 w-8 text-primary-foreground" />
+          <div className="relative">
+             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
+               <Icons.logo className="h-8 w-8 text-primary-foreground" />
+             </div>
+             <button 
+                onClick={handleSecretClick} 
+                className="absolute inset-0 z-10 cursor-pointer opacity-0"
+                aria-label="Secret button"
+              />
           </div>
           <div>
             <h1 className="text-3xl font-bold text-foreground">عرض النطاق</h1>
@@ -26,7 +42,13 @@ export default function Home() {
                   <TabsTrigger value="other">مشاريع أخرى</TabsTrigger>
                 </TabsList>
                 <TabsContent value="rehlethadaf">
-                  <DomainDashboard project="rehlethadaf" />
+                  {isRehlethadafVisible ? (
+                    <DomainDashboard project="rehlethadaf" />
+                  ) : (
+                    <div className="flex h-64 items-center justify-center text-muted-foreground">
+                      <p>اضغط على الزر السري لإظهار المحتوى.</p>
+                    </div>
+                  )}
                 </TabsContent>
                 <TabsContent value="bofa">
                    <DomainDashboard project="bofa" />
