@@ -456,9 +456,6 @@ export function DomainDashboard({ project }: { project: Project }) {
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
-                  <Button variant="ghost" size="icon" onClick={() => openDataSheetDialog(domain)} title="عرض شيت البيانات">
-                     <FileText className="h-4 w-4" />
-                   </Button>
                    <a href={getGoogleCalendarLink(domain)} target="_blank" rel="noopener noreferrer" title="إضافة للتقويم">
                       <Button variant="ghost" size="icon">
                         <CalendarPlus className="h-4 w-4" />
@@ -489,6 +486,9 @@ export function DomainDashboard({ project }: { project: Project }) {
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
+                  <Button variant="ghost" size="icon" onClick={() => openDataSheetDialog(domain)} title="عرض شيت البيانات">
+                     <FileText className="h-4 w-4" />
+                   </Button>
                   </div>
                 </TableCell>
               </TableRow>
@@ -526,9 +526,6 @@ export function DomainDashboard({ project }: { project: Project }) {
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
-                    <Button variant="ghost" size="icon" onClick={() => openDataSheetDialog(domain)} title="عرض شيت البيانات">
-                        <FileText className="h-4 w-4" />
-                    </Button>
                     <a href={getGoogleCalendarLink(domain)} target="_blank" rel="noopener noreferrer" title="إضافة للتقويم">
                         <Button variant="ghost" size="icon">
                             <CalendarPlus className="h-4 w-4" />
@@ -561,6 +558,9 @@ export function DomainDashboard({ project }: { project: Project }) {
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
+                     <Button variant="ghost" size="icon" onClick={() => openDataSheetDialog(domain)} title="عرض شيت البيانات">
+                        <FileText className="h-4 w-4" />
+                    </Button>
                 </div>
               </div>
             <CardContent className="p-4">
@@ -812,3 +812,5 @@ export function DomainDashboard({ project }: { project: Project }) {
     </>
   );
 }
+
+    
