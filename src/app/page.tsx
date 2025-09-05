@@ -38,8 +38,8 @@ export default function Home() {
             <CardContent>
               <Tabs defaultValue="rehlethadaf" className="w-full pt-4">
                 <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="rehlethadaf">مشاريع رحلة هدف</TabsTrigger>
-                  <TabsTrigger value="bofa">مشاريع بوفا</TabsTrigger>
+                  <TabsTrigger value="rehlethadaf">رحلة هدف</TabsTrigger>
+                  <TabsTrigger value="bofa">بوفا</TabsTrigger>
                   <TabsTrigger value="other">مشاريع أخرى</TabsTrigger>
                 </TabsList>
                 <TabsContent value="rehlethadaf">
