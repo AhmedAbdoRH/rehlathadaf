@@ -480,73 +480,75 @@ export function DomainDashboard({ project }: { project: Project }) {
       {/* Mobile Cards */}
       <div className="md:hidden grid grid-cols-1 gap-4 mt-4">
         {filteredDomains.map(domain => (
-          <Card key={domain.id} className="w-full">
-            <CardContent className="p-4">
-              <div className="flex justify-between items-start">
-                 <div>
-                  <div className="flex items-center gap-2">
-                    {domain.id && renderStatusDot(domain.id)}
-                     <a href={getUrl(domain.domainName)} target="_blank" rel="noopener noreferrer" className="font-medium text-lg text-primary hover:underline">{domain.domainName}</a>
-                  </div>
+          <Card key={domain.id} className="w-full overflow-hidden">
+             <div className="bg-muted/50 p-2 flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <Button variant="ghost" size="icon" onClick={() => openDataSheetDialog(domain)}>
+                    <FileText className="h-4 w-4" />
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <Check className="h-4 w-4 text-green-500" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>تأكيد التجديد</AlertDialogTitle>
+                        <AlertDialogDescription>
+                           هل أنت متأكد من أنك تريد تجديد النطاق 
+                           <span className="font-bold"> {domain.domainName}</span>؟ 
+                           سيتم تحديث تاريخ التجديد للعام القادم.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleRenewDomain(domain)}>
+                          تجديد
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
-                <div className="flex items-center flex-shrink-0 -mr-2 -mt-2">
-                    <Button variant="ghost" size="icon" onClick={() => openDataSheetDialog(domain)}>
-                      <FileText className="h-4 w-4" />
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <Check className="h-4 w-4 text-green-500" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>تأكيد التجديد</AlertDialogTitle>
-                          <AlertDialogDescription>
-                             هل أنت متأكد من أنك تريد تجديد النطاق 
-                             <span className="font-bold"> {domain.domainName}</span>؟ 
-                             سيتم تحديث تاريخ التجديد للعام القادم.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>إلغاء</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => handleRenewDomain(domain)}>
-                            تجديد
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                   <Button variant="ghost" size="icon" onClick={() => openEditDialog(domain)}>
+                <div className="flex items-center">
+                  <Button variant="ghost" size="icon" onClick={() => openEditDialog(domain)}>
                     <Pencil className="h-4 w-4" />
                   </Button>
                   <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon" disabled={!domain.id}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف النطاق بشكل دائم
-                            <span className="font-bold"> {domain.domainName}</span>.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>إلغاء</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => handleDeleteDomain(domain.id!)}>
-                            متابعة
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon" disabled={!domain.id}>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف النطاق بشكل دائم
+                          <span className="font-bold"> {domain.domainName}</span>.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDeleteDomain(domain.id!)}>
+                          متابعة
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2">
+                {domain.id && renderStatusDot(domain.id)}
+                 <a href={getUrl(domain.domainName)} target="_blank" rel="noopener noreferrer" className="font-medium text-lg text-primary hover:underline">{domain.domainName}</a>
+              </div>
+              
               <div className='mt-4'>
                 <div>{format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}</div>
                 <Progress value={getRenewalProgress(domain.renewalDate as string)} className="h-2 mt-1" />
               </div>
+
               <div className={`mt-4 grid ${project === 'rehlethadaf' ? 'grid-cols-2' : 'grid-cols-1'} gap-4 text-center`}>
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">تكلفة العميل</div>
