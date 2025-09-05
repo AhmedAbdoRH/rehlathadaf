@@ -47,7 +47,7 @@ export default function Home() {
                     <DomainDashboard project="rehlethadaf" />
                   ) : (
                     <div className="flex h-64 items-center justify-center text-muted-foreground">
-                      <p>انقر نقرًا مزدوجًا على الشعار لإظهار المحتوى.</p>
+                      
                     </div>
                   )}
                 </TabsContent>
