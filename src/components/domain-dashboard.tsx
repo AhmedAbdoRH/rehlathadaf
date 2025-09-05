@@ -33,7 +33,6 @@ import { Card, CardContent } from './ui/card';
 import { getDomains, addDomain, deleteDomain, updateDomain } from '@/services/domainService';
 import { cn } from "@/lib/utils"
 import { Textarea } from './ui/textarea';
-import { generateRenewalReminders } from '@/ai/flows/generate-renewal-reminders';
 import { Checkbox } from './ui/checkbox';
 
 const USD_TO_EGP_RATE_OFFICE = 47.5; // سعر الصرف لمصاريف المكتب
@@ -58,7 +57,6 @@ export function DomainDashboard({ project }: { project: Project }) {
   const [dataSheetContent, setDataSheetContent] = React.useState({ title: '', content: '' });
   const [editingDataSheetDomain, setEditingDataSheetDomain] = React.useState<Domain | null>(null);
   const { toast } = useToast();
-  const [isGenerating, setIsGenerating] = React.useState(false);
 
   React.useEffect(() => {
     const fetchDomains = async () => {
@@ -254,56 +252,6 @@ export function DomainDashboard({ project }: { project: Project }) {
     }
   };
 
-  const handleGenerateReminders = async () => {
-    setIsGenerating(true);
-    try {
-      const domainsToRemind = filteredDomains
-        .filter(d => d.clientEmail)
-        .map(d => {
-            const renewalDate = parseISO(d.renewalDate as string);
-            const daysRemaining = differenceInDays(renewalDate, new Date());
-            return {
-                domainName: d.domainName,
-                renewalDate: format(renewalDate, 'yyyy-MM-dd'),
-                clientEmail: d.clientEmail as string,
-                outstandingBalance: d.renewalCostClient ? Number(d.renewalCostClient) : 0,
-                isPastDue: daysRemaining < 0
-            };
-        });
-
-      if (domainsToRemind.length === 0) {
-        toast({
-          title: "لا توجد نطاقات للتذكير",
-          description: "تأكد من وجود بريد إلكتروني للعملاء في النطاقات التي تريد إنشاء تذكيرات لها.",
-        });
-        return;
-      }
-
-      const result = await generateRenewalReminders({ domains: domainsToRemind });
-      
-      const remindersText = result.reminders.map(r => 
-        `----------------------------------------\n` +
-        `إلى: ${r.clientEmail}\n` +
-        `النطاق: ${r.domainName}\n` +
-        `الرسالة:\n${r.reminderMessage}`
-      ).join('\n\n');
-
-      setDataSheetContent({ title: 'رسائل التذكير المنشأة', content: remindersText });
-      setDataSheetOpen(true);
-
-    } catch (error) {
-      console.error("Error generating reminders:", error);
-      toast({
-        title: "خطأ في إنشاء التذكيرات",
-        description: "حدث خطأ أثناء التواصل مع الذكاء الاصطناعي.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-
   const openEditDialog = (domain: Domain) => {
     setDomainToEdit({
         ...domain,
@@ -399,15 +347,8 @@ export function DomainDashboard({ project }: { project: Project }) {
 
   return (
     <>
-      <div className="flex justify-end mb-4 pt-4">
-        <Button onClick={handleGenerateReminders} disabled={isGenerating}>
-          {isGenerating ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <FileText className="ml-2 h-4 w-4" />}
-          {isGenerating ? "جاري الإنشاء..." : "إنشاء رسائل تذكير"}
-        </Button>
-      </div>
-
       {/* Desktop Table */}
-      <div className="hidden md:block rounded-md border">
+      <div className="hidden md:block rounded-md border mt-4">
         <Table>
           <TableBody>
             {filteredDomains.map(domain => (
@@ -489,7 +430,7 @@ export function DomainDashboard({ project }: { project: Project }) {
       </div>
 
       {/* Mobile Cards */}
-      <div className="md:hidden grid grid-cols-1 gap-4">
+      <div className="md:hidden grid grid-cols-1 gap-4 mt-4">
         {filteredDomains.map(domain => (
           <Card key={domain.id} className="w-full">
             <CardContent className="p-4">
@@ -779,7 +720,7 @@ export function DomainDashboard({ project }: { project: Project }) {
               value={dataSheetContent.content}
               onChange={(e) => handleDataSheetChange(e.target.value)}
               className="min-h-[200px] w-full"
-              readOnly={!editingDataSheetDomain && dataSheetContent.title !== 'رسائل التذكير المنشأة'}
+              readOnly={!editingDataSheetDomain}
             />
           </div>
           <DialogFooter>
@@ -793,5 +734,3 @@ export function DomainDashboard({ project }: { project: Project }) {
     </>
   );
 }
-
-    
