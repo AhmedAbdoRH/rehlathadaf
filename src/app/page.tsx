@@ -18,14 +18,12 @@ export default function Home() {
       <div className="container mx-auto p-4 sm:p-6 lg:p-8">
         <header className="mb-8 flex items-center gap-4">
           <div className="relative">
-             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
+             <div 
+                onClick={handleSecretClick} 
+                className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary cursor-pointer"
+             >
                <Icons.logo className="h-8 w-8 text-primary-foreground" />
              </div>
-             <button 
-                onClick={handleSecretClick} 
-                className="absolute inset-0 z-10 cursor-pointer opacity-0"
-                aria-label="Secret button"
-              />
           </div>
           <div>
             <h1 className="text-3xl font-bold text-foreground">عرض النطاق</h1>
