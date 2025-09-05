@@ -369,7 +369,9 @@ export function DomainDashboard({ project }: { project: Project }) {
     if (status === 'offline') {
       return <div className="h-2 w-2 rounded-full bg-red-500" title="غير متصل"></div>;
     }
-    // Render nothing for 'online'
+    if (status === 'online') {
+      return <div className="h-2 w-2 rounded-full bg-green-500" title="متصل"></div>;
+    }
     return null;
   };
 
