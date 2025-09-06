@@ -12,7 +12,7 @@ import { checkDomainStatus } from '@/ai/flows/checkDomainStatus';
 import type { Domain } from '@/lib/types';
 
 export default function DashboardPage() {
-  const [isRehlethadafVisible, setRehlethadafVisible] = React.useState(false);
+  const [isSecretVisible, setSecretVisible] = React.useState(false);
   const [clickCount, setClickCount] = React.useState(0);
   const [allDomains, setAllDomains] = React.useState<Domain[]>([]);
   const [domainStatuses, setDomainStatuses] = React.useState<Record<string, 'checking' | 'online' | 'offline'>>({});
@@ -22,7 +22,7 @@ export default function DashboardPage() {
     const newClickCount = clickCount + 1;
     setClickCount(newClickCount);
     if (newClickCount >= 2) {
-      setRehlethadafVisible(true);
+      setSecretVisible(true);
     }
   };
 
@@ -131,14 +131,14 @@ export default function DashboardPage() {
           <main>
             <Card className="shadow-lg">
               <CardContent>
-                <Tabs defaultValue="rehlethadaf" className="w-full pt-4">
+                <Tabs defaultValue="bofa" className="w-full pt-4">
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="rehlethadaf">رحلة هدف</TabsTrigger>
                     <TabsTrigger value="bofa">بوفا</TabsTrigger>
                     <TabsTrigger value="other">مشاريع أخرى</TabsTrigger>
                   </TabsList>
                   <TabsContent value="rehlethadaf">
-                    {isRehlethadafVisible ? (
+                    {isSecretVisible ? (
                       <DomainDashboard project="rehlethadaf" onDomainChange={refreshDomains} />
                     ) : (
                       <div className="flex h-64 items-center justify-center text-muted-foreground">
@@ -150,7 +150,12 @@ export default function DashboardPage() {
                     <DomainDashboard project="bofa" onDomainChange={refreshDomains} />
                   </TabsContent>
                   <TabsContent value="other">
-                    <DomainDashboard project="other" onDomainChange={refreshDomains} />
+                     {isSecretVisible ? (
+                      <DomainDashboard project="other" onDomainChange={refreshDomains} />
+                    ) : (
+                      <div className="flex h-64 items-center justify-center text-muted-foreground">
+                      </div>
+                    )}
                   </TabsContent>
                 </Tabs>
               </CardContent>
