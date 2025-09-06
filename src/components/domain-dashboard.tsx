@@ -431,10 +431,6 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                    <div className="text-sm">
                     {format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}
                   </div>
-                  <div className="text-sm mt-1">
-                    <span className="font-medium">تاريخ التحصيل: </span>
-                    {domain.collectionDate ? format(parseISO(domain.collectionDate), 'dd/MM/yyyy') : 'N/A'}
-                  </div>
                 </TableCell>
                 {project === 'pova' ? (
                   <TableCell>
