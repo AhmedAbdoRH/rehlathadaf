@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
-import { ArrowLeft, Banknote, Coins, Briefcase, HandCoins, Building, User, LayoutGrid } from 'lucide-react';
+import { ArrowLeft, Banknote, Coins, HandCoins, Building, User, LayoutGrid } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +12,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Card, CardContent } from '@/components/ui/card';
+
+const Bullseye = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <circle cx="12" cy="12" r="10" />
+        <circle cx="12" cy="12" r="6" />
+        <circle cx="12" cy="12" r="2" />
+    </svg>
+);
+
 
 const NavCard = ({ href, icon: Icon, title, newTab = false }: { href: string, icon: React.ElementType, title: string, newTab?: boolean }) => (
   <Link href={href} passHref legacyBehavior>
@@ -55,7 +64,7 @@ export default function Home() {
       <div className="container mx-auto flex flex-col items-center justify-center text-center">
         
         <div className="flex h-24 w-24 items-center justify-center rounded-full bg-card border border-border mb-6 shadow-lg">
-          <Briefcase className="h-12 w-12 text-red-500/90" />
+          <Bullseye className="h-12 w-12 text-red-500/90" />
         </div>
         <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-3">
           رحلة هدف - الأنظمة الداخلية
