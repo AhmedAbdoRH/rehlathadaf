@@ -427,11 +427,6 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                     <Progress value={getRenewalProgress(domain.renewalDate as string)} className="h-2 mt-1" />
                   </div>
                 </TableCell>
-                <TableCell className="text-center">
-                   <div className="text-sm">
-                    {format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}
-                  </div>
-                </TableCell>
                 {project === 'pova' ? (
                   <TableCell>
                       <div className="text-destructive font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
@@ -658,7 +653,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                 <Progress value={getRenewalProgress(domain.renewalDate as string)} className="h-2 mt-1" />
               </div>
               
-              <div className={`mt-4 grid ${project === 'rehlethadaf' ? 'grid-cols-2' : (project === 'pova' ? 'grid-cols-2' : 'grid-cols-1')} gap-4 text-center`}>
+              <div className={`mt-4 grid ${project === 'rehlethadaf' || project === 'other' ? 'grid-cols-2' : (project === 'pova' ? 'grid-cols-2' : 'grid-cols-1')} gap-4 text-center`}>
                 {project === 'pova' ? (
                    <div>
                     <div className="text-sm font-medium text-muted-foreground">قيمة التجديد (B2B)</div>
@@ -958,5 +953,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
     </>
   );
 }
+
+    
 
     
