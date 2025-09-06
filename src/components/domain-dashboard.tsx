@@ -767,7 +767,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                     </DialogClose>
                     <Button 
                       type="submit"
-                      className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/25"
+                      className="hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/25"
                     >
                       إضافة نطاق
                     </Button>
@@ -866,7 +866,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                 </DialogClose>
                 <Button 
                   type="submit"
-                  className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-green-500/25"
+                  className="hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/25"
                 >
                   حفظ التغييرات
                 </Button>
@@ -909,7 +909,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
               <Button 
                 type="button" 
                 onClick={handleSaveDataSheet}
-                className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-purple-500/25"
+                className="hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/25"
               >
                 حفظ
               </Button>
@@ -926,5 +926,6 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
     
 
     
+
 
 
