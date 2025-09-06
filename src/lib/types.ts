@@ -10,6 +10,7 @@ export type Domain = {
   outstandingBalance?: number;
   renewalCostClient: number | '';
   renewalCostOffice: number | '';
+  renewalCostBofa?: number | '';
   projects?: Project[];
 };
 

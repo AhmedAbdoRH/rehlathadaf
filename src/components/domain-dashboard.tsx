@@ -115,6 +115,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
     renewalDate: Date;
     renewalCostClient: number | '';
     renewalCostOffice: number | '';
+    renewalCostBofa: number | '';
     projects: Project[];
   }>({
     domainName: '',
@@ -122,6 +123,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
     renewalDate: addYears(new Date(), 1),
     renewalCostClient: '',
     renewalCostOffice: '',
+    renewalCostBofa: '',
     projects: [project]
   });
 
@@ -151,6 +153,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
       renewalDate: formatISO(newDomain.renewalDate),
       renewalCostClient: Number(newDomain.renewalCostClient) || 0,
       renewalCostOffice: Number(newDomain.renewalCostOffice) || 0,
+      renewalCostBofa: Number(newDomain.renewalCostBofa) || 0,
       status: 'active',
       collectionDate: formatISO(new Date()),
       projects: newDomain.projects
@@ -170,6 +173,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
           renewalDate: addYears(new Date(), 1),
           renewalCostClient: '',
           renewalCostOffice: '',
+          renewalCostBofa: '',
           projects: [project],
       });
       // Refresh the status panel
@@ -235,10 +239,11 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
           ...updatedData,
           renewalCostClient: Number(updatedData.renewalCostClient) || 0,
           renewalCostOffice: Number(updatedData.renewalCostOffice) || 0,
+          renewalCostBofa: Number(updatedData.renewalCostBofa) || 0,
       };
 
       await updateDomain(id, finalData);
-      setDomains(prevDomains => prevDomains.map(d => d.id === id ? { ...d, ...domainToEdit, renewalDate: finalData.renewalDate, renewalCostClient: finalData.renewalCostClient, renewalCostOffice: finalData.renewalCostOffice } : d).sort((a, b) => differenceInDays(parseISO(a.renewalDate as string), new Date()) - differenceInDays(parseISO(b.renewalDate as string), new Date())));
+      setDomains(prevDomains => prevDomains.map(d => d.id === id ? { ...d, ...domainToEdit, renewalDate: finalData.renewalDate, renewalCostClient: finalData.renewalCostClient, renewalCostOffice: finalData.renewalCostOffice, renewalCostBofa: finalData.renewalCostBofa } : d).sort((a, b) => differenceInDays(parseISO(a.renewalDate as string), new Date()) - differenceInDays(parseISO(b.renewalDate as string), new Date())));
       toast({
         title: "تم تحديث النطاق",
         description: `تم تحديث ${domainToEdit.domainName} بنجاح.`,
@@ -288,6 +293,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
         renewalDate: parseISO(domain.renewalDate as string),
         renewalCostClient: domain.renewalCostClient || '',
         renewalCostOffice: domain.renewalCostOffice || '',
+        renewalCostBofa: domain.renewalCostBofa || '',
         projects: domain.projects || [],
     });
     setEditDomainOpen(true);
@@ -434,6 +440,12 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                   <TableCell>
                       <div className="text-accent font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
                       <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
+                  </TableCell>
+                )}
+                 {project === 'bofa' && domain.renewalCostBofa && Number(domain.renewalCostBofa) > 0 && (
+                    <TableCell>
+                      <div className="text-accent font-semibold">${Number(domain.renewalCostBofa).toFixed(2)}</div>
+                      <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostBofa) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
                   </TableCell>
                 )}
                 {(project === 'rehlethadaf' || project === 'other') && (
@@ -639,12 +651,19 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                 <Progress value={getRenewalProgress(domain.renewalDate as string)} className="h-2 mt-1" />
               </div>
               
-              <div className={`mt-4 grid ${project === 'rehlethadaf' ? 'grid-cols-2' : 'grid-cols-1'} gap-4 text-center`}>
+              <div className={`mt-4 grid ${project === 'rehlethadaf' ? 'grid-cols-2' : (project === 'bofa' && domain.renewalCostBofa && Number(domain.renewalCostBofa) > 0 ? 'grid-cols-2' : 'grid-cols-1')} gap-4 text-center`}>
                 {project !== 'other' && (
                   <div>
                     <div className="text-sm font-medium text-muted-foreground">{project === 'bofa' ? 'قيمة التجديد (B2B)' : 'قيمة التجديد'}</div>
                     <div className="text-accent font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
                     <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
+                  </div>
+                )}
+                 {project === 'bofa' && domain.renewalCostBofa && Number(domain.renewalCostBofa) > 0 && (
+                  <div>
+                    <div className="text-sm font-medium text-muted-foreground">قيمة التجديد (Bofa)</div>
+                    <div className="text-accent font-semibold">${Number(domain.renewalCostBofa).toFixed(2)}</div>
+                    <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostBofa) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
                   </div>
                 )}
                 {(project === 'rehlethadaf' || project === 'other') && (
@@ -703,6 +722,15 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                             <div className="relative">
                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">$</span>
                                <Input id="renewalCostOffice" type="number" placeholder="0.00" value={newDomain.renewalCostOffice} onChange={(e) => setNewDomain({...newDomain, renewalCostOffice: e.target.value === '' ? '' : Number(e.target.value)})} className="pl-7" />
+                           </div>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                         <div className="space-y-2">
+                           <Label htmlFor="renewalCostBofa">قيمة التجديد (Bofa)</Label>
+                           <div className="relative">
+                               <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">$</span>
+                               <Input id="renewalCostBofa" type="number" placeholder="0.00" value={newDomain.renewalCostBofa} onChange={(e) => setNewDomain({...newDomain, renewalCostBofa: e.target.value === '' ? '' : Number(e.target.value)})} className="pl-7" />
                            </div>
                         </div>
                     </div>
@@ -797,6 +825,15 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                     <div className="relative">
                       <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">$</span>
                       <Input id="editRenewalCostOffice" type="number" placeholder="0.00" value={domainToEdit.renewalCostOffice} onChange={(e) => setDomainToEdit({ ...domainToEdit, renewalCostOffice: e.target.value === '' ? '' : Number(e.target.value) })} className="pl-7" />
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="editRenewalCostBofa">قيمة التجديد (Bofa)</Label>
+                     <div className="relative">
+                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">$</span>
+                      <Input id="editRenewalCostBofa" type="number" placeholder="0.00" value={domainToEdit.renewalCostBofa} onChange={(e) => setDomainToEdit({ ...domainToEdit, renewalCostBofa: e.target.value === '' ? '' : Number(e.target.value) })} className="pl-7" />
                     </div>
                   </div>
                 </div>
