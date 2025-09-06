@@ -438,7 +438,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                 </TableCell>
                 {project === 'bofa' ? (
                   <TableCell>
-                      <div className="text-accent font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
+                      <div className="text-destructive font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
                       <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
                       <div className="text-xs text-muted-foreground mt-1">B2B</div>
                   </TableCell>
@@ -666,7 +666,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                 {project === 'bofa' ? (
                    <div>
                     <div className="text-sm font-medium text-muted-foreground">قيمة التجديد (B2B)</div>
-                    <div className="text-accent font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
+                    <div className="text-destructive font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
                     <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
                   </div>
                 ) : project !== 'other' && (
@@ -982,5 +982,6 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
     
 
     
+
 
 
