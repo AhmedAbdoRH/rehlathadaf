@@ -696,7 +696,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                     </div>
                      <div className="grid grid-cols-4 items-start gap-4">
                         <Label htmlFor="dataSheet" className="text-right pt-2">شيت البيانات</Label>
-                        <Textarea id="dataSheet" value={newDomain.dataSheet} onChange={(e) => setNewDomain({...newDomain, dataSheet: e.target.value})} className="col-span-3" />
+                        <Textarea id="dataSheet" value={newDomain.dataSheet} onChange={(e) => setNewDomain({...newDomain, dataSheet: e.target.value})} className="col-span-3 text-left" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
@@ -891,7 +891,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
             <Textarea
               value={dataSheetContent.content}
               onChange={(e) => handleDataSheetChange(e.target.value)}
-              className="min-h-[200px] w-full"
+              className="min-h-[200px] w-full text-left"
               readOnly={!editingDataSheetDomain}
             />
           </div>
@@ -926,3 +926,4 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
     
 
     
+
