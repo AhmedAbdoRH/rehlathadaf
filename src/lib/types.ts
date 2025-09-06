@@ -11,5 +11,6 @@ export type Domain = {
   renewalCostClient: number | '';
   renewalCostOffice: number | '';
   projects?: Project[];
-  clientEmail?: string;
 };
+
+    

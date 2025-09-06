@@ -115,7 +115,6 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
     renewalDate: Date;
     renewalCostClient: number | '';
     renewalCostOffice: number | '';
-    clientEmail: string;
     projects: Project[];
   }>({
     domainName: '',
@@ -123,7 +122,6 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
     renewalDate: addYears(new Date(), 1),
     renewalCostClient: '',
     renewalCostOffice: '',
-    clientEmail: '',
     projects: [project]
   });
 
@@ -155,7 +153,6 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
       renewalCostOffice: Number(newDomain.renewalCostOffice) || 0,
       status: 'active',
       collectionDate: formatISO(new Date()),
-      clientEmail: newDomain.clientEmail,
       projects: newDomain.projects
     };
     
@@ -173,7 +170,6 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
           renewalDate: addYears(new Date(), 1),
           renewalCostClient: '',
           renewalCostOffice: '',
-          clientEmail: '',
           projects: [project],
       });
       // Refresh the status panel
@@ -292,7 +288,6 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
         renewalDate: parseISO(domain.renewalDate as string),
         renewalCostClient: domain.renewalCostClient || '',
         renewalCostOffice: domain.renewalCostOffice || '',
-        clientEmail: domain.clientEmail || '',
         projects: domain.projects || [],
     });
     setEditDomainOpen(true);
@@ -338,7 +333,6 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
     const title = encodeURIComponent(`تذكير تجديد نطاق: ${domain.domainName}`);
     const details = encodeURIComponent(
       `لا تنسَ تجديد نطاق ${domain.domainName}.\n` +
-      `بريد العميل: ${domain.clientEmail || 'غير محدد'}\n` +
       `تكلفة العميل: $${Number(domain.renewalCostClient).toFixed(2)} (${(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م)\n` +
       (project === 'rehlethadaf' ? `تكلفة المكتب: $${Number(domain.renewalCostOffice).toFixed(2)} (${(Number(domain.renewalCostOffice) * USD_TO_EGP_RATE_OFFICE).toFixed(2)} ج.م)` : '')
     );
@@ -692,10 +686,6 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                         <Label htmlFor="domainName" className="text-right">النطاق</Label>
                         <Input id="domainName" value={newDomain.domainName} onChange={(e) => setNewDomain({...newDomain, domainName: e.target.value})} className="col-span-3" required />
                     </div>
-                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="clientEmail" className="text-right">بريد العميل</Label>
-                        <Input id="clientEmail" value={newDomain.clientEmail} onChange={(e) => setNewDomain({...newDomain, clientEmail: e.target.value})} className="col-span-3" />
-                    </div>
                      <div className="grid grid-cols-4 items-start gap-4">
                         <Label htmlFor="dataSheet" className="text-right pt-2">شيت البيانات</Label>
                         <Textarea id="dataSheet" value={newDomain.dataSheet} onChange={(e) => setNewDomain({...newDomain, dataSheet: e.target.value})} className="col-span-3 text-left" />
@@ -793,10 +783,6 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="editDomainName" className="text-right">النطاق</Label>
                   <Input id="editDomainName" value={domainToEdit.domainName} onChange={(e) => setDomainToEdit({ ...domainToEdit, domainName: e.target.value })} className="col-span-3" required />
-                </div>
-                 <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="editClientEmail" className="text-right">بريد العميل</Label>
-                    <Input id="editClientEmail" value={domainToEdit.clientEmail} onChange={(e) => setDomainToEdit({ ...domainToEdit, clientEmail: e.target.value })} className="col-span-3" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -935,3 +921,6 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
 
     
 
+
+
+    
