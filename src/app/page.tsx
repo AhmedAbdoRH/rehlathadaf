@@ -11,7 +11,7 @@ export default function Home() {
     <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
       <div className="container mx-auto flex flex-col items-center justify-center text-center p-4">
         <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary mb-6">
-          <Icons.logo className="h-12 w-12 text-primary-foreground" />
+          <Icons.logo className="h-12 w-12 text-primary-foreground animate-spin" style={{animationDuration: '10s'}} />
         </div>
         <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-3">
           رحلة هدف - الأنظمة الداخلية
