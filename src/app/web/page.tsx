@@ -127,7 +127,7 @@ export default function WebPage() {
               </div>
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-foreground">إدارة المواقع وتطبيقات الويب</h1>
+              <h1 className="text-3xl font-bold text-foreground">لوحة  المواقع وتطبيقات الويب</h1>
             </div>
           </header>
 

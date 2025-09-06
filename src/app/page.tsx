@@ -4,58 +4,78 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
-import { ArrowLeft, Banknote, Coins, Briefcase, HandCoins } from 'lucide-react';
+import { ArrowLeft, Banknote, Coins, Briefcase, HandCoins, Building, User, LayoutGrid } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Card, CardContent } from '@/components/ui/card';
+
+const NavCard = ({ href, icon: Icon, title, newTab = false }: { href: string, icon: React.ElementType, title: string, newTab?: boolean }) => (
+  <Link href={href} passHref legacyBehavior>
+    <a target={newTab ? "_blank" : "_self"} rel={newTab ? "noopener noreferrer" : ""}>
+      <Card className="bg-card hover:bg-muted/50 transition-all duration-200 ease-in-out transform hover:-translate-y-1 hover:shadow-xl w-48 h-48 flex flex-col items-center justify-center text-center cursor-pointer group">
+        <CardContent className="flex flex-col items-center justify-center p-6">
+          <Icon className="h-16 w-16 text-red-500/90 mb-4 transition-transform duration-300 group-hover:scale-110" />
+          <h3 className="text-lg font-semibold text-foreground">{title}</h3>
+        </CardContent>
+      </Card>
+    </a>
+  </Link>
+);
+
+
+const DropdownNavCard = ({ icon: Icon, title, items }: { icon: React.ElementType, title: string, items: {href: string, label: string}[] }) => (
+    <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+            <Card className="bg-card hover:bg-muted/50 transition-all duration-200 ease-in-out transform hover:-translate-y-1 hover:shadow-xl w-48 h-48 flex flex-col items-center justify-center text-center cursor-pointer group">
+                <CardContent className="flex flex-col items-center justify-center p-6">
+                    <Icon className="h-16 w-16 text-red-500/90 mb-4 transition-transform duration-300 group-hover:scale-110" />
+                    <h3 className="text-lg font-semibold text-foreground">{title}</h3>
+                </CardContent>
+            </Card>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56 bg-card border-border">
+            {items.map((item) => (
+                 <Link href={item.href} passHref key={item.href}>
+                    <DropdownMenuItem className="cursor-pointer focus:bg-muted/50 focus:text-foreground">
+                        {item.label}
+                    </DropdownMenuItem>
+                </Link>
+            ))}
+        </DropdownMenuContent>
+    </DropdownMenu>
+);
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
-      <div className="container mx-auto flex flex-col items-center justify-center text-center p-4">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary mb-6">
-          <Icons.logo className="h-12 w-12 text-primary-foreground animate-spin" style={{animationDuration: '10s'}} />
+    <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
+      <div className="container mx-auto flex flex-col items-center justify-center text-center">
+        
+        <div className="flex h-24 w-24 items-center justify-center rounded-full bg-card border border-border mb-6 shadow-lg">
+          <LayoutGrid className="h-12 w-12 text-red-500/90" />
         </div>
         <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-3">
           رحلة هدف - الأنظمة الداخلية
         </h1>
-        <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl">
+        <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-2xl">
           مرحباً بك في بوابة الأنظمة الداخلية. من هنا يمكنك الوصول إلى الأدوات والتطبيقات المختلفة.
         </p>
-        <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-4 mt-8">
-            <Link href="/web" passHref>
-            <Button size="lg" className="h-12 px-8 text-lg bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/25">
-                <span>لوحة تحكم النطاقات</span>
-                <ArrowLeft className="mr-2 h-5 w-5" />
-            </Button>
-            </Link>
-             <Link href="/finance" passHref>
-            <Button size="lg" className="h-12 px-8 text-lg bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-700 hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-cyan-500/25">
-                <span>المالية والمبيعات</span>
-                <Coins className="mr-2 h-5 w-5" />
-            </Button>
-            </Link>
-             <Link href="/income" passHref>
-            <Button size="lg" className="h-12 px-8 text-lg bg-gradient-to-r from-yellow-500 to-red-500 hover:from-yellow-600 hover:to-red-700 hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-yellow-500/25">
-                <span>إدارة الدخل والمشاريع</span>
-                <Briefcase className="mr-2 h-5 w-5" />
-            </Button>
-            </Link>
-            <Link href="/cash" passHref>
-            <Button size="lg" className="h-12 px-8 text-lg bg-gradient-to-r from-indigo-500 to-pink-500 hover:from-indigo-600 hover:to-pink-700 hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-indigo-500/25">
-                <span>RHM SA CASH HUB</span>
-                <HandCoins className="mr-2 h-5 w-5" />
-            </Button>
-            </Link>
-            <Link href="/transfer" passHref>
-            <Button size="lg" className="h-12 px-8 text-lg bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-green-500/25">
-                <span>تحويل (مؤسسة رحلة هدف)</span>
-                <Banknote className="mr-2 h-5 w-5" />
-            </Button>
-            </Link>
-            <Link href="/transfer-mohamed" passHref>
-            <Button size="lg" className="h-12 px-8 text-lg bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-amber-500/25">
-                <span>تحويل (محمد رزق)</span>
-                <Banknote className="mr-2 h-5 w-5" />
-            </Button>
-            </Link>
+
+        <div className="flex flex-wrap justify-center gap-6">
+            <NavCard href="/web" icon={Icons.logo} title="لوحة تحكم النطاقات" />
+            <NavCard href="/finance" icon={Coins} title="الإدارة المالية لمشروع أونلاين كاتلوج" />
+            <NavCard href="/income" icon={Briefcase} title="الإدارة المالية لمكتب التسويق" />
+             <DropdownNavCard 
+                icon={Banknote}
+                title="بيانات التحويل"
+                items={[
+                    { href: "/transfer", label: "تحويل (مؤسسة رحلة هدف)" },
+                    { href: "/transfer-mohamed", label: "تحويل (محمد رزق)" }
+                ]}
+            />
         </div>
       </div>
     </div>
