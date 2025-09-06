@@ -12,7 +12,7 @@ import { checkDomainStatus } from '@/ai/flows/checkDomainStatus';
 import type { Domain } from '@/lib/types';
 import Link from 'next/link';
 
-export default function DashboardPage() {
+export default function WebPage() {
   const [isSecretVisible, setSecretVisible] = React.useState(false);
   const [clickCount, setClickCount] = React.useState(0);
   const [allDomains, setAllDomains] = React.useState<Domain[]>([]);
@@ -137,7 +137,7 @@ export default function DashboardPage() {
 
           <main>
             <Card className="shadow-lg bg-card">
-              <CardContent className="p-0 pt-2">
+              <CardContent className="p-0 pt-0">
                 <Tabs defaultValue="bofa" className="w-full">
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="rehlethadaf">رحلة هدف</TabsTrigger>
