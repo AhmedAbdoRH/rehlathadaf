@@ -119,8 +119,8 @@ export default function DashboardPage() {
       </Link>
       <div className="min-h-screen bg-background text-foreground">
         <div className="container mx-auto p-4 sm:p-6 lg:p-8">
-          {/* Status Panel - Fixed Position Top Left */}
-          <div className="fixed top-4 left-4 z-50">
+          {/* Status Panel */}
+          <div className="w-full mb-8">
             <StatusPanel domains={allDomains} domainStatuses={domainStatuses} />
           </div>
 
