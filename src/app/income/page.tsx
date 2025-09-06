@@ -92,21 +92,12 @@ export default function IncomePage() {
     const projectsRef = ref(database, 'projects');
     const unsubscribe = onValue(projectsRef, (snapshot) => {
       const projectsData = snapshot.val();
-      if (projectsData) {
-        const allProjects: Project[] = Object.keys(projectsData).map(key => ({
-          id: key,
-          ...projectsData[key]
-        }));
-        setEgyptProjects(allProjects.filter(p => p.projectType === 'egypt'));
-        setSaudiProjects(allProjects.filter(p => p.projectType === 'saudi'));
-        setMahProjects(allProjects.filter(p => p.projectType === 'mah'));
-        updateAllTotals(allProjects);
-      } else {
-        setEgyptProjects([]);
-        setSaudiProjects([]);
-        setMahProjects([]);
-        updateAllTotals([]);
-      }
+      const allProjects: Project[] = projectsData ? Object.keys(projectsData).map(key => ({ id: key, ...projectsData[key] })) : [];
+      
+      setEgyptProjects(allProjects.filter(p => p.projectType === 'egypt'));
+      setSaudiProjects(allProjects.filter(p => p.projectType === 'saudi'));
+      setMahProjects(allProjects.filter(p => p.projectType === 'mah'));
+      updateAllTotals(allProjects);
     });
 
     return () => unsubscribe();
@@ -151,92 +142,83 @@ export default function IncomePage() {
   };
 
   const ProjectTable = ({ title, projects, total }: { title: string, projects: Project[], total: number }) => (
-    <Card className="flex-1 min-w-[300px]">
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>المشروع</TableHead>
-              <TableHead>التاريخ</TableHead>
-              <TableHead>التكلفة</TableHead>
-              <TableHead></TableHead>
+    <div className="flex-1 max-w-full md:max-w-[30%] bg-[#2c2c2c] p-3 rounded-lg">
+      <h3 className="text-center text-lg font-bold mb-3">{title}</h3>
+      <Table>
+        <TableHeader>
+          <TableRow className="border-b border-gray-700">
+            <TableHead className="text-right text-white bg-[#444]">المشروع</TableHead>
+            <TableHead className="text-right text-white bg-[#444]">التاريخ</TableHead>
+            <TableHead className="text-right text-white bg-[#444]">التكلفة</TableHead>
+            <TableHead className="text-right text-white bg-[#444]"></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {projects.map((p, index) => (
+            <TableRow key={p.id} className={index % 2 === 0 ? 'bg-[#333]' : 'bg-[#222]'}>
+              <TableCell>{p.name}</TableCell>
+              <TableCell className="text-gray-400">{p.date}</TableCell>
+              <TableCell className="font-mono">${p.cost.toFixed(2)}</TableCell>
+              <TableCell>
+                <Button className="bg-[#666] hover:bg-[#555] text-white py-1 px-2 text-xs rounded" onClick={() => handleDeleteProject(p.id)}>حذف</Button>
+              </TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody>
-            {projects.map(p => (
-              <TableRow key={p.id}>
-                <TableCell>{p.name}</TableCell>
-                <TableCell>{p.date}</TableCell>
-                <TableCell className="font-mono">${p.cost.toFixed(2)}</TableCell>
-                <TableCell>
-                  <Button variant="ghost" size="sm" onClick={() => handleDeleteProject(p.id)}>حذف</Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <p className="text-right font-bold mt-4">الإجمالي: ${total.toFixed(2)}</p>
-      </CardContent>
-    </Card>
+          ))}
+        </TableBody>
+      </Table>
+      <p className="text-right font-bold mt-4">الإجمالي: ${total.toFixed(2)}</p>
+    </div>
   );
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        <header className="text-center">
-          <h1 className="text-3xl font-bold">إجمالي دخل مكتب رحلة هدف لخدمات التسويق</h1>
-          <p className="text-muted-foreground text-lg">لشهر 4 لعام 2025</p>
+    <div className="bg-[#1e1e1e] text-white min-h-screen flex flex-col items-center">
+      <div className="container mx-auto max-w-6xl">
+        <header className="text-center my-5 flex flex-col items-center">
+          <h1 className="text-2xl font-bold">إجمالي دخل مكتب رحلة هدف لخدمات التسويق</h1>
+          <p className="text-sm text-gray-400">لشهر 4 لعام 2025</p>
         </header>
 
-        <section className="text-center">
-          <Card className="max-w-md mx-auto">
-            <CardHeader>
-              <CardTitle className="text-5xl font-bold text-primary">${totals.totalIncome.toFixed(2)}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <p className="text-lg">نصيب مكتب التسويق: <span className="font-semibold">${totals.marketingShare.toFixed(2)}</span></p>
-              <p className="text-lg">نصيب المكتب الرئيسي: <span className="font-semibold">${totals.mainOfficeShare.toFixed(2)}</span></p>
-            </CardContent>
-          </Card>
+        <section className="flex flex-col items-center mb-5">
+            <div className="text-center mb-2">
+                <div id="totalIncome" className="text-5xl font-bold text-green-400">${totals.totalIncome.toFixed(2)}</div>
+                <div className="mt-2 text-lg">
+                  <p>نصيب مكتب التسويق: <span id="marketingShare">${totals.marketingShare.toFixed(2)}</span></p>
+                  <p>نصيب المكتب الرئيسي: <span id="mainOfficeShare">${totals.mainOfficeShare.toFixed(2)}</span></p>
+                </div>
+            </div>
+            <div className="w-52 p-4 bg-[#333] rounded-md text-center shadow-lg mb-5">
+                <h4 className="text-base text-gray-400 mb-1">نتيجة المقاصة</h4>
+                <p id="clearanceResult" className="text-xl font-bold text-yellow-300 my-1">${totals.clearanceResult.toFixed(2)}</p>
+                <Button onClick={handleClearanceAction} className="mt-2 py-3 px-5 w-full bg-[#222] text-white border border-white rounded-md text-base hover:bg-[#444]">
+                  التحويل الآن
+                </Button>
+            </div>
         </section>
 
-        <section className="flex justify-center">
-           <Card className="text-center bg-card-dark p-6 rounded-lg shadow-lg border border-primary/50">
-              <h4 className="text-xl font-semibold mb-2">نتيجة المقاصة</h4>
-              <p id="clearanceResult" className="text-3xl font-bold text-primary mb-4">${totals.clearanceResult.toFixed(2)}</p>
-              <Button onClick={handleClearanceAction}>التحويل الآن</Button>
-            </Card>
-        </section>
-
-        <section>
-          <Card>
-            <CardHeader>
-              <CardTitle>إدارة المشاريع</CardTitle>
-              <CardDescription>إضافة مشروع جديد وتحديد نوعه وتكلفته.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4 md:space-y-0 md:flex md:items-center md:justify-center md:gap-4 bg-muted/30 p-6 rounded-lg">
-                <Input type="text" placeholder="اسم المشروع" value={projectName} onChange={e => setProjectName(e.target.value)} className="max-w-xs"/>
-                <Input type="number" placeholder="التكلفة" value={projectCost} onChange={e => setProjectCost(e.target.value)} className="max-w-xs"/>
-                <RadioGroup value={projectType} onValueChange={(value) => setProjectType(value as any)} className="flex gap-4">
+        <section className="w-full max-w-5xl mx-auto bg-[#141414] p-5 md:p-10">
+            <h2 className="text-2xl font-bold text-center mb-2">إدارة المشاريع</h2>
+            <div className="flex flex-col items-center gap-2 my-5 p-2">
+                <div className="flex flex-col md:flex-row gap-2">
+                    <Input type="text" placeholder="اسم المشروع" value={projectName} onChange={e => setProjectName(e.target.value)} className="bg-[#2c2c2c] border-[#444] text-white"/>
+                    <Input type="number" placeholder="التكلفة" value={projectCost} onChange={e => setProjectCost(e.target.value)} className="bg-[#2c2c2c] border-[#444] text-white"/>
+                </div>
+                <RadioGroup value={projectType} onValueChange={(value) => setProjectType(value as any)} className="flex gap-4 my-2">
                     <div className="flex items-center space-x-2 space-x-reverse"><RadioGroupItem value="egypt" id="egypt" /><Label htmlFor="egypt">مصر</Label></div>
                     <div className="flex items-center space-x-2 space-x-reverse"><RadioGroupItem value="saudi" id="saudi" /><Label htmlFor="saudi">المملكة</Label></div>
                     <div className="flex items-center space-x-2 space-x-reverse"><RadioGroupItem value="mah" id="mah" /><Label htmlFor="mah">MAH/MOH</Label></div>
                 </RadioGroup>
-                <Button onClick={handleAddProject}>إضافة المشروع</Button>
-            </CardContent>
-          </Card>
-        </section>
+                <Button onClick={handleAddProject} className="bg-[#2c2c2c] border-[#444] text-white py-2 px-4">إضافة المشروع</Button>
+            </div>
 
-        <section className="flex flex-wrap justify-center gap-6">
-            <ProjectTable title="مشاريع مصر" projects={egyptProjects} total={totals.egypt} />
-            <ProjectTable title="مشاريع المملكة" projects={saudiProjects} total={totals.saudi} />
-            <ProjectTable title="MAH/MOH" projects={mahProjects} total={totals.mah} />
+            <div className="flex flex-col md:flex-row gap-5 justify-between mt-2 p-6">
+                <ProjectTable title="مشاريع مصر" projects={egyptProjects} total={totals.egypt} />
+                <ProjectTable title="مشاريع المملكة" projects={saudiProjects} total={totals.saudi} />
+                <ProjectTable title="MAH/MOH" projects={mahProjects} total={totals.mah} />
+            </div>
         </section>
-
       </div>
     </div>
   );
 }
+
+    
