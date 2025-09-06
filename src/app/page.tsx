@@ -2,9 +2,10 @@
 "use client";
 
 import Link from 'next/link';
+import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
-import { ArrowLeft, Banknote, Coins, Briefcase, HandCoins, Building, User, LayoutGrid } from 'lucide-react';
+import { Banknote, HandCoins, LayoutGrid } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -50,32 +51,47 @@ const DropdownNavCard = ({ icon: Icon, title, items }: { icon: React.ElementType
 );
 
 export default function Home() {
+  const [clickCount, setClickCount] = React.useState(0);
+  const [cardsVisible, setCardsVisible] = React.useState(false);
+
+  const handleIconClick = () => {
+    const newClickCount = clickCount + 1;
+    setClickCount(newClickCount);
+    if (newClickCount >= 2) {
+      setCardsVisible(true);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
       <div className="container mx-auto flex flex-col items-center justify-center text-center">
         
-        <div className="flex h-24 w-24 items-center justify-center rounded-full bg-card border border-border mb-6 shadow-lg">
-          <LayoutGrid className="h-12 w-12 text-red-500/90" />
+        <div 
+          className="flex h-24 w-24 items-center justify-center rounded-full bg-card border border-border mb-6 shadow-lg cursor-pointer"
+          onClick={handleIconClick}
+        >
+          <Icons.bullseye className="h-12 w-12 text-red-500/90" />
         </div>
         <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-3">
           رحلة هدف - الأنظمة الداخلية
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-2xl">
         </p>
-
-        <div className="flex flex-wrap justify-center gap-6">
-            <NavCard href="/web" icon={Icons.logo} title=" مشاريع الويب والأونلاين كاتلوج " />
-            <NavCard href="/oc" icon={Coins} title="الإدارة المالية لأونلاين كاتلوج" />
-            <NavCard href="/marketing" icon={Briefcase} title="الإدارة المالية لمكتب التسويق" />
-             <DropdownNavCard 
-                icon={Banknote}
-                title="بيانات التحويل"
-                items={[
-                    { href: "/transfer", label: "تحويل (مؤسسة رحلة هدف)" },
-                    { href: "/transfer-mohamed", label: "تحويل (محمد رزق)" }
-                ]}
-            />
-        </div>
+        
+        {cardsVisible && (
+          <div className="flex flex-wrap justify-center gap-6">
+              <NavCard href="/oc" icon={LayoutGrid} title="الإدارة المالية لأونلاين كاتلوج" />
+              <NavCard href="/marketing" icon={HandCoins} title="الإدارة المالية لمكتب التسويق" />
+               <DropdownNavCard 
+                  icon={Banknote}
+                  title="بيانات التحويل"
+                  items={[
+                      { href: "/transfer", label: "تحويل (مؤسسة رحلة هدف)" },
+                      { href: "/transfer-mohamed", label: "تحويل (محمد رزق)" }
+                  ]}
+              />
+          </div>
+        )}
       </div>
     </div>
   );
