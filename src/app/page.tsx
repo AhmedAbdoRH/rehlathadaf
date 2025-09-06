@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
-import { ArrowLeft, Banknote, Coins, Briefcase } from 'lucide-react';
+import { ArrowLeft, Banknote, Coins, Briefcase, HandCoins } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -36,6 +36,12 @@ export default function Home() {
             <Button size="lg" className="h-12 px-8 text-lg bg-gradient-to-r from-yellow-500 to-red-500 hover:from-yellow-600 hover:to-red-700 hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-yellow-500/25">
                 <span>إدارة الدخل والمشاريع</span>
                 <Briefcase className="mr-2 h-5 w-5" />
+            </Button>
+            </Link>
+            <Link href="/cash" passHref>
+            <Button size="lg" className="h-12 px-8 text-lg bg-gradient-to-r from-indigo-500 to-pink-500 hover:from-indigo-600 hover:to-pink-700 hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-indigo-500/25">
+                <span>RHM SA CASH HUB</span>
+                <HandCoins className="mr-2 h-5 w-5" />
             </Button>
             </Link>
             <Link href="/transfer" passHref>
