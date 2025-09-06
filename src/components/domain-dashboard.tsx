@@ -120,7 +120,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
   }>({
     domainName: '',
     dataSheet: '',
-    renewalDate: new Date(),
+    renewalDate: addYears(new Date(), 1),
     renewalCostClient: '',
     renewalCostOffice: '',
     clientEmail: '',
@@ -170,7 +170,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
       setNewDomain({
           domainName: '',
           dataSheet: '',
-          renewalDate: new Date(),
+          renewalDate: addYears(new Date(), 1),
           renewalCostClient: '',
           renewalCostOffice: '',
           clientEmail: '',
@@ -668,7 +668,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
 
       <Button 
         onClick={() => {
-          setNewDomain(prev => ({ ...prev, projects: [project] }));
+          setNewDomain(prev => ({ ...prev, renewalDate: addYears(new Date(), 1), projects: [project] }));
           setAddDomainOpen(true);
         }}
         className="fixed bottom-8 left-8 z-50 h-14 w-14 rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
@@ -934,3 +934,4 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
 
 
     
+
