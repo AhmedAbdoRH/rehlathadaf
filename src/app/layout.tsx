@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'عرض النطاق',
-  description: 'لوحة تحكم لإدارة نطاقات مكتبك',
+  title: 'رحلة هدف - الأنظمة الداخلية',
+  description: 'بوابة الأنظمة الداخلية لمكتب رحلة هدف',
 };
 
 export default function RootLayout({
