@@ -422,7 +422,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                 <TableCell>
                   <div className="flex items-center gap-2">
                     {domain.id && renderStatusDot(domain.id)}
-                    <a href={getUrl(domain.domainName)} target="_blank" rel="noopener noreferrer" className="font-medium text-lg text-primary hover:underline">{domain.domainName}</a>
+                    <a href={getUrl(domain.domainName)} target="_blank" rel="noopener noreferrer" className="font-medium text-lg text-blue-400 hover:underline">{domain.domainName}</a>
                   </div>
                   <div className='mt-2'>
                     <div className="text-right">{`${format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}`}</div>
@@ -637,7 +637,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
                 {domain.id && renderStatusDot(domain.id)}
-                 <a href={getUrl(domain.domainName)} target="_blank" rel="noopener noreferrer" className="font-medium text-lg text-primary hover:underline">{domain.domainName}</a>
+                 <a href={getUrl(domain.domainName)} target="_blank" rel="noopener noreferrer" className="font-medium text-lg text-blue-400 hover:underline">{domain.domainName}</a>
               </div>
               
               <div className='mt-4'>
@@ -926,4 +926,5 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
     
 
     
+
 
