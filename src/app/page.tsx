@@ -55,7 +55,7 @@ export default function Home() {
       <div className="container mx-auto flex flex-col items-center justify-center text-center">
         
         <div className="flex h-24 w-24 items-center justify-center rounded-full bg-card border border-border mb-6 shadow-lg">
-          <Coins className="h-12 w-12 text-red-500/90" />
+          <Briefcase className="h-12 w-12 text-red-500/90" />
         </div>
         <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-3">
           رحلة هدف - الأنظمة الداخلية
@@ -66,7 +66,7 @@ export default function Home() {
         <div className="flex flex-wrap justify-center gap-6">
             <NavCard href="/web" icon={Icons.logo} title=" مشاريع الويب والأونلاين كاتلوج " />
             <NavCard href="/finance" icon={LayoutGrid} title="الإدارة المالية لأونلاين كاتلوج" />
-            <NavCard href="/income" icon={Briefcase} title="الإدارة المالية لمكتب التسويق" />
+            <NavCard href="/income" icon={HandCoins} title="الإدارة المالية لمكتب التسويق" />
              <DropdownNavCard 
                 icon={Banknote}
                 title="بيانات التحويل"
