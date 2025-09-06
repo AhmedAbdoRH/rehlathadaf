@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Banknote } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -19,12 +19,20 @@ export default function Home() {
         <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl">
           مرحباً بك في بوابة الأنظمة الداخلية. من هنا يمكنك الوصول إلى الأدوات والتطبيقات المختلفة.
         </p>
-        <Link href="/web" passHref>
-          <Button size="lg" className="h-12 px-8 text-lg bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/25">
-            <span>الدخول إلى لوحة تحكم النطاقات</span>
-            <ArrowLeft className="mr-2 h-5 w-5" />
-          </Button>
-        </Link>
+        <div className="flex flex-col sm:flex-row gap-4 mt-8">
+            <Link href="/web" passHref>
+            <Button size="lg" className="h-12 px-8 text-lg bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/25">
+                <span>لوحة تحكم النطاقات</span>
+                <ArrowLeft className="mr-2 h-5 w-5" />
+            </Button>
+            </Link>
+            <Link href="/transfer" passHref>
+            <Button size="lg" className="h-12 px-8 text-lg bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-green-500/25">
+                <span>الذهاب لصفحة التحويل</span>
+                <Banknote className="mr-2 h-5 w-5" />
+            </Button>
+            </Link>
+        </div>
       </div>
     </div>
   );
