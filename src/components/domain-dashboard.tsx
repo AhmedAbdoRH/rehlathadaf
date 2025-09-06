@@ -333,7 +333,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
     const title = encodeURIComponent(`تذكير تجديد نطاق: ${domain.domainName}`);
     const details = encodeURIComponent(
       `لا تنسَ تجديد نطاق ${domain.domainName}.\n` +
-      `تكلفة العميل: $${Number(domain.renewalCostClient).toFixed(2)} (${(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م)\n` +
+      `قيمة التجديد: $${Number(domain.renewalCostClient).toFixed(2)} (${(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م)\n` +
       (project === 'rehlethadaf' ? `تكلفة المكتب: $${Number(domain.renewalCostOffice).toFixed(2)} (${(Number(domain.renewalCostOffice) * USD_TO_EGP_RATE_OFFICE).toFixed(2)} ج.م)` : '')
     );
     return `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dateStr}/${dateStr}&details=${details}&sf=true&output=xml`;
@@ -642,7 +642,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
               <div className={`mt-4 grid ${project === 'rehlethadaf' ? 'grid-cols-2' : 'grid-cols-1'} gap-4 text-center`}>
                 {project !== 'other' && (
                   <div>
-                    <div className="text-sm font-medium text-muted-foreground">تكلفة العميل</div>
+                    <div className="text-sm font-medium text-muted-foreground">قيمة التجديد</div>
                     <div className="text-accent font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
                     <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
                   </div>
@@ -692,7 +692,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                           <Label htmlFor="renewalCostClient">تكلفة العميل (بالدولار)</Label>
+                           <Label htmlFor="renewalCostClient">قيمة التجديد (بالدولار)</Label>
                            <div className="relative">
                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">$</span>
                                <Input id="renewalCostClient" type="number" placeholder="0.00" value={newDomain.renewalCostClient} onChange={(e) => setNewDomain({...newDomain, renewalCostClient: e.target.value === '' ? '' : Number(e.target.value)})} className="pl-7" />
@@ -786,7 +786,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="editRenewalCostClient">تكلفة العميل (بالدولار)</Label>
+                    <Label htmlFor="editRenewalCostClient">قيمة التجديد (بالدولار)</Label>
                     <div className="relative">
                       <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">$</span>
                       <Input id="editRenewalCostClient" type="number" placeholder="0.00" value={domainToEdit.renewalCostClient} onChange={(e) => setDomainToEdit({ ...domainToEdit, renewalCostClient: e.target.value === '' ? '' : Number(e.target.value) })} className="pl-7" />
@@ -922,5 +922,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
     
 
 
+
+    
 
     
