@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
-import { ArrowLeft, Banknote } from 'lucide-react';
+import { ArrowLeft, Banknote, Coins } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -24,6 +24,12 @@ export default function Home() {
             <Button size="lg" className="h-12 px-8 text-lg bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/25">
                 <span>لوحة تحكم النطاقات</span>
                 <ArrowLeft className="mr-2 h-5 w-5" />
+            </Button>
+            </Link>
+             <Link href="/finance" passHref>
+            <Button size="lg" className="h-12 px-8 text-lg bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-700 hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-cyan-500/25">
+                <span>المالية والمبيعات</span>
+                <Coins className="mr-2 h-5 w-5" />
             </Button>
             </Link>
             <Link href="/transfer" passHref>
