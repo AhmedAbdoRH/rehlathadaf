@@ -46,10 +46,10 @@ type DomainStatus = 'checking' | 'online' | 'offline';
 
 const projectLabels: Record<Project, string> = {
   rehlethadaf: 'رحلة هدف',
-  bofa: 'بوفا',
+  pova: 'Pova',
   other: 'مشاريع أخرى',
 };
-const projectOptions: Project[] = ['rehlethadaf', 'bofa', 'other'];
+const projectOptions: Project[] = ['rehlethadaf', 'pova', 'other'];
 
 
 export function DomainDashboard({ project, onDomainChange }: { project: Project; onDomainChange?: () => void }) {
@@ -115,7 +115,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
     renewalDate: Date;
     renewalCostClient: number | '';
     renewalCostOffice: number | '';
-    renewalCostBofa: number | '';
+    renewalCostPova: number | '';
     projects: Project[];
   }>({
     domainName: '',
@@ -123,7 +123,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
     renewalDate: addYears(new Date(), 1),
     renewalCostClient: '',
     renewalCostOffice: '',
-    renewalCostBofa: '',
+    renewalCostPova: '',
     projects: [project]
   });
 
@@ -153,7 +153,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
       renewalDate: formatISO(newDomain.renewalDate),
       renewalCostClient: Number(newDomain.renewalCostClient) || 0,
       renewalCostOffice: Number(newDomain.renewalCostOffice) || 0,
-      renewalCostBofa: Number(newDomain.renewalCostBofa) || 0,
+      renewalCostPova: Number(newDomain.renewalCostPova) || 0,
       status: 'active',
       collectionDate: formatISO(new Date()),
       projects: newDomain.projects
@@ -173,7 +173,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
           renewalDate: addYears(new Date(), 1),
           renewalCostClient: '',
           renewalCostOffice: '',
-          renewalCostBofa: '',
+          renewalCostPova: '',
           projects: [project],
       });
       // Refresh the status panel
@@ -239,11 +239,11 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
           ...updatedData,
           renewalCostClient: Number(updatedData.renewalCostClient) || 0,
           renewalCostOffice: Number(updatedData.renewalCostOffice) || 0,
-          renewalCostBofa: Number(updatedData.renewalCostBofa) || 0,
+          renewalCostPova: Number(updatedData.renewalCostPova) || 0,
       };
 
       await updateDomain(id, finalData);
-      setDomains(prevDomains => prevDomains.map(d => d.id === id ? { ...d, ...domainToEdit, renewalDate: finalData.renewalDate, renewalCostClient: finalData.renewalCostClient, renewalCostOffice: finalData.renewalCostOffice, renewalCostBofa: finalData.renewalCostBofa } : d).sort((a, b) => differenceInDays(parseISO(a.renewalDate as string), new Date()) - differenceInDays(parseISO(b.renewalDate as string), new Date())));
+      setDomains(prevDomains => prevDomains.map(d => d.id === id ? { ...d, ...domainToEdit, renewalDate: finalData.renewalDate, renewalCostClient: finalData.renewalCostClient, renewalCostOffice: finalData.renewalCostOffice, renewalCostPova: finalData.renewalCostPova } : d).sort((a, b) => differenceInDays(parseISO(a.renewalDate as string), new Date()) - differenceInDays(parseISO(b.renewalDate as string), new Date())));
       toast({
         title: "تم تحديث النطاق",
         description: `تم تحديث ${domainToEdit.domainName} بنجاح.`,
@@ -293,7 +293,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
         renewalDate: parseISO(domain.renewalDate as string),
         renewalCostClient: domain.renewalCostClient || '',
         renewalCostOffice: domain.renewalCostOffice || '',
-        renewalCostBofa: domain.renewalCostBofa || '',
+        renewalCostPova: domain.renewalCostPova || '',
         projects: domain.projects || [],
     });
     setEditDomainOpen(true);
@@ -436,7 +436,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                     {domain.collectionDate ? format(parseISO(domain.collectionDate), 'dd/MM/yyyy') : 'N/A'}
                   </div>
                 </TableCell>
-                {project === 'bofa' ? (
+                {project === 'pova' ? (
                   <TableCell>
                       <div className="text-destructive font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
                       <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
@@ -448,11 +448,11 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                       <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
                   </TableCell>
                 )}
-                 {project === 'bofa' && (
+                 {project === 'pova' && (
                     <TableCell>
-                      <div className="text-accent font-semibold">${Number(domain.renewalCostBofa).toFixed(2)}</div>
-                      <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostBofa) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
-                      <div className="text-xs text-muted-foreground mt-1">Bofa</div>
+                      <div className="text-accent font-semibold">${Number(domain.renewalCostPova).toFixed(2)}</div>
+                      <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostPova) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
+                      <div className="text-xs text-muted-foreground mt-1">Pova</div>
                   </TableCell>
                 )}
                 {(project === 'rehlethadaf' || project === 'other') && (
@@ -500,7 +500,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                         <CalendarPlus className="h-4 w-4 text-yellow-500" />
                       </Button>
                     </a>
-                  {project !== 'bofa' && (
+                  {project !== 'pova' && (
                   <Button 
                     variant="ghost" 
                     size="icon" 
@@ -601,7 +601,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                     </a>
                 </div>
                 <div className="flex items-center gap-2">
-                    {project !== 'bofa' && (
+                    {project !== 'pova' && (
                     <Button 
                       variant="ghost" 
                       size="icon" 
@@ -662,8 +662,8 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                 <Progress value={getRenewalProgress(domain.renewalDate as string)} className="h-2 mt-1" />
               </div>
               
-              <div className={`mt-4 grid ${project === 'rehlethadaf' ? 'grid-cols-2' : (project === 'bofa' ? 'grid-cols-2' : 'grid-cols-1')} gap-4 text-center`}>
-                {project === 'bofa' ? (
+              <div className={`mt-4 grid ${project === 'rehlethadaf' ? 'grid-cols-2' : (project === 'pova' ? 'grid-cols-2' : 'grid-cols-1')} gap-4 text-center`}>
+                {project === 'pova' ? (
                    <div>
                     <div className="text-sm font-medium text-muted-foreground">قيمة التجديد (B2B)</div>
                     <div className="text-destructive font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
@@ -676,11 +676,11 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                     <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
                   </div>
                 )}
-                 {project === 'bofa' && (
+                 {project === 'pova' && (
                   <div>
-                    <div className="text-sm font-medium text-muted-foreground">قيمة التجديد (Bofa)</div>
-                    <div className="text-accent font-semibold">${Number(domain.renewalCostBofa).toFixed(2)}</div>
-                    <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostBofa) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
+                    <div className="text-sm font-medium text-muted-foreground">قيمة التجديد (Pova)</div>
+                    <div className="text-accent font-semibold">${Number(domain.renewalCostPova).toFixed(2)}</div>
+                    <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostPova) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
                   </div>
                 )}
                 {(project === 'rehlethadaf' || project === 'other') && (
@@ -744,10 +744,10 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                          <div className="space-y-2">
-                           <Label htmlFor="renewalCostBofa">قيمة التجديد (Bofa)</Label>
+                           <Label htmlFor="renewalCostPova">قيمة التجديد (Pova)</Label>
                            <div className="relative">
                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">$</span>
-                               <Input id="renewalCostBofa" type="number" placeholder="0.00" value={newDomain.renewalCostBofa} onChange={(e) => setNewDomain({...newDomain, renewalCostBofa: e.target.value === '' ? '' : Number(e.target.value)})} className="pl-7" />
+                               <Input id="renewalCostPova" type="number" placeholder="0.00" value={newDomain.renewalCostPova} onChange={(e) => setNewDomain({...newDomain, renewalCostPova: e.target.value === '' ? '' : Number(e.target.value)})} className="pl-7" />
                            </div>
                         </div>
                     </div>
@@ -847,10 +847,10 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="editRenewalCostBofa">قيمة التجديد (Bofa)</Label>
+                    <Label htmlFor="editRenewalCostPova">قيمة التجديد (Pova)</Label>
                      <div className="relative">
                       <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">$</span>
-                      <Input id="editRenewalCostBofa" type="number" placeholder="0.00" value={domainToEdit.renewalCostBofa} onChange={(e) => setDomainToEdit({ ...domainToEdit, renewalCostBofa: e.target.value === '' ? '' : Number(e.target.value) })} className="pl-7" />
+                      <Input id="editRenewalCostPova" type="number" placeholder="0.00" value={domainToEdit.renewalCostPova} onChange={(e) => setDomainToEdit({ ...domainToEdit, renewalCostPova: e.target.value === '' ? '' : Number(e.target.value) })} className="pl-7" />
                     </div>
                   </div>
                 </div>
@@ -962,26 +962,3 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
     </>
   );
 }
-
-    
-
-    
-
-    
-
-
-
-
-
-    
-
-
-
-    
-
-    
-
-    
-
-
-

@@ -138,10 +138,10 @@ export default function WebPage() {
           <main>
             <Card className="shadow-lg bg-card">
               <CardContent className="p-0 pt-0">
-                <Tabs defaultValue="bofa" className="w-full">
+                <Tabs defaultValue="pova" className="w-full">
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="rehlethadaf">رحلة هدف</TabsTrigger>
-                    <TabsTrigger value="bofa">بوفا</TabsTrigger>
+                    <TabsTrigger value="pova">Pova</TabsTrigger>
                     <TabsTrigger value="other">مشاريع أخرى</TabsTrigger>
                   </TabsList>
                   <TabsContent value="rehlethadaf">
@@ -153,8 +153,8 @@ export default function WebPage() {
                       </div>
                     )}
                   </TabsContent>
-                  <TabsContent value="bofa">
-                    <DomainDashboard project="bofa" onDomainChange={refreshDomains} />
+                  <TabsContent value="pova">
+                    <DomainDashboard project="pova" onDomainChange={refreshDomains} />
                   </TabsContent>
                   <TabsContent value="other">
                      {isSecretVisible ? (
