@@ -59,7 +59,7 @@ export function StatusPanel({ domains, domainStatuses }: StatusPanelProps) {
   };
 
   return (
-    <Card className="w-32 bg-gray-900/95 backdrop-blur-md border-gray-700/60 shadow-2xl">
+    <Card className="w-32 bg-card/95 backdrop-blur-md border-border/60 shadow-2xl">
       <CardContent className="p-2">
         <div className="flex flex-wrap gap-1.5 justify-center">
           {domains.map((domain, index) => {
@@ -68,7 +68,7 @@ export function StatusPanel({ domains, domainStatuses }: StatusPanelProps) {
             return (
               <div 
                 key={domain.id} 
-                className="w-4 h-4 border border-gray-600/40 rounded-sm flex items-center justify-center bg-gray-800/50"
+                className="w-4 h-4 border border-border/40 rounded-sm flex items-center justify-center bg-muted/50"
                 style={{
                   animationDelay: `${index * 200}ms`,
                   animation: status === 'checking' ? 'pulse 2s infinite' : 'none'
