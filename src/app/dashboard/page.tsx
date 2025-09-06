@@ -133,7 +133,7 @@ export default function DashboardPage() {
           </header>
 
           {/* Status Panel */}
-          <div className="w-full mb-8">
+          <div className="w-full mb-2">
             <StatusPanel domains={allDomains} domainStatuses={domainStatuses} />
           </div>
 
