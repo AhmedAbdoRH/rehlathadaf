@@ -59,7 +59,7 @@ export function StatusPanel({ domains, domainStatuses }: StatusPanelProps) {
   };
 
   return (
-    <Card className="w-full bg-[#1A1A1A] backdrop-blur-md border-border/60 shadow-lg">
+    <Card className="w-full bg-card backdrop-blur-md border-border/60 shadow-lg">
       <CardContent className="p-2">
         <div className="flex flex-row flex-wrap gap-1.5 justify-center">
           {domains.map((domain, index) => {

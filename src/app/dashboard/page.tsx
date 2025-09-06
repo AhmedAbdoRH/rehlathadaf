@@ -120,7 +120,7 @@ export default function DashboardPage() {
       <div className="min-h-screen bg-background text-foreground">
         <div className="container mx-auto p-4 sm:p-6 lg:p-8">
           
-          <header className="mb-8 flex items-center gap-4">
+          <header className="mb-4 flex items-center gap-4">
             <div className="relative cursor-pointer" onClick={handleSecretClick}>
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
                 <Icons.logo className="h-8 w-8 text-primary-foreground" />
@@ -140,7 +140,7 @@ export default function DashboardPage() {
           <main>
             <Card className="shadow-lg bg-card">
               <CardContent>
-                <Tabs defaultValue="bofa" className="w-full pt-4">
+                <Tabs defaultValue="bofa" className="w-full pt-2">
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="rehlethadaf">رحلة هدف</TabsTrigger>
                     <TabsTrigger value="bofa">بوفا</TabsTrigger>
