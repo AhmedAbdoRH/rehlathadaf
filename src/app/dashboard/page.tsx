@@ -132,15 +132,14 @@ export default function DashboardPage() {
             </div>
           </header>
 
-          {/* Status Panel */}
           <div className="w-full mb-2">
             <StatusPanel domains={allDomains} domainStatuses={domainStatuses} />
           </div>
 
           <main>
             <Card className="shadow-lg bg-card">
-              <CardContent>
-                <Tabs defaultValue="bofa" className="w-full pt-2">
+              <CardContent className="p-4 pt-2">
+                <Tabs defaultValue="bofa" className="w-full">
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="rehlethadaf">رحلة هدف</TabsTrigger>
                     <TabsTrigger value="bofa">بوفا</TabsTrigger>
