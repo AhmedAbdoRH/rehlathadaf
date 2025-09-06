@@ -119,11 +119,7 @@ export default function DashboardPage() {
       </Link>
       <div className="min-h-screen bg-background text-foreground">
         <div className="container mx-auto p-4 sm:p-6 lg:p-8">
-          {/* Status Panel */}
-          <div className="w-full mb-8">
-            <StatusPanel domains={allDomains} domainStatuses={domainStatuses} />
-          </div>
-
+          
           <header className="mb-8 flex items-center gap-4">
             <div className="relative cursor-pointer" onClick={handleSecretClick}>
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
@@ -135,6 +131,12 @@ export default function DashboardPage() {
               <p className="text-muted-foreground">نظرة شاملة على نطاقاتك.</p>
             </div>
           </header>
+
+          {/* Status Panel */}
+          <div className="w-full mb-8">
+            <StatusPanel domains={allDomains} domainStatuses={domainStatuses} />
+          </div>
+
           <main>
             <Card className="shadow-lg bg-card">
               <CardContent>
