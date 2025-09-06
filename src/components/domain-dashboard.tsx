@@ -642,7 +642,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
               <div className={`mt-4 grid ${project === 'rehlethadaf' ? 'grid-cols-2' : 'grid-cols-1'} gap-4 text-center`}>
                 {project !== 'other' && (
                   <div>
-                    <div className="text-sm font-medium text-muted-foreground">قيمة التجديد</div>
+                    <div className="text-sm font-medium text-muted-foreground">{project === 'bofa' ? 'قيمة التجديد (B2B)' : 'قيمة التجديد'}</div>
                     <div className="text-accent font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
                     <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
                   </div>
@@ -922,6 +922,8 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
     
 
 
+
+    
 
     
 
