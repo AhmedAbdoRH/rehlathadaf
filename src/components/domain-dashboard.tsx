@@ -500,6 +500,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                         <CalendarPlus className="h-4 w-4 text-yellow-500" />
                       </Button>
                     </a>
+                  {project !== 'bofa' && (
                   <Button 
                     variant="ghost" 
                     size="icon" 
@@ -509,6 +510,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                   >
                     <Pencil className="h-4 w-4 text-blue-500" />
                   </Button>
+                  )}
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button 
@@ -599,6 +601,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                     </a>
                 </div>
                 <div className="flex items-center gap-2">
+                    {project !== 'bofa' && (
                     <Button 
                       variant="ghost" 
                       size="icon" 
@@ -608,6 +611,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                     >
                         <Pencil className="h-4 w-4 text-blue-500" />
                     </Button>
+                    )}
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <Button 
@@ -978,4 +982,5 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
     
 
     
+
 
