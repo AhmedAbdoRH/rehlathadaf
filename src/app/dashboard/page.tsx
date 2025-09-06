@@ -117,7 +117,7 @@ export default function DashboardPage() {
           title="العودة للصفحة الرئيسية"
         />
       </Link>
-      <div className="min-h-screen bg-black text-foreground">
+      <div className="min-h-screen bg-background text-foreground">
         <div className="container mx-auto p-4 sm:p-6 lg:p-8">
           {/* Status Panel - Fixed Position Top Left */}
           <div className="fixed top-4 left-4 z-50">
@@ -136,7 +136,7 @@ export default function DashboardPage() {
             </div>
           </header>
           <main>
-            <Card className="shadow-lg bg-black">
+            <Card className="shadow-lg bg-card">
               <CardContent>
                 <Tabs defaultValue="bofa" className="w-full pt-4">
                   <TabsList className="grid w-full grid-cols-3">
