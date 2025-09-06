@@ -3,13 +3,20 @@
 
 import * as React from 'react';
 import { DomainDashboard } from '@/components/domain-dashboard';
+import { StatusPanel } from '@/components/status-panel';
 import { Icons } from '@/components/icons';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getDomains } from '@/services/domainService';
+import { checkDomainStatus } from '@/ai/flows/checkDomainStatus';
+import type { Domain } from '@/lib/types';
 
 export default function Home() {
   const [isRehlethadafVisible, setRehlethadafVisible] = React.useState(false);
   const [clickCount, setClickCount] = React.useState(0);
+  const [allDomains, setAllDomains] = React.useState<Domain[]>([]);
+  const [domainStatuses, setDomainStatuses] = React.useState<Record<string, 'checking' | 'online' | 'offline'>>({});
+  const [loading, setLoading] = React.useState(true);
 
   const handleSecretClick = () => {
     const newClickCount = clickCount + 1;
@@ -18,6 +25,83 @@ export default function Home() {
       setRehlethadafVisible(true);
     }
   };
+
+  // Load all domains and check their status
+  React.useEffect(() => {
+    const fetchDomainsAndStatuses = async () => {
+      try {
+        setLoading(true);
+        const domainsFromDb = await getDomains();
+        const domainsWithProject = domainsFromDb.map(d => ({
+          ...d,
+          projects: d.projects && d.projects.length > 0 ? d.projects as any[] : ['rehlethadaf']
+        }));
+        setAllDomains(domainsWithProject);
+
+        // Set all to checking initially
+        const initialStatuses: Record<string, 'checking' | 'online' | 'offline'> = {};
+        domainsWithProject.forEach(d => {
+            if (d.id) initialStatuses[d.id] = 'checking';
+        });
+        setDomainStatuses(initialStatuses);
+        
+        // Check statuses sequentially
+        for (const domain of domainsWithProject) {
+          if (domain.id) {
+            try {
+              const { isOnline } = await checkDomainStatus({ domainName: domain.domainName });
+              setDomainStatuses(prev => ({ ...prev, [domain.id!]: isOnline ? 'online' : 'offline' }));
+            } catch (e) {
+               setDomainStatuses(prev => ({ ...prev, [domain.id!]: 'offline' }));
+            }
+            // Add a small delay between checks for sequential effect
+            await new Promise(resolve => setTimeout(resolve, 200));
+          }
+        }
+
+      } catch (error) {
+        console.error("Error fetching domains:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDomainsAndStatuses();
+  }, []);
+
+  // Function to refresh domains and statuses
+  const refreshDomains = React.useCallback(async () => {
+    try {
+      const domainsFromDb = await getDomains();
+      const domainsWithProject = domainsFromDb.map(d => ({
+        ...d,
+        projects: d.projects && d.projects.length > 0 ? d.projects as any[] : ['rehlethadaf']
+      }));
+      setAllDomains(domainsWithProject);
+
+      // Set all to checking initially
+      const initialStatuses: Record<string, 'checking' | 'online' | 'offline'> = {};
+      domainsWithProject.forEach(d => {
+          if (d.id) initialStatuses[d.id] = 'checking';
+      });
+      setDomainStatuses(initialStatuses);
+      
+      // Check statuses sequentially
+      for (const domain of domainsWithProject) {
+        if (domain.id) {
+          try {
+            const { isOnline } = await checkDomainStatus({ domainName: domain.domainName });
+            setDomainStatuses(prev => ({ ...prev, [domain.id!]: isOnline ? 'online' : 'offline' }));
+          } catch (e) {
+             setDomainStatuses(prev => ({ ...prev, [domain.id!]: 'offline' }));
+          }
+          // Add a small delay between checks for sequential effect
+          await new Promise(resolve => setTimeout(resolve, 200));
+        }
+      }
+    } catch (error) {
+      console.error("Error refreshing domains:", error);
+    }
+  }, []);
 
   return (
     <>
@@ -28,6 +112,11 @@ export default function Home() {
       />
       <div className="min-h-screen bg-background text-foreground">
         <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+          {/* Status Panel - Fixed Position Top Left */}
+          <div className="fixed top-4 left-4 z-50">
+            <StatusPanel domains={allDomains} domainStatuses={domainStatuses} />
+          </div>
+
           <header className="mb-8 flex items-center gap-4">
             <div className="relative cursor-pointer" onClick={handleSecretClick}>
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
@@ -50,7 +139,7 @@ export default function Home() {
                   </TabsList>
                   <TabsContent value="rehlethadaf">
                     {isRehlethadafVisible ? (
-                      <DomainDashboard project="rehlethadaf" />
+                      <DomainDashboard project="rehlethadaf" onDomainChange={refreshDomains} />
                     ) : (
                       <div className="flex h-64 items-center justify-center text-muted-foreground">
                         
@@ -58,10 +147,10 @@ export default function Home() {
                     )}
                   </TabsContent>
                   <TabsContent value="bofa">
-                    <DomainDashboard project="bofa" />
+                    <DomainDashboard project="bofa" onDomainChange={refreshDomains} />
                   </TabsContent>
                   <TabsContent value="other">
-                    <DomainDashboard project="other" />
+                    <DomainDashboard project="other" onDomainChange={refreshDomains} />
                   </TabsContent>
                 </Tabs>
               </CardContent>

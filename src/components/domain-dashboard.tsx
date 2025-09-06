@@ -52,7 +52,7 @@ const projectLabels: Record<Project, string> = {
 const projectOptions: Project[] = ['rehlethadaf', 'bofa', 'other'];
 
 
-export function DomainDashboard({ project }: { project: Project }) {
+export function DomainDashboard({ project, onDomainChange }: { project: Project; onDomainChange?: () => void }) {
   const [domains, setDomains] = React.useState<Domain[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [isAddDomainOpen, setAddDomainOpen] = React.useState(false);
@@ -176,6 +176,10 @@ export function DomainDashboard({ project }: { project: Project }) {
           clientEmail: '',
           projects: [project],
       });
+      // Refresh the status panel
+      if (onDomainChange) {
+        onDomainChange();
+      }
     } catch (error) {
        console.error("Error adding domain:", error);
        toast({
@@ -198,6 +202,10 @@ export function DomainDashboard({ project }: { project: Project }) {
           description: `تم حذف ${domainToDelete.domainName} بنجاح.`,
           variant: "destructive"
       });
+      // Refresh the status panel
+      if (onDomainChange) {
+        onDomainChange();
+      }
     } catch (error) {
        toast({
           title: "خطأ",
