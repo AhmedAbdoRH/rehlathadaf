@@ -436,16 +436,23 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                     {domain.collectionDate ? format(parseISO(domain.collectionDate), 'dd/MM/yyyy') : 'N/A'}
                   </div>
                 </TableCell>
-                {project !== 'other' && (
+                {project === 'bofa' ? (
+                  <TableCell>
+                      <div className="text-accent font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
+                      <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
+                      <div className="text-xs text-muted-foreground mt-1">B2B</div>
+                  </TableCell>
+                ) : project !== 'other' && (
                   <TableCell>
                       <div className="text-accent font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
                       <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
                   </TableCell>
                 )}
-                 {project === 'bofa' && domain.renewalCostBofa && Number(domain.renewalCostBofa) > 0 && (
+                 {project === 'bofa' && (
                     <TableCell>
                       <div className="text-accent font-semibold">${Number(domain.renewalCostBofa).toFixed(2)}</div>
                       <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostBofa) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
+                      <div className="text-xs text-muted-foreground mt-1">Bofa</div>
                   </TableCell>
                 )}
                 {(project === 'rehlethadaf' || project === 'other') && (
@@ -651,15 +658,21 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                 <Progress value={getRenewalProgress(domain.renewalDate as string)} className="h-2 mt-1" />
               </div>
               
-              <div className={`mt-4 grid ${project === 'rehlethadaf' ? 'grid-cols-2' : (project === 'bofa' && domain.renewalCostBofa && Number(domain.renewalCostBofa) > 0 ? 'grid-cols-2' : 'grid-cols-1')} gap-4 text-center`}>
-                {project !== 'other' && (
+              <div className={`mt-4 grid ${project === 'rehlethadaf' ? 'grid-cols-2' : (project === 'bofa' ? 'grid-cols-2' : 'grid-cols-1')} gap-4 text-center`}>
+                {project === 'bofa' ? (
+                   <div>
+                    <div className="text-sm font-medium text-muted-foreground">قيمة التجديد (B2B)</div>
+                    <div className="text-accent font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
+                    <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
+                  </div>
+                ) : project !== 'other' && (
                   <div>
-                    <div className="text-sm font-medium text-muted-foreground">{project === 'bofa' ? 'قيمة التجديد (B2B)' : 'قيمة التجديد'}</div>
+                    <div className="text-sm font-medium text-muted-foreground">قيمة التجديد</div>
                     <div className="text-accent font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
                     <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
                   </div>
                 )}
-                 {project === 'bofa' && domain.renewalCostBofa && Number(domain.renewalCostBofa) > 0 && (
+                 {project === 'bofa' && (
                   <div>
                     <div className="text-sm font-medium text-muted-foreground">قيمة التجديد (Bofa)</div>
                     <div className="text-accent font-semibold">${Number(domain.renewalCostBofa).toFixed(2)}</div>
@@ -965,3 +978,4 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
     
 
     
+
