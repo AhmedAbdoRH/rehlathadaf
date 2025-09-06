@@ -12,13 +12,13 @@ const AccountInfo = () => {
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const accountDetails = {
-    id: 'hadaf',
-    name: 'حساب مؤسسة رحلة هدف',
+    id: 'mohamed',
+    name: 'حساب محمد رزق',
     fields: [
-      { id: 'name', label: 'الاسم', value: 'مؤسسة رحلة هدف التجارية' },
-      { id: 'account', label: 'رقم الحساب', value: '262354467001' },
-      { id: 'iban', label: 'رقم الايبان', value: 'SA3145000000262354467001' },
-      { id: 'bank', label: 'البنك', value: 'بنك الأول ساب' },
+      { id: 'name', label: 'الاسم', value: 'محمد رزق جوده جاد' },
+      { id: 'account', label: 'رقم الحساب', value: '991000010006087124455' },
+      { id: 'iban', label: 'رقم الايبان', value: 'SA04 8000 0991 6080 1712 4455' },
+      { id: 'bank', label: 'البنك', value: 'ALRAJHI BANKING CORPORATION' },
     ]
   };
 
@@ -51,12 +51,12 @@ const AccountInfo = () => {
   );
 };
 
-export default function TransferPage() {
+export default function TransferMohamedPage() {
   return (
     <div className="min-h-screen bg-background text-foreground flex justify-center items-center p-4">
       <Card className="w-full max-w-2xl shadow-lg">
         <CardHeader>
-          <CardTitle className="text-center text-2xl">بيانات تحويل (مؤسسة رحلة هدف)</CardTitle>
+          <CardTitle className="text-center text-2xl">بيانات تحويل (محمد رزق)</CardTitle>
         </CardHeader>
         <CardContent>
           <AccountInfo />
