@@ -25,10 +25,10 @@ export default function TransferPage() {
   };
 
   const fields: { id: CopyableField; label: string; value: string }[] = [
-    { id: 'name', label: 'الاسم', value: 'محمد رزق جوده جاد' },
-    { id: 'account', label: 'رقم الحساب', value: '991000010006087124455' },
-    { id: 'iban', label: 'رقم الايبان', value: 'SA04 8000 0991 6080 1712 4455' },
-    { id: 'bank', label: 'البنك', value: 'ALRAJHI BANKING CORPORATION' },
+    { id: 'name', label: 'الاسم', value: 'مؤسسة رحلة هدف التجارية' },
+    { id: 'account', label: 'رقم الحساب', value: '262354467001' },
+    { id: 'iban', label: 'رقم الايبان', value: 'SA3145000000262354467001' },
+    { id: 'bank', label: 'البنك', value: 'بنك الأول ساب' },
   ];
 
   return (
