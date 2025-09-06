@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getDomains } from '@/services/domainService';
 import { checkDomainStatus } from '@/ai/flows/checkDomainStatus';
 import type { Domain } from '@/lib/types';
+import Link from 'next/link';
 
 export default function DashboardPage() {
   const [isSecretVisible, setSecretVisible] = React.useState(false);
@@ -110,6 +111,12 @@ export default function DashboardPage() {
         className="fixed left-0 top-0 h-full w-4 cursor-pointer z-10"
         title="Secret"
       />
+      <Link href="/" passHref>
+        <div 
+          className="fixed bottom-0 left-0 h-8 w-8 cursor-pointer z-10 opacity-0"
+          title="العودة للصفحة الرئيسية"
+        />
+      </Link>
       <div className="min-h-screen bg-background text-foreground">
         <div className="container mx-auto p-4 sm:p-6 lg:p-8">
           {/* Status Panel - Fixed Position Top Left */}
