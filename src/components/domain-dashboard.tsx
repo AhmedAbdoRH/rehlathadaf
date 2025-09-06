@@ -282,7 +282,6 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
         toast({
             title: "خطأ",
             description: "فشل في تجديد النطاق.",
-            variant: "destructive",
         });
     }
   };
@@ -329,7 +328,6 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
         toast({
             title: "خطأ",
             description: "فشل في حفظ شيت البيانات.",
-            variant: "destructive",
         });
     }
   };
@@ -422,7 +420,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                 <TableCell>
                   <div className="flex items-center gap-2">
                     {domain.id && renderStatusDot(domain.id)}
-                    <a href={getUrl(domain.domainName)} target="_blank" rel="noopener noreferrer" className="font-medium text-lg text-blue-300 hover:underline">{domain.domainName}</a>
+                    <a href={getUrl(domain.domainName)} target="_blank" rel="noopener noreferrer" className="font-medium text-lg" style={{ color: '#90b8f8' }}>{domain.domainName}</a>
                   </div>
                   <div className='mt-2'>
                     <div className="text-right">{`${format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}`}</div>
@@ -438,11 +436,13 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                     {domain.collectionDate ? format(parseISO(domain.collectionDate), 'dd/MM/yyyy') : 'N/A'}
                   </div>
                 </TableCell>
-                <TableCell>
-                    <div className="text-accent font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
-                    <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
-                </TableCell>
-                {project === 'rehlethadaf' && (
+                {project !== 'other' && (
+                  <TableCell>
+                      <div className="text-accent font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
+                      <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
+                  </TableCell>
+                )}
+                {(project === 'rehlethadaf' || project === 'other') && (
                   <TableCell>
                       <div className="text-destructive font-semibold">${Number(domain.renewalCostOffice).toFixed(2)}</div>
                       <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostOffice) * USD_TO_EGP_RATE_OFFICE).toFixed(2)} ج.م</div>
@@ -637,7 +637,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
                 {domain.id && renderStatusDot(domain.id)}
-                 <a href={getUrl(domain.domainName)} target="_blank" rel="noopener noreferrer" className="font-medium text-lg text-blue-300 hover:underline">{domain.domainName}</a>
+                 <a href={getUrl(domain.domainName)} target="_blank" rel="noopener noreferrer" className="font-medium text-lg" style={{ color: '#90b8f8' }}>{domain.domainName}</a>
               </div>
               
               <div className='mt-4'>
@@ -646,12 +646,14 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
               </div>
               
               <div className={`mt-4 grid ${project === 'rehlethadaf' ? 'grid-cols-2' : 'grid-cols-1'} gap-4 text-center`}>
-                <div>
-                  <div className="text-sm font-medium text-muted-foreground">تكلفة العميل</div>
-                  <div className="text-accent font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
-                  <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
-                </div>
-                {project === 'rehlethadaf' && (
+                {project !== 'other' && (
+                  <div>
+                    <div className="text-sm font-medium text-muted-foreground">تكلفة العميل</div>
+                    <div className="text-accent font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
+                    <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
+                  </div>
+                )}
+                {(project === 'rehlethadaf' || project === 'other') && (
                   <div>
                     <div className="text-sm font-medium text-muted-foreground">تكلفة المكتب</div>
                      <div className="text-destructive font-semibold">${Number(domain.renewalCostOffice).toFixed(2)}</div>
@@ -669,7 +671,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
           setNewDomain(prev => ({ ...prev, projects: [project] }));
           setAddDomainOpen(true);
         }}
-        className="fixed bottom-8 left-8 z-50 h-14 w-14 rounded-full shadow-lg"
+        className="fixed bottom-8 left-8 z-50 h-14 w-14 rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
         size="icon"
       >
         <Plus className="h-6 w-6" />
