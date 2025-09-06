@@ -5,7 +5,7 @@ import Link from 'next/link';
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
-import { Banknote, HandCoins, LayoutGrid } from 'lucide-react';
+import { Banknote, HandCoins, LayoutGrid, Globe } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -80,8 +80,9 @@ export default function Home() {
         
         {cardsVisible && (
           <div className="flex flex-wrap justify-center gap-6">
-              <NavCard href="/oc" icon={LayoutGrid} title="الإدارة المالية لأونلاين كاتلوج" />
+              <NavCard href="/oc" icon={HandCoins} title="الإدارة المالية لأونلاين كاتلوج" />
               <NavCard href="/marketing" icon={HandCoins} title="الإدارة المالية لمكتب التسويق" />
+              <NavCard href="/web" icon={Globe} title="مشاريع الويب" />
                <DropdownNavCard 
                   icon={Banknote}
                   title="بيانات التحويل"
