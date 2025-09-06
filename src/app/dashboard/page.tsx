@@ -127,8 +127,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-foreground">عرض النطاق</h1>
-              <p className="text-muted-foreground">نظرة شاملة على نطاقاتك.</p>
+              <h1 className="text-3xl font-bold text-foreground">إدارة المواقع وتطبيقات الويب</h1>
             </div>
           </header>
 
@@ -138,7 +137,7 @@ export default function DashboardPage() {
 
           <main>
             <Card className="shadow-lg bg-card">
-              <CardContent className="p-4 pt-2">
+              <CardContent className="p-0 pt-2">
                 <Tabs defaultValue="bofa" className="w-full">
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="rehlethadaf">رحلة هدف</TabsTrigger>
