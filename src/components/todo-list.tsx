@@ -92,6 +92,8 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
     }
   };
 
+  const uncompletedTodos = todos.filter(todo => !todo.completed);
+
   return (
     <div className="space-y-4">
       <form onSubmit={handleAddTodo} className="flex gap-2">
@@ -113,7 +115,7 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
         </div>
       ) : (
         <div className="space-y-2">
-          {todos.map(todo => (
+          {uncompletedTodos.map(todo => (
             <div key={todo.id} className="flex items-center gap-3 p-2 rounded-md bg-background/50 hover:bg-background transition-colors">
               <Checkbox
                 id={`todo-${todo.id}`}
@@ -135,7 +137,7 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
               </Button>
             </div>
           ))}
-           {todos.length === 0 && (
+           {uncompletedTodos.length === 0 && (
              <p className="text-center text-muted-foreground py-4">لا توجد مهام حتى الآن.</p>
            )}
         </div>
