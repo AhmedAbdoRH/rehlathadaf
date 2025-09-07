@@ -45,7 +45,7 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
     };
 
     // Optimistic update
-    setTodos(prevTodos => [optimisticTodo, ...prevTodos]);
+    setTodos(prevTodos => [optimisticTodo, ...prevTodos].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
     setNewTodo('');
 
     try {
@@ -60,12 +60,7 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
         prevTodos.map(t => (t.id === tempId ? addedTodo : t))
       );
       
-      toast({
-        title: "نجاح",
-        description: "تمت إضافة المهمة.",
-      });
-
-      onUpdate(); // Notify parent to update global state (e.g., status panel)
+      onUpdate();
     } catch (error) {
        // Revert optimistic update on error
       setTodos(prevTodos => prevTodos.filter(t => t.id !== tempId));
@@ -78,14 +73,22 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
     }
   };
 
-  const handleToggleTodo = async (todo: Todo) => {
-    if (!todo.id) return;
+  const handleToggleTodo = async (todoToToggle: Todo) => {
+    if (!todoToToggle.id || todoToToggle.id.startsWith('temp-')) return;
+  
+    // Optimistic update
+    const originalTodos = todos;
+    setTodos(prev => 
+      prev.filter(t => t.id !== todoToToggle.id)
+    );
+  
     try {
-      const updates = { completed: !todo.completed };
-      await updateTodo(todo.id, updates);
-      onUpdate(); // Notify parent component to re-fetch data
+      await updateTodo(todoToToggle.id, { completed: !todoToToggle.completed });
+      onUpdate();
     } catch (error) {
-       console.error("Error updating todo:", error);
+      // Revert on error
+      setTodos(originalTodos);
+      console.error("Error updating todo:", error);
       toast({
         title: "خطأ",
         description: "فشل في تحديث المهمة.",
@@ -93,8 +96,14 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
       });
     }
   };
-
+  
   const handleDeleteTodo = async (todoId: string) => {
+    if (!todoId || todoId.startsWith('temp-')) return;
+  
+    // Optimistic update
+    const originalTodos = todos;
+    setTodos(prev => prev.filter(t => t.id !== todoId));
+  
     try {
       await deleteTodo(todoId);
       toast({
@@ -102,10 +111,12 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
         description: "تم حذف المهمة.",
         variant: "destructive"
       });
-      onUpdate(); // Notify parent component to re-fetch data
+      onUpdate();
     } catch (error) {
+      // Revert on error
+      setTodos(originalTodos);
       console.error("Error deleting todo:", error);
-       toast({
+      toast({
         title: "خطأ",
         description: "فشل في حذف المهمة.",
         variant: "destructive",

@@ -33,7 +33,7 @@ export default function WebPage() {
     }
   };
 
-  const refreshDomains = React.useCallback(async () => {
+  const refreshDomainsAndStatuses = React.useCallback(async () => {
     try {
       setLoading(true);
       const domainsFromDb = await getDomains();
@@ -42,16 +42,6 @@ export default function WebPage() {
         projects: d.projects && d.projects.length > 0 ? d.projects as any[] : ['rehlethadaf']
       }));
       setAllDomains(domainsWithProject);
-
-      const domainIds = domainsWithProject.map(d => d.id).filter((id): id is string => !!id);
-      if (domainIds.length > 0) {
-        const todosByDomain = await getTodosForDomains(domainIds);
-        const hasTodosMap: Record<string, boolean> = {};
-        Object.keys(todosByDomain).forEach(domainId => {
-          hasTodosMap[domainId] = todosByDomain[domainId].some(todo => !todo.completed);
-        });
-        setDomainTodos(hasTodosMap);
-      }
 
       // Set all to checking initially
       const initialStatuses: Record<string, 'checking' | 'online' | 'offline'> = {};
@@ -72,16 +62,40 @@ export default function WebPage() {
         }
       }
     } catch (error) {
-      console.error("Error refreshing domains:", error);
+      console.error("Error refreshing domains and statuses:", error);
     } finally {
       setLoading(false);
     }
   }, []);
 
+  const refreshTodos = React.useCallback(async () => {
+    try {
+      const domainIds = allDomains.map(d => d.id).filter((id): id is string => !!id);
+      if (domainIds.length > 0) {
+        const todosByDomain = await getTodosForDomains(domainIds);
+        const hasTodosMap: Record<string, boolean> = {};
+        Object.keys(todosByDomain).forEach(domainId => {
+          hasTodosMap[domainId] = todosByDomain[domainId].some(todo => !todo.completed);
+        });
+        setDomainTodos(hasTodosMap);
+      } else {
+        setDomainTodos({});
+      }
+    } catch (error) {
+      console.error("Error refreshing todos:", error);
+    }
+  }, [allDomains]);
+
+
   // Initial load
   React.useEffect(() => {
-    refreshDomains();
-  }, [refreshDomains]);
+    refreshDomainsAndStatuses();
+  }, [refreshDomainsAndStatuses]);
+  
+  // Refresh todos whenever domains change or on demand
+  React.useEffect(() => {
+    refreshTodos();
+  }, [refreshTodos]);
 
 
   return (
@@ -120,7 +134,7 @@ export default function WebPage() {
             </CollapsibleTrigger>
             <CollapsibleContent>
               <div className="mt-2">
-                <AllTodosPanel onUpdate={refreshDomains} />
+                <AllTodosPanel onUpdate={refreshTodos} />
               </div>
             </CollapsibleContent>
           </Collapsible>
@@ -137,7 +151,7 @@ export default function WebPage() {
                   </TabsList>
                   <TabsContent value="rehlethadaf">
                     {isSecretVisible ? (
-                      <DomainDashboard project="rehlethadaf" onDomainChange={refreshDomains} />
+                      <DomainDashboard project="rehlethadaf" onDomainChange={refreshDomainsAndStatuses} />
                     ) : (
                       <div className="flex h-64 items-center justify-center text-muted-foreground">
                         
@@ -145,11 +159,11 @@ export default function WebPage() {
                     )}
                   </TabsContent>
                   <TabsContent value="pova">
-                    <DomainDashboard project="pova" onDomainChange={refreshDomains} />
+                    <DomainDashboard project="pova" onDomainChange={refreshDomainsAndStatuses} />
                   </TabsContent>
                   <TabsContent value="other">
                      {isSecretVisible ? (
-                      <DomainDashboard project="other" onDomainChange={refreshDomains} />
+                      <DomainDashboard project="other" onDomainChange={refreshDomainsAndStatuses} />
                     ) : (
                       <div className="flex h-64 items-center justify-center text-muted-foreground">
                       </div>

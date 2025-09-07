@@ -38,7 +38,7 @@ import { Checkbox } from './ui/checkbox';
 import { checkDomainStatus } from '@/ai/flows/checkDomainStatus';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { TodoList } from './todo-list';
-import { getTodosForDomains } from '@/services/todoService';
+import { getTodos, getTodosForDomains } from '@/services/todoService';
 
 
 const USD_TO_EGP_RATE_OFFICE = 47.5; // سعر الصرف لمصاريف المكتب
@@ -396,10 +396,10 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
 
   const renderStatusDot = (domainId: string) => {
     const status = domainStatuses[domainId];
-    const hasTodos = allTodos[domainId] && allTodos[domainId].length > 0;
+    const hasTodos = allTodos[domainId] && allTodos[domainId].some(t => !t.completed);
 
     if (hasTodos) {
-      return <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" title="يحتوي على مهام"></div>;
+      return <div className="h-2 w-2 rounded-full bg-blue-500 shadow-[0_0_8px_2px] shadow-blue-500/60 animate-pulse" title="يحتوي على مهام"></div>;
     }
     if (status === 'checking') {
       return <div className="h-2 w-2 rounded-full bg-yellow-500 animate-pulse" title="يتم التحقق..."></div>;
@@ -417,10 +417,13 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
     return domainName.startsWith('http') ? domainName : `https://${domainName}`;
   }
 
-  const handleTodoUpdate = () => {
-    // Re-fetch all data to ensure UI is consistent
-    fetchDomainsAndData();
-    if(onDomainChange) {
+  const handleTodoUpdate = async (domainId: string) => {
+    const updatedTodos = await getTodos(domainId);
+    setAllTodos(prev => ({
+      ...prev,
+      [domainId]: updatedTodos,
+    }));
+    if (onDomainChange) {
       onDomainChange();
     }
   };
@@ -587,7 +590,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                         <TodoList 
                           domainId={domain.id!} 
                           initialTodos={allTodos[domain.id!] || []}
-                          onUpdate={handleTodoUpdate}
+                          onUpdate={() => handleTodoUpdate(domain.id!)}
                         />
                       </div>
                   </TableCell>
@@ -747,7 +750,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                   <TodoList 
                     domainId={domain.id!}
                     initialTodos={allTodos[domain.id!] || []}
-                    onUpdate={handleTodoUpdate}
+                    onUpdate={() => handleTodoUpdate(domain.id!)}
                    />
                 </div>
               </CollapsibleContent>
