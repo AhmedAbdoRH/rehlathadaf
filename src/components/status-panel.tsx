@@ -78,7 +78,7 @@ export function StatusPanel({ domains, domainStatuses, domainTodos }: StatusPane
   };
 
   return (
-    <Card className="w-full bg-card backdrop-blur-md border-border/60 shadow-lg">
+    <Card className="w-full bg-card backdrop-blur-md border-border/60 shadow-lg rounded-b-none">
       <CardContent className="p-2">
         <div className="flex flex-row flex-wrap gap-1.5 justify-center">
           {domains.map((domain, index) => {
@@ -101,5 +101,3 @@ export function StatusPanel({ domains, domainStatuses, domainTodos }: StatusPane
     </Card>
   );
 }
-
-    

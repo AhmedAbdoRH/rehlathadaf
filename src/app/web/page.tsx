@@ -112,16 +112,14 @@ export default function WebPage() {
           </header>
 
           <Collapsible className="w-full mb-2">
-            <div className="relative">
-              <StatusPanel domains={allDomains} domainStatuses={domainStatuses} domainTodos={domainTodos} />
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="icon" className="absolute bottom-[-10px] left-1/2 -translate-x-1/2 h-6 w-8 bg-card/80 backdrop-blur-sm border-border/60 border rounded-full hover:bg-muted/80">
-                  <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform data-[state=open]:rotate-180" />
-                </Button>
-              </CollapsibleTrigger>
-            </div>
+            <StatusPanel domains={allDomains} domainStatuses={domainStatuses} domainTodos={domainTodos} />
+            <CollapsibleTrigger asChild>
+              <div className="w-full h-4 bg-card hover:bg-muted/80 border-x border-b border-border/60 rounded-b-lg flex items-center justify-center cursor-pointer">
+                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform data-[state=open]:rotate-180" />
+              </div>
+            </CollapsibleTrigger>
             <CollapsibleContent>
-              <div className="mt-4">
+              <div className="mt-2">
                 <AllTodosPanel onUpdate={refreshDomains} />
               </div>
             </CollapsibleContent>
