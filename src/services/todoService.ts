@@ -93,7 +93,7 @@ export const getAllTodosGroupedByDomain = async (): Promise<Record<string, Todo[
     });
 
     // 2. Fetch all todos
-    const todosQuery = query(todosCollectionRef, orderBy('createdAt', 'desc'));
+    const todosQuery = query(todosCollectionRef, where('completed', '==', false), orderBy('createdAt', 'desc'));
     const todosSnapshot = await getDocs(todosQuery);
     const todos = todosSnapshot.docs.map(todoFromDoc);
 

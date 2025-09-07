@@ -49,7 +49,7 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
         if (!todo.id) return;
         
         // Optimistic update
-        const originalGroupedTodos = groupedTodos;
+        const originalGroupedTodos = { ...groupedTodos };
         const newGroups = {...originalGroupedTodos};
         let domainNameForUpdate: string | null = null;
         for (const domainName in newGroups) {
@@ -85,7 +85,7 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
 
     const handleDeleteTodo = async (todoId: string) => {
          // Optimistic update
-        const originalGroupedTodos = groupedTodos;
+        const originalGroupedTodos = {...groupedTodos};
         const newGroups = {...originalGroupedTodos};
         for (const domainName in newGroups) {
             const initialLength = newGroups[domainName].length;
