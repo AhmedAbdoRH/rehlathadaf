@@ -9,7 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getDomains } from '@/services/domainService';
 import { checkDomainStatus } from '@/ai/flows/checkDomainStatus';
-import type { Domain } from '@/lib/types';
+import type { Domain, Todo } from '@/lib/types';
 import Link from 'next/link';
 import { getTodosForDomains } from '@/services/todoService';
 import { AllTodosPanel } from '@/components/all-todos-panel';
@@ -22,7 +22,7 @@ export default function WebPage() {
   const [clickCount, setClickCount] = React.useState(0);
   const [allDomains, setAllDomains] = React.useState<Domain[]>([]);
   const [domainStatuses, setDomainStatuses] = React.useState<Record<string, 'checking' | 'online' | 'offline'>>({});
-  const [domainTodos, setDomainTodos] = React.useState<Record<string, boolean>>({});
+  const [domainTodos, setDomainTodos] = React.useState<Record<string, Todo[]>>({});
   const [loading, setLoading] = React.useState(true);
 
   const handleSecretClick = () => {
@@ -32,17 +32,13 @@ export default function WebPage() {
       setSecretVisible(true);
     }
   };
-
+  
   const refreshTodos = React.useCallback(async () => {
     try {
       const domainIds = allDomains.map(d => d.id).filter((id): id is string => !!id);
       if (domainIds.length > 0) {
         const todosByDomain = await getTodosForDomains(domainIds);
-        const hasTodosMap: Record<string, boolean> = {};
-        Object.keys(todosByDomain).forEach(domainId => {
-          hasTodosMap[domainId] = todosByDomain[domainId].some(todo => !todo.completed);
-        });
-        setDomainTodos(hasTodosMap);
+        setDomainTodos(todosByDomain);
       } else {
         setDomainTodos({});
       }
@@ -50,6 +46,7 @@ export default function WebPage() {
       console.error("Error refreshing todos:", error);
     }
   }, [allDomains]);
+
 
   const refreshDomainsAndStatuses = React.useCallback(async () => {
     try {
@@ -71,14 +68,10 @@ export default function WebPage() {
       // Refresh todos in parallel
       const domainIds = domainsWithProject.map(d => d.id).filter((id): id is string => !!id);
       if (domainIds.length > 0) {
-          const todosByDomain = await getTodosForDomains(domainIds);
-          const hasTodosMap: Record<string, boolean> = {};
-          Object.keys(todosByDomain).forEach(domainId => {
-              hasTodosMap[domainId] = todosByDomain[domainId].some(todo => !todo.completed);
-          });
-          setDomainTodos(hasTodosMap);
+        const todosByDomain = await getTodosForDomains(domainIds);
+        setDomainTodos(todosByDomain);
       } else {
-          setDomainTodos({});
+        setDomainTodos({});
       }
 
 
@@ -105,12 +98,13 @@ export default function WebPage() {
     refreshDomainsAndStatuses();
   }, [refreshDomainsAndStatuses]);
   
-  // Refresh todos whenever domains change (this effect is for the initial load)
-  React.useEffect(() => {
-    if(allDomains.length > 0) {
-      refreshTodos();
-    }
-  }, [allDomains, refreshTodos]);
+  const hasTodosMap = React.useMemo(() => {
+    const hasTodos: Record<string, boolean> = {};
+    Object.keys(domainTodos).forEach(domainId => {
+      hasTodos[domainId] = domainTodos[domainId].some(todo => !todo.completed);
+    });
+    return hasTodos;
+  }, [domainTodos]);
 
 
   return (
@@ -141,7 +135,7 @@ export default function WebPage() {
           </header>
 
           <Collapsible className="w-full mb-2">
-            <StatusPanel domains={allDomains} domainStatuses={domainStatuses} domainTodos={domainTodos} />
+            <StatusPanel domains={allDomains} domainStatuses={domainStatuses} domainTodos={hasTodosMap} />
             <CollapsibleTrigger asChild>
               <div className="w-full h-4 bg-card hover:bg-muted/80 border-x border-b border-border/60 rounded-b-lg flex items-center justify-center cursor-pointer">
                 <ChevronDown className="h-4 w-4 text-muted-foreground opacity-50 transition-transform data-[state=open]:rotate-180" />
@@ -166,7 +160,15 @@ export default function WebPage() {
                   </TabsList>
                   <TabsContent value="rehlethadaf">
                     {isSecretVisible ? (
-                      <DomainDashboard project="rehlethadaf" onDomainChange={refreshDomainsAndStatuses} onTodoChange={refreshTodos} />
+                      <DomainDashboard 
+                        project="rehlethadaf"
+                        allDomains={allDomains}
+                        allTodos={domainTodos}
+                        domainStatuses={domainStatuses}
+                        loading={loading}
+                        onDomainChange={refreshDomainsAndStatuses} 
+                        onTodoChange={refreshTodos} 
+                      />
                     ) : (
                       <div className="flex h-64 items-center justify-center text-muted-foreground">
                         
@@ -174,11 +176,27 @@ export default function WebPage() {
                     )}
                   </TabsContent>
                   <TabsContent value="pova">
-                    <DomainDashboard project="pova" onDomainChange={refreshDomainsAndStatuses} onTodoChange={refreshTodos} />
+                    <DomainDashboard 
+                       project="pova"
+                       allDomains={allDomains}
+                       allTodos={domainTodos}
+                       domainStatuses={domainStatuses}
+                       loading={loading}
+                       onDomainChange={refreshDomainsAndStatuses} 
+                       onTodoChange={refreshTodos}
+                    />
                   </TabsContent>
                   <TabsContent value="other">
                      {isSecretVisible ? (
-                      <DomainDashboard project="other" onDomainChange={refreshDomainsAndStatuses} onTodoChange={refreshTodos} />
+                       <DomainDashboard 
+                         project="other"
+                         allDomains={allDomains}
+                         allTodos={domainTodos}
+                         domainStatuses={domainStatuses}
+                         loading={loading}
+                         onDomainChange={refreshDomainsAndStatuses} 
+                         onTodoChange={refreshTodos} 
+                       />
                     ) : (
                       <div className="flex h-64 items-center justify-center text-muted-foreground">
                       </div>

@@ -31,15 +31,12 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Calendar } from './ui/calendar';
 import { Progress } from './ui/progress';
 import { Card, CardContent } from './ui/card';
-import { getDomains, addDomain, deleteDomain, updateDomain } from '@/services/domainService';
+import { addDomain, deleteDomain, updateDomain } from '@/services/domainService';
 import { cn } from "@/lib/utils"
 import { Textarea } from './ui/textarea';
 import { Checkbox } from './ui/checkbox';
-import { checkDomainStatus } from '@/ai/flows/checkDomainStatus';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { TodoList } from './todo-list';
-import { getTodos, getTodosForDomains } from '@/services/todoService';
-
 
 const USD_TO_EGP_RATE_OFFICE = 47.5; // سعر الصرف لمصاريف المكتب
 const USD_TO_EGP_RATE_CLIENT = 50; // سعر الصرف لتحصيل العميل
@@ -54,71 +51,32 @@ const projectLabels: Record<Project, string> = {
 };
 const projectOptions: Project[] = ['rehlethadaf', 'pova', 'other'];
 
+interface DomainDashboardProps {
+  project: Project;
+  allDomains: Domain[];
+  allTodos: Record<string, Todo[]>;
+  domainStatuses: Record<string, DomainStatus>;
+  loading: boolean;
+  onDomainChange: () => void;
+  onTodoChange: () => void;
+}
 
-export function DomainDashboard({ project, onDomainChange, onTodoChange }: { project: Project; onDomainChange?: () => void, onTodoChange?: () => void }) {
-  const [domains, setDomains] = React.useState<Domain[]>([]);
-  const [allTodos, setAllTodos] = React.useState<Record<string, Todo[]>>({});
-  const [loading, setLoading] = React.useState(true);
+export function DomainDashboard({ 
+  project, 
+  allDomains,
+  allTodos,
+  domainStatuses,
+  loading,
+  onDomainChange, 
+  onTodoChange 
+}: DomainDashboardProps) {
   const [isAddDomainOpen, setAddDomainOpen] = React.useState(false);
   const [isEditDomainOpen, setEditDomainOpen] = React.useState(false);
   const [domainToEdit, setDomainToEdit] = React.useState<Domain | null>(null);
   const [isDataSheetOpen, setDataSheetOpen] = React.useState(false);
   const [dataSheetContent, setDataSheetContent] = React.useState({ title: '', content: '' });
   const [editingDataSheetDomain, setEditingDataSheetDomain] = React.useState<Domain | null>(null);
-  const [domainStatuses, setDomainStatuses] = React.useState<Record<string, DomainStatus>>({});
   const { toast } = useToast();
-
-  const fetchDomainsAndData = React.useCallback(async () => {
-    try {
-      setLoading(true);
-      const domainsFromDb = await getDomains();
-      const domainsWithProject = domainsFromDb.map(d => ({
-        ...d,
-        projects: d.projects && d.projects.length > 0 ? d.projects as Project[] : ['rehlethadaf' as Project]
-      }));
-      const sortedDomains = domainsWithProject.sort((a, b) => differenceInDays(parseISO(a.renewalDate as string), new Date()) - differenceInDays(parseISO(b.renewalDate as string), new Date()));
-      setDomains(sortedDomains);
-      
-      const domainIds = sortedDomains.map(d => d.id).filter((id): id is string => !!id);
-      if (domainIds.length > 0) {
-        const todosByDomain = await getTodosForDomains(domainIds);
-        setAllTodos(todosByDomain);
-      }
-
-      // Set all to checking initially
-      const initialStatuses: Record<string, DomainStatus> = {};
-      sortedDomains.forEach(d => {
-          if (d.id) initialStatuses[d.id] = 'checking';
-      });
-      setDomainStatuses(initialStatuses);
-      
-      // Check statuses
-      for (const domain of sortedDomains) {
-        if (domain.id) {
-          try {
-            const { isOnline } = await checkDomainStatus({ domainName: domain.domainName });
-            setDomainStatuses(prev => ({ ...prev, [domain.id!]: isOnline ? 'online' : 'offline' }));
-          } catch (e) {
-             setDomainStatuses(prev => ({ ...prev, [domain.id!]: 'offline' }));
-          }
-        }
-      }
-
-    } catch (error) {
-      console.error("Error fetching domains and todos:", error);
-      toast({
-        title: "خطأ",
-        description: "فشل في تحميل البيانات من قاعدة البيانات.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [toast]);
-  
-  React.useEffect(() => {
-    fetchDomainsAndData();
-  }, [fetchDomainsAndData]);
 
   const [newDomain, setNewDomain] = React.useState<{
     domainName: string;
@@ -186,11 +144,7 @@ export function DomainDashboard({ project, onDomainChange, onTodoChange }: { pro
           renewalCostPova: '',
           projects: [project],
       });
-      // Refresh the data
-      fetchDomainsAndData();
-      if (onDomainChange) {
-        onDomainChange();
-      }
+      onDomainChange();
     } catch (error) {
        console.error("Error adding domain:", error);
        toast({
@@ -202,7 +156,7 @@ export function DomainDashboard({ project, onDomainChange, onTodoChange }: { pro
   };
 
   const handleDeleteDomain = async (domainId: string) => {
-    const domainToDelete = domains.find(d => d.id === domainId);
+    const domainToDelete = allDomains.find(d => d.id === domainId);
     if (!domainToDelete) return;
 
     try {
@@ -212,11 +166,7 @@ export function DomainDashboard({ project, onDomainChange, onTodoChange }: { pro
           description: `تم حذف ${domainToDelete.domainName} بنجاح.`,
           variant: "destructive"
       });
-      // Refresh the data
-      fetchDomainsAndData();
-      if (onDomainChange) {
-        onDomainChange();
-      }
+      onDomainChange();
     } catch (error) {
        toast({
           title: "خطأ",
@@ -260,11 +210,7 @@ export function DomainDashboard({ project, onDomainChange, onTodoChange }: { pro
       });
       setEditDomainOpen(false);
       setDomainToEdit(null);
-      // Refresh the data
-      fetchDomainsAndData();
-      if (onDomainChange) {
-        onDomainChange();
-      }
+      onDomainChange();
     } catch (error) {
       console.error("Error updating domain:", error);
       toast({
@@ -288,8 +234,7 @@ export function DomainDashboard({ project, onDomainChange, onTodoChange }: { pro
             title: "تم تجديد النطاق",
             description: `تم تحديث تاريخ تجديد ${domain.domainName} إلى ${format(nextRenewalDate, 'dd/MM/yyyy')}.`,
         });
-         // Refresh the data
-        fetchDomainsAndData();
+        onDomainChange();
     } catch (error) {
         console.error("Error renewing domain:", error);
         toast({
@@ -335,8 +280,7 @@ export function DomainDashboard({ project, onDomainChange, onTodoChange }: { pro
         });
         setDataSheetOpen(false);
         setEditingDataSheetDomain(null);
-        // Refresh the data
-        fetchDomainsAndData();
+        onDomainChange();
     } catch (error) {
         console.error("Error saving data sheet:", error);
         toast({
@@ -418,20 +362,6 @@ export function DomainDashboard({ project, onDomainChange, onTodoChange }: { pro
     return domainName.startsWith('http') ? domainName : `https://${domainName}`;
   }
 
-  const handleTodoUpdate = async (domainId: string) => {
-    // This function is called from TodoList on any change.
-    // 1. Refetch todos for the specific domain to update the list visually
-    const updatedTodos = await getTodos(domainId);
-    setAllTodos(prev => ({
-      ...prev,
-      [domainId]: updatedTodos,
-    }));
-    // 2. Notify the parent page to update the global status indicators
-    if (onTodoChange) {
-      onTodoChange();
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -439,8 +369,11 @@ export function DomainDashboard({ project, onDomainChange, onTodoChange }: { pro
       </div>
     );
   }
+  
+  const filteredDomains = allDomains
+    .filter(d => d.projects?.includes(project))
+    .sort((a, b) => differenceInDays(parseISO(a.renewalDate as string), new Date()) - differenceInDays(parseISO(b.renewalDate as string), new Date()));
 
-  const filteredDomains = domains.filter(d => d.projects?.includes(project));
 
   return (
     <>
@@ -594,7 +527,7 @@ export function DomainDashboard({ project, onDomainChange, onTodoChange }: { pro
                         <TodoList 
                           domainId={domain.id!} 
                           initialTodos={allTodos[domain.id!] || []}
-                          onUpdate={() => handleTodoUpdate(domain.id!)}
+                          onUpdate={onTodoChange}
                         />
                       </div>
                   </TableCell>
@@ -754,7 +687,7 @@ export function DomainDashboard({ project, onDomainChange, onTodoChange }: { pro
                   <TodoList 
                     domainId={domain.id!}
                     initialTodos={allTodos[domain.id!] || []}
-                    onUpdate={() => handleTodoUpdate(domain.id!)}
+                    onUpdate={onTodoChange}
                    />
                 </div>
               </CollapsibleContent>
