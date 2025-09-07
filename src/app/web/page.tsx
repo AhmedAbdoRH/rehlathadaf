@@ -5,7 +5,7 @@ import * as React from 'react';
 import { DomainDashboard } from '@/components/domain-dashboard';
 import { StatusPanel } from '@/components/status-panel';
 import { Icons } from '@/components/icons';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getDomains } from '@/services/domainService';
 import { checkDomainStatus } from '@/ai/flows/checkDomainStatus';
@@ -15,7 +15,24 @@ import { getTodosForDomains } from '@/services/todoService';
 import { AllTodosPanel } from '@/components/all-todos-panel';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from '@/components/ui/button';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, DollarSign, PiggyBank } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+const StatCard = ({ title, value, icon, className }: { title: string, value: string, icon: React.ElementType, className?: string }) => {
+    const Icon = icon;
+    return (
+        <Card className={cn("bg-card/50", className)}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">{title}</CardTitle>
+                <Icon className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">{value}</div>
+            </CardContent>
+        </Card>
+    );
+};
+
 
 export default function WebPage() {
   const [isSecretVisible, setSecretVisible] = React.useState(false);
@@ -106,6 +123,17 @@ export default function WebPage() {
     return hasTodos;
   }, [domainTodos]);
 
+  const rehlethadafStats = React.useMemo(() => {
+        const rehlethadafDomains = allDomains.filter(d => d.projects?.includes('rehlethadaf'));
+        const totalIncome = rehlethadafDomains.reduce((acc, domain) => acc + (Number(domain.renewalCostClient) || 0), 0);
+        const netProfit = rehlethadafDomains.reduce((acc, domain) => {
+            const clientCost = Number(domain.renewalCostClient) || 0;
+            const officeCost = Number(domain.renewalCostOffice) || 0;
+            return acc + (clientCost - officeCost);
+        }, 0);
+        return { totalIncome, netProfit };
+    }, [allDomains]);
+
 
   return (
     <>
@@ -116,7 +144,7 @@ export default function WebPage() {
       />
       <Link href="/" passHref>
         <div 
-          className="fixed bottom-0 left-0 h-8 w-8 cursor-pointer z-10 opacity-0"
+          className="fixed bottom-0 left-0 h-8 w-8 cursor-pointer z-10"
           title="العودة للصفحة الرئيسية"
         />
       </Link>
@@ -160,15 +188,33 @@ export default function WebPage() {
                   </TabsList>
                   <TabsContent value="rehlethadaf">
                     {isSecretVisible ? (
-                      <DomainDashboard 
-                        project="rehlethadaf"
-                        allDomains={allDomains}
-                        allTodos={domainTodos}
-                        domainStatuses={domainStatuses}
-                        loading={loading}
-                        onDomainChange={refreshDomainsAndStatuses} 
-                        onTodoChange={refreshTodos} 
-                      />
+                      <>
+                        <DomainDashboard 
+                          project="rehlethadaf"
+                          allDomains={allDomains}
+                          allTodos={domainTodos}
+                          domainStatuses={domainStatuses}
+                          loading={loading}
+                          onDomainChange={refreshDomainsAndStatuses} 
+                          onTodoChange={refreshTodos} 
+                        />
+                        <div className="p-4 border-t border-border mt-4">
+                            <div className="grid gap-4 md:grid-cols-2">
+                                <StatCard 
+                                    title="إجمالي الدخل السنوي" 
+                                    value={`$${rehlethadafStats.totalIncome.toFixed(2)}`} 
+                                    icon={DollarSign} 
+                                    className="border-green-500/30"
+                                />
+                                <StatCard 
+                                    title="صافي الربح السنوي" 
+                                    value={`$${rehlethadafStats.netProfit.toFixed(2)}`} 
+                                    icon={PiggyBank}
+                                    className="border-blue-500/30"
+                                />
+                            </div>
+                        </div>
+                      </>
                     ) : (
                       <div className="flex h-64 items-center justify-center text-muted-foreground">
                         
