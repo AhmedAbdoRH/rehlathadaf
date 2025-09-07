@@ -121,10 +121,7 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
 
     return (
         <Card className="bg-card/80 backdrop-blur-sm">
-            <CardHeader>
-                <CardTitle className="text-center text-lg">قائمة المهام المجمعة</CardTitle>
-            </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
                 {Object.keys(groupedTodos).length === 0 ? (
                     <p className="text-center text-muted-foreground py-4">لا توجد أي مهام في جميع المشاريع.</p>
                 ) : (
@@ -186,4 +183,3 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
         </Card>
     );
 }
-

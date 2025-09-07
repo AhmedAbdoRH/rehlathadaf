@@ -14,6 +14,8 @@ import Link from 'next/link';
 import { getTodosForDomains } from '@/services/todoService';
 import { AllTodosPanel } from '@/components/all-todos-panel';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Button } from '@/components/ui/button';
+import { ChevronDown } from 'lucide-react';
 
 export default function WebPage() {
   const [isSecretVisible, setSecretVisible] = React.useState(false);
@@ -46,7 +48,7 @@ export default function WebPage() {
         const todosByDomain = await getTodosForDomains(domainIds);
         const hasTodosMap: Record<string, boolean> = {};
         Object.keys(todosByDomain).forEach(domainId => {
-          hasTodosMap[domainId] = todosByDomain[domainId].length > 0;
+          hasTodosMap[domainId] = todosByDomain[domainId].some(todo => !todo.completed);
         });
         setDomainTodos(hasTodosMap);
       }
@@ -110,20 +112,23 @@ export default function WebPage() {
           </header>
 
           <Collapsible className="w-full mb-2">
-            <CollapsibleTrigger asChild>
-              <button type="button" className="w-full">
-                <StatusPanel domains={allDomains} domainStatuses={domainStatuses} domainTodos={domainTodos} />
-              </button>
-            </CollapsibleTrigger>
+            <div className="relative">
+              <StatusPanel domains={allDomains} domainStatuses={domainStatuses} domainTodos={domainTodos} />
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="icon" className="absolute bottom-[-10px] left-1/2 -translate-x-1/2 h-6 w-8 bg-card/80 backdrop-blur-sm border-border/60 border rounded-full hover:bg-muted/80">
+                  <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform data-[state=open]:rotate-180" />
+                </Button>
+              </CollapsibleTrigger>
+            </div>
             <CollapsibleContent>
-              <div className="mt-2">
+              <div className="mt-4">
                 <AllTodosPanel onUpdate={refreshDomains} />
               </div>
             </CollapsibleContent>
           </Collapsible>
 
 
-          <main>
+          <main className="mt-4">
             <Card className="shadow-lg bg-card">
               <CardContent className="p-0 pt-0">
                 <Tabs defaultValue="pova" className="w-full">
