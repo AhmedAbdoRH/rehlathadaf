@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Trash2 } from 'lucide-react';
-import { getTodos, addTodo, updateTodo, deleteTodo } from '@/services/todoService';
+import { addTodo, updateTodo, deleteTodo } from '@/services/todoService';
 import type { Todo } from '@/lib/types';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -35,19 +35,40 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
     const text = newTodo.trim();
     if (!text) return;
 
+    const tempId = `temp-${Date.now()}`;
+    const optimisticTodo: Todo = {
+      id: tempId,
+      domainId,
+      text,
+      completed: false,
+      createdAt: new Date().toISOString(),
+    };
+
+    // Optimistic update
+    setTodos(prevTodos => [optimisticTodo, ...prevTodos]);
+    setNewTodo('');
+
     try {
-      await addTodo({
+      const addedTodo = await addTodo({
         domainId,
         text,
         completed: false,
       });
-      setNewTodo('');
+
+      // Replace temporary todo with the real one from the server
+      setTodos(prevTodos => 
+        prevTodos.map(t => (t.id === tempId ? addedTodo : t))
+      );
+      
       toast({
         title: "نجاح",
         description: "تمت إضافة المهمة.",
       });
-      onUpdate(); // Notify parent component to re-fetch data
+
+      onUpdate(); // Notify parent to update global state (e.g., status panel)
     } catch (error) {
+       // Revert optimistic update on error
+      setTodos(prevTodos => prevTodos.filter(t => t.id !== tempId));
       console.error("Error adding todo:", error);
       toast({
         title: "خطأ",

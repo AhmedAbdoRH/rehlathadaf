@@ -12,7 +12,8 @@ import {
   where,
   orderBy,
   serverTimestamp,
-  Timestamp
+  Timestamp,
+  getDoc
 } from 'firebase/firestore';
 
 const todosCollectionRef = collection(db, 'todos');
@@ -67,10 +68,8 @@ export const addTodo = async (todo: Omit<Todo, 'id' | 'createdAt'>): Promise<Tod
     createdAt: serverTimestamp(),
   };
   const docRef = await addDoc(todosCollectionRef, newTodoData);
-  
-  // To return the full object, we need to make a "best guess" for the timestamp or re-fetch.
-  // For simplicity, we'll return it with the client-side date.
-  return { ...todo, id: docRef.id, createdAt: new Date().toISOString() };
+  const newDoc = await getDoc(docRef);
+  return todoFromDoc(newDoc);
 };
 
 export const updateTodo = async (id: string, updates: Partial<Omit<Todo, 'id'>>): Promise<void> => {
