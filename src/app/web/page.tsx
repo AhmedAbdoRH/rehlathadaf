@@ -11,12 +11,14 @@ import { getDomains } from '@/services/domainService';
 import { checkDomainStatus } from '@/ai/flows/checkDomainStatus';
 import type { Domain } from '@/lib/types';
 import Link from 'next/link';
+import { getTodosForDomains } from '@/services/todoService';
 
 export default function WebPage() {
   const [isSecretVisible, setSecretVisible] = React.useState(false);
   const [clickCount, setClickCount] = React.useState(0);
   const [allDomains, setAllDomains] = React.useState<Domain[]>([]);
   const [domainStatuses, setDomainStatuses] = React.useState<Record<string, 'checking' | 'online' | 'offline'>>({});
+  const [domainTodos, setDomainTodos] = React.useState<Record<string, boolean>>({});
   const [loading, setLoading] = React.useState(true);
 
   const handleSecretClick = () => {
@@ -27,51 +29,9 @@ export default function WebPage() {
     }
   };
 
-  // Load all domains and check their status
-  React.useEffect(() => {
-    const fetchDomainsAndStatuses = async () => {
-      try {
-        setLoading(true);
-        const domainsFromDb = await getDomains();
-        const domainsWithProject = domainsFromDb.map(d => ({
-          ...d,
-          projects: d.projects && d.projects.length > 0 ? d.projects as any[] : ['rehlethadaf']
-        }));
-        setAllDomains(domainsWithProject);
-
-        // Set all to checking initially
-        const initialStatuses: Record<string, 'checking' | 'online' | 'offline'> = {};
-        domainsWithProject.forEach(d => {
-            if (d.id) initialStatuses[d.id] = 'checking';
-        });
-        setDomainStatuses(initialStatuses);
-        
-        // Check statuses sequentially
-        for (const domain of domainsWithProject) {
-          if (domain.id) {
-            try {
-              const { isOnline } = await checkDomainStatus({ domainName: domain.domainName });
-              setDomainStatuses(prev => ({ ...prev, [domain.id!]: isOnline ? 'online' : 'offline' }));
-            } catch (e) {
-               setDomainStatuses(prev => ({ ...prev, [domain.id!]: 'offline' }));
-            }
-            // Add a small delay between checks for sequential effect
-            await new Promise(resolve => setTimeout(resolve, 200));
-          }
-        }
-
-      } catch (error) {
-        console.error("Error fetching domains:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchDomainsAndStatuses();
-  }, []);
-
-  // Function to refresh domains and statuses
   const refreshDomains = React.useCallback(async () => {
     try {
+      setLoading(true);
       const domainsFromDb = await getDomains();
       const domainsWithProject = domainsFromDb.map(d => ({
         ...d,
@@ -79,30 +39,46 @@ export default function WebPage() {
       }));
       setAllDomains(domainsWithProject);
 
+      const domainIds = domainsWithProject.map(d => d.id).filter((id): id is string => !!id);
+      if (domainIds.length > 0) {
+        const todosByDomain = await getTodosForDomains(domainIds);
+        const hasTodosMap: Record<string, boolean> = {};
+        Object.keys(todosByDomain).forEach(domainId => {
+          hasTodosMap[domainId] = todosByDomain[domainId].length > 0;
+        });
+        setDomainTodos(hasTodosMap);
+      }
+
       // Set all to checking initially
       const initialStatuses: Record<string, 'checking' | 'online' | 'offline'> = {};
       domainsWithProject.forEach(d => {
-          if (d.id) initialStatuses[d.id] = 'checking';
+        if (d.id) initialStatuses[d.id] = 'checking';
       });
       setDomainStatuses(initialStatuses);
-      
-      // Check statuses sequentially
+
+      // Check statuses
       for (const domain of domainsWithProject) {
         if (domain.id) {
           try {
             const { isOnline } = await checkDomainStatus({ domainName: domain.domainName });
             setDomainStatuses(prev => ({ ...prev, [domain.id!]: isOnline ? 'online' : 'offline' }));
           } catch (e) {
-             setDomainStatuses(prev => ({ ...prev, [domain.id!]: 'offline' }));
+            setDomainStatuses(prev => ({ ...prev, [domain.id!]: 'offline' }));
           }
-          // Add a small delay between checks for sequential effect
-          await new Promise(resolve => setTimeout(resolve, 200));
         }
       }
     } catch (error) {
       console.error("Error refreshing domains:", error);
+    } finally {
+      setLoading(false);
     }
   }, []);
+
+  // Initial load
+  React.useEffect(() => {
+    refreshDomains();
+  }, [refreshDomains]);
+
 
   return (
     <>
@@ -132,7 +108,7 @@ export default function WebPage() {
           </header>
 
           <div className="w-full mb-2">
-            <StatusPanel domains={allDomains} domainStatuses={domainStatuses} />
+            <StatusPanel domains={allDomains} domainStatuses={domainStatuses} domainTodos={domainTodos} />
           </div>
 
           <main>

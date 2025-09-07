@@ -172,8 +172,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
     };
     
     try {
-      const addedDomain = await addDomain(newDomainEntry);
-      setDomains(prevDomains => [...prevDomains, addedDomain].sort((a, b) => differenceInDays(parseISO(a.renewalDate as string), new Date()) - differenceInDays(parseISO(b.renewalDate as string), new Date())));
+      await addDomain(newDomainEntry);
       toast({
           title: "تمت إضافة النطاق",
           description: `تمت إضافة ${newDomain.domainName} بنجاح.`,
@@ -188,7 +187,8 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
           renewalCostPova: '',
           projects: [project],
       });
-      // Refresh the status panel
+      // Refresh the data
+      fetchDomainsAndData();
       if (onDomainChange) {
         onDomainChange();
       }
@@ -208,13 +208,13 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
 
     try {
       await deleteDomain(domainId);
-      setDomains(domains.filter(d => d.id !== domainId));
       toast({
           title: "تم حذف النطاق",
           description: `تم حذف ${domainToDelete.domainName} بنجاح.`,
           variant: "destructive"
       });
-      // Refresh the status panel
+      // Refresh the data
+      fetchDomainsAndData();
       if (onDomainChange) {
         onDomainChange();
       }
@@ -255,13 +255,17 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
       };
 
       await updateDomain(id, finalData);
-      setDomains(prevDomains => prevDomains.map(d => d.id === id ? { ...d, ...domainToEdit, renewalDate: finalData.renewalDate, renewalCostClient: finalData.renewalCostClient, renewalCostOffice: finalData.renewalCostOffice, renewalCostPova: finalData.renewalCostPova } : d).sort((a, b) => differenceInDays(parseISO(a.renewalDate as string), new Date()) - differenceInDays(parseISO(b.renewalDate as string), new Date())));
       toast({
         title: "تم تحديث النطاق",
         description: `تم تحديث ${domainToEdit.domainName} بنجاح.`,
       });
       setEditDomainOpen(false);
       setDomainToEdit(null);
+      // Refresh the data
+      fetchDomainsAndData();
+      if (onDomainChange) {
+        onDomainChange();
+      }
     } catch (error) {
       console.error("Error updating domain:", error);
       toast({
@@ -281,15 +285,12 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
 
     try {
         await updateDomain(domain.id, { renewalDate: nextRenewalDateISO });
-        setDomains(prevDomains =>
-            prevDomains.map(d =>
-                d.id === domain.id ? { ...d, renewalDate: nextRenewalDateISO } : d
-            ).sort((a, b) => differenceInDays(parseISO(a.renewalDate as string), new Date()) - differenceInDays(parseISO(b.renewalDate as string), new Date()))
-        );
         toast({
             title: "تم تجديد النطاق",
             description: `تم تحديث تاريخ تجديد ${domain.domainName} إلى ${format(nextRenewalDate, 'dd/MM/yyyy')}.`,
         });
+         // Refresh the data
+        fetchDomainsAndData();
     } catch (error) {
         console.error("Error renewing domain:", error);
         toast({
@@ -329,13 +330,14 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
 
     try {
         await updateDomain(editingDataSheetDomain.id, { dataSheet: editingDataSheetDomain.dataSheet });
-        setDomains(prevDomains => prevDomains.map(d => d.id === editingDataSheetDomain.id ? editingDataSheetDomain : d));
         toast({
             title: "تم حفظ شيت البيانات",
             description: `تم تحديث شيت بيانات ${editingDataSheetDomain.domainName}.`,
         });
         setDataSheetOpen(false);
         setEditingDataSheetDomain(null);
+        // Refresh the data
+        fetchDomainsAndData();
     } catch (error) {
         console.error("Error saving data sheet:", error);
         toast({
@@ -419,6 +421,9 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
   const handleTodoUpdate = () => {
     // Re-fetch all data to ensure UI is consistent
     fetchDomainsAndData();
+    if(onDomainChange) {
+      onDomainChange();
+    }
   };
 
   if (loading) {
@@ -439,8 +444,9 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
           <TableBody>
             {filteredDomains.map(domain => (
              <Collapsible asChild key={domain.id}>
+              <>
               <TableRow>
-                <TableCell colSpan={project === 'pova' ? 5 : 4}>
+                <TableCell colSpan={project === 'pova' ? 6 : 5}>
                   <div className='flex items-start'>
                     <div className='flex-grow'>
                       <div className="flex items-center gap-2">
@@ -573,17 +579,22 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                     </CollapsibleTrigger>
                   </div>
                   </div>
-                  <CollapsibleContent asChild>
-                    <div className="p-4 bg-muted/50">
-                      <TodoList 
-                        domainId={domain.id!} 
-                        initialTodos={allTodos[domain.id!] || []}
-                        onUpdate={handleTodoUpdate}
-                      />
-                    </div>
-                  </CollapsibleContent>
                 </TableCell>
               </TableRow>
+              <CollapsibleContent asChild>
+                <TableRow>
+                  <TableCell colSpan={project === 'pova' ? 6 : 5} className="p-0">
+                    <div className="p-4 bg-muted/50">
+                        <TodoList 
+                          domainId={domain.id!} 
+                          initialTodos={allTodos[domain.id!] || []}
+                          onUpdate={handleTodoUpdate}
+                        />
+                      </div>
+                  </TableCell>
+                </TableRow>
+              </CollapsibleContent>
+              </>
             </Collapsible>
             ))}
           </TableBody>
@@ -1012,9 +1023,3 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
     </>
   );
 }
-
-    
-
-    
-
-    
