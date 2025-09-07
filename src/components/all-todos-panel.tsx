@@ -47,21 +47,34 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
 
     const handleToggleTodo = async (todo: Todo) => {
         if (!todo.id) return;
-        try {
-            const updates = { completed: !todo.completed };
-            await updateTodo(todo.id, updates);
-            // Optimistic update
-            setGroupedTodos(prev => {
-                const newGroups = {...prev};
-                for (const domainName in newGroups) {
-                    newGroups[domainName] = newGroups[domainName].map(t => 
-                        t.id === todo.id ? {...t, ...updates} : t
-                    );
+        
+        // Optimistic update
+        const originalGroupedTodos = groupedTodos;
+        const newGroups = {...originalGroupedTodos};
+        let domainNameForUpdate: string | null = null;
+        for (const domainName in newGroups) {
+            const todoIndex = newGroups[domainName].findIndex(t => t.id === todo.id);
+            if (todoIndex > -1) {
+                domainNameForUpdate = domainName;
+                newGroups[domainName] = newGroups[domainName].map(t =>
+                    t.id === todo.id ? {...t, completed: !t.completed} : t
+                );
+                // Filter out the completed todo from the uncompleted list
+                newGroups[domainName] = newGroups[domainName].filter(t => !t.completed);
+                 if (newGroups[domainName].length === 0) {
+                    delete newGroups[domainName];
                 }
-                return newGroups;
-            });
-            onUpdate(); 
+                break;
+            }
+        }
+        setGroupedTodos(newGroups);
+        onUpdate();
+
+        try {
+            await updateTodo(todo.id, { completed: !todo.completed });
         } catch (error) {
+            setGroupedTodos(originalGroupedTodos); // Revert on error
+            onUpdate(); // Revert state in parent too
             toast({
                 title: "خطأ",
                 description: "فشل في تحديث المهمة.",
@@ -71,6 +84,22 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
     };
 
     const handleDeleteTodo = async (todoId: string) => {
+         // Optimistic update
+        const originalGroupedTodos = groupedTodos;
+        const newGroups = {...originalGroupedTodos};
+        for (const domainName in newGroups) {
+            const initialLength = newGroups[domainName].length;
+            newGroups[domainName] = newGroups[domainName].filter(t => t.id !== todoId);
+            if (newGroups[domainName].length !== initialLength) {
+                if (newGroups[domainName].length === 0) {
+                    delete newGroups[domainName];
+                }
+                break; 
+            }
+        }
+        setGroupedTodos(newGroups);
+        onUpdate(); 
+        
         try {
             await deleteTodo(todoId);
             toast({
@@ -78,19 +107,9 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
                 description: "تم حذف المهمة.",
                 variant: "destructive"
             });
-             // Optimistic update
-            setGroupedTodos(prev => {
-                const newGroups = {...prev};
-                for (const domainName in newGroups) {
-                    newGroups[domainName] = newGroups[domainName].filter(t => t.id !== todoId);
-                    if (newGroups[domainName].length === 0) {
-                        delete newGroups[domainName];
-                    }
-                }
-                return newGroups;
-            });
-            onUpdate();
         } catch (error) {
+            setGroupedTodos(originalGroupedTodos); // Revert on error
+            onUpdate(); // Revert state in parent too
             toast({
                 title: "خطأ",
                 description: "فشل في حذف المهمة.",
@@ -111,7 +130,7 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
     }
 
     const uncompletedDomains = Object.keys(groupedTodos).filter(domainName => 
-        groupedTodos[domainName].some(todo => !todo.completed)
+        groupedTodos[domainName] && groupedTodos[domainName].some(todo => !todo.completed)
     );
 
     return (

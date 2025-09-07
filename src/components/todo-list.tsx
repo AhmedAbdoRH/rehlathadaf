@@ -54,12 +54,10 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
         text,
         completed: false,
       });
-
       // Replace temporary todo with the real one from the server
       setTodos(prevTodos => 
         prevTodos.map(t => (t.id === tempId ? addedTodo : t))
       );
-      
       onUpdate();
     } catch (error) {
        // Revert optimistic update on error
@@ -81,13 +79,15 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
     setTodos(prev => 
       prev.filter(t => t.id !== todoToToggle.id)
     );
+    onUpdate();
   
     try {
       await updateTodo(todoToToggle.id, { completed: !todoToToggle.completed });
-      onUpdate();
+      // No need to call onUpdate() again unless there is a success state to show
     } catch (error) {
       // Revert on error
       setTodos(originalTodos);
+      onUpdate();
       console.error("Error updating todo:", error);
       toast({
         title: "خطأ",
@@ -103,6 +103,7 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
     // Optimistic update
     const originalTodos = todos;
     setTodos(prev => prev.filter(t => t.id !== todoId));
+    onUpdate();
   
     try {
       await deleteTodo(todoId);
@@ -111,10 +112,11 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
         description: "تم حذف المهمة.",
         variant: "destructive"
       });
-      onUpdate();
+      // No need to call onUpdate() again on success, it's already updated
     } catch (error) {
       // Revert on error
       setTodos(originalTodos);
+      onUpdate();
       console.error("Error deleting todo:", error);
       toast({
         title: "خطأ",

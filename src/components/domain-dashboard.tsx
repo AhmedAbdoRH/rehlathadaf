@@ -55,7 +55,7 @@ const projectLabels: Record<Project, string> = {
 const projectOptions: Project[] = ['rehlethadaf', 'pova', 'other'];
 
 
-export function DomainDashboard({ project, onDomainChange }: { project: Project; onDomainChange?: () => void }) {
+export function DomainDashboard({ project, onDomainChange, onTodoChange }: { project: Project; onDomainChange?: () => void, onTodoChange?: () => void }) {
   const [domains, setDomains] = React.useState<Domain[]>([]);
   const [allTodos, setAllTodos] = React.useState<Record<string, Todo[]>>({});
   const [loading, setLoading] = React.useState(true);
@@ -396,7 +396,8 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
 
   const renderStatusDot = (domainId: string) => {
     const status = domainStatuses[domainId];
-    const hasTodos = allTodos[domainId] && allTodos[domainId].some(t => !t.completed);
+    const todosForDomain = allTodos[domainId] || [];
+    const hasTodos = todosForDomain.some(t => !t.completed);
 
     if (hasTodos) {
       return <div className="h-2 w-2 rounded-full bg-blue-500 shadow-[0_0_8px_2px] shadow-blue-500/60 animate-pulse" title="يحتوي على مهام"></div>;
@@ -418,13 +419,16 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
   }
 
   const handleTodoUpdate = async (domainId: string) => {
+    // This function is called from TodoList on any change.
+    // 1. Refetch todos for the specific domain to update the list visually
     const updatedTodos = await getTodos(domainId);
     setAllTodos(prev => ({
       ...prev,
       [domainId]: updatedTodos,
     }));
-    if (onDomainChange) {
-      onDomainChange();
+    // 2. Notify the parent page to update the global status indicators
+    if (onTodoChange) {
+      onTodoChange();
     }
   };
 
@@ -1025,5 +1029,3 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
     </>
   );
 }
-
-    

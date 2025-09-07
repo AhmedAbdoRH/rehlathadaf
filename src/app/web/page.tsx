@@ -33,6 +33,24 @@ export default function WebPage() {
     }
   };
 
+  const refreshTodos = React.useCallback(async () => {
+    try {
+      const domainIds = allDomains.map(d => d.id).filter((id): id is string => !!id);
+      if (domainIds.length > 0) {
+        const todosByDomain = await getTodosForDomains(domainIds);
+        const hasTodosMap: Record<string, boolean> = {};
+        Object.keys(todosByDomain).forEach(domainId => {
+          hasTodosMap[domainId] = todosByDomain[domainId].some(todo => !todo.completed);
+        });
+        setDomainTodos(hasTodosMap);
+      } else {
+        setDomainTodos({});
+      }
+    } catch (error) {
+      console.error("Error refreshing todos:", error);
+    }
+  }, [allDomains]);
+
   const refreshDomainsAndStatuses = React.useCallback(async () => {
     try {
       setLoading(true);
@@ -49,6 +67,20 @@ export default function WebPage() {
         if (d.id) initialStatuses[d.id] = 'checking';
       });
       setDomainStatuses(initialStatuses);
+      
+      // Refresh todos in parallel
+      const domainIds = domainsWithProject.map(d => d.id).filter((id): id is string => !!id);
+      if (domainIds.length > 0) {
+          const todosByDomain = await getTodosForDomains(domainIds);
+          const hasTodosMap: Record<string, boolean> = {};
+          Object.keys(todosByDomain).forEach(domainId => {
+              hasTodosMap[domainId] = todosByDomain[domainId].some(todo => !todo.completed);
+          });
+          setDomainTodos(hasTodosMap);
+      } else {
+          setDomainTodos({});
+      }
+
 
       // Check statuses
       for (const domain of domainsWithProject) {
@@ -68,34 +100,17 @@ export default function WebPage() {
     }
   }, []);
 
-  const refreshTodos = React.useCallback(async () => {
-    try {
-      const domainIds = allDomains.map(d => d.id).filter((id): id is string => !!id);
-      if (domainIds.length > 0) {
-        const todosByDomain = await getTodosForDomains(domainIds);
-        const hasTodosMap: Record<string, boolean> = {};
-        Object.keys(todosByDomain).forEach(domainId => {
-          hasTodosMap[domainId] = todosByDomain[domainId].some(todo => !todo.completed);
-        });
-        setDomainTodos(hasTodosMap);
-      } else {
-        setDomainTodos({});
-      }
-    } catch (error) {
-      console.error("Error refreshing todos:", error);
-    }
-  }, [allDomains]);
-
-
   // Initial load
   React.useEffect(() => {
     refreshDomainsAndStatuses();
   }, [refreshDomainsAndStatuses]);
   
-  // Refresh todos whenever domains change or on demand
+  // Refresh todos whenever domains change (this effect is for the initial load)
   React.useEffect(() => {
-    refreshTodos();
-  }, [refreshTodos]);
+    if(allDomains.length > 0) {
+      refreshTodos();
+    }
+  }, [allDomains, refreshTodos]);
 
 
   return (
@@ -151,7 +166,7 @@ export default function WebPage() {
                   </TabsList>
                   <TabsContent value="rehlethadaf">
                     {isSecretVisible ? (
-                      <DomainDashboard project="rehlethadaf" onDomainChange={refreshDomainsAndStatuses} />
+                      <DomainDashboard project="rehlethadaf" onDomainChange={refreshDomainsAndStatuses} onTodoChange={refreshTodos} />
                     ) : (
                       <div className="flex h-64 items-center justify-center text-muted-foreground">
                         
@@ -159,11 +174,11 @@ export default function WebPage() {
                     )}
                   </TabsContent>
                   <TabsContent value="pova">
-                    <DomainDashboard project="pova" onDomainChange={refreshDomainsAndStatuses} />
+                    <DomainDashboard project="pova" onDomainChange={refreshDomainsAndStatuses} onTodoChange={refreshTodos} />
                   </TabsContent>
                   <TabsContent value="other">
                      {isSecretVisible ? (
-                      <DomainDashboard project="other" onDomainChange={refreshDomainsAndStatuses} />
+                      <DomainDashboard project="other" onDomainChange={refreshDomainsAndStatuses} onTodoChange={refreshTodos} />
                     ) : (
                       <div className="flex h-64 items-center justify-center text-muted-foreground">
                       </div>
