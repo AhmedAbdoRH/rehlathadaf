@@ -91,7 +91,6 @@ export default function Home() {
               />
           </div>
         )}
-        <Link href="/admin" className="hidden">Admin</Link>
       </div>
     </div>
   );
