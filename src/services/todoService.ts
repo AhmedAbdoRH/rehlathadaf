@@ -34,6 +34,31 @@ export const getTodos = async (domainId: string): Promise<Todo[]> => {
   return data.docs.map(todoFromDoc);
 };
 
+export const getTodosForDomains = async (domainIds: string[]): Promise<Record<string, Todo[]>> => {
+  if (domainIds.length === 0) {
+    return {};
+  }
+  const q = query(todosCollectionRef, where('domainId', 'in', domainIds));
+  const data = await getDocs(q);
+  const todos = data.docs.map(todoFromDoc);
+
+  const todosByDomain: Record<string, Todo[]> = {};
+  todos.forEach(todo => {
+    if (!todosByDomain[todo.domainId]) {
+      todosByDomain[todo.domainId] = [];
+    }
+    todosByDomain[todo.domainId].push(todo);
+  });
+  
+  // Sort todos within each domain
+  Object.keys(todosByDomain).forEach(key => {
+    todosByDomain[key].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  });
+
+  return todosByDomain;
+};
+
+
 export const addTodo = async (todo: Omit<Todo, 'id' | 'createdAt'>): Promise<Todo> => {
   const newTodoData = {
     ...todo,

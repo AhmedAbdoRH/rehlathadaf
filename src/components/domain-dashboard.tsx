@@ -25,7 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import type { Domain, Project } from '@/lib/types';
+import type { Domain, Project, Todo } from '@/lib/types';
 import { format, parseISO, formatISO, differenceInDays, subYears, addYears } from 'date-fns';
 import { Plus, Trash2, Calendar as CalendarIcon, Loader2, Pencil, Check, FileText, CalendarPlus, ChevronDown } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
@@ -39,6 +39,7 @@ import { Checkbox } from './ui/checkbox';
 import { checkDomainStatus } from '@/ai/flows/checkDomainStatus';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { TodoList } from './todo-list';
+import { getTodosForDomains } from '@/services/todoService';
 
 
 const USD_TO_EGP_RATE_OFFICE = 47.5; // سعر الصرف لمصاريف المكتب
@@ -57,6 +58,7 @@ const projectOptions: Project[] = ['rehlethadaf', 'pova', 'other'];
 
 export function DomainDashboard({ project, onDomainChange }: { project: Project; onDomainChange?: () => void }) {
   const [domains, setDomains] = React.useState<Domain[]>([]);
+  const [allTodos, setAllTodos] = React.useState<Record<string, Todo[]>>({});
   const [loading, setLoading] = React.useState(true);
   const [isAddDomainOpen, setAddDomainOpen] = React.useState(false);
   const [isEditDomainOpen, setEditDomainOpen] = React.useState(false);
@@ -67,50 +69,57 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
   const [domainStatuses, setDomainStatuses] = React.useState<Record<string, DomainStatus>>({});
   const { toast } = useToast();
 
-  React.useEffect(() => {
-    const fetchDomainsAndStatuses = async () => {
-      try {
-        setLoading(true);
-        const domainsFromDb = await getDomains();
-        const domainsWithProject = domainsFromDb.map(d => ({
-          ...d,
-          projects: d.projects && d.projects.length > 0 ? d.projects as Project[] : ['rehlethadaf' as Project]
-        }));
-        const sortedDomains = domainsWithProject.sort((a, b) => differenceInDays(parseISO(a.renewalDate as string), new Date()) - differenceInDays(parseISO(b.renewalDate as string), new Date()));
-        setDomains(sortedDomains);
-
-        // Set all to checking initially
-        const initialStatuses: Record<string, DomainStatus> = {};
-        sortedDomains.forEach(d => {
-            if (d.id) initialStatuses[d.id] = 'checking';
-        });
-        setDomainStatuses(initialStatuses);
-        
-        // Check statuses
-        sortedDomains.forEach(async (domain) => {
-          if (domain.id) {
-            try {
-              const { isOnline } = await checkDomainStatus({ domainName: domain.domainName });
-              setDomainStatuses(prev => ({ ...prev, [domain.id!]: isOnline ? 'online' : 'offline' }));
-            } catch (e) {
-               setDomainStatuses(prev => ({ ...prev, [domain.id!]: 'offline' }));
-            }
-          }
-        });
-
-      } catch (error) {
-        console.error("Error fetching domains:", error);
-        toast({
-          title: "خطأ",
-          description: "فشل في تحميل النطاقات من قاعدة البيانات.",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
+  const fetchDomainsAndData = React.useCallback(async () => {
+    try {
+      setLoading(true);
+      const domainsFromDb = await getDomains();
+      const domainsWithProject = domainsFromDb.map(d => ({
+        ...d,
+        projects: d.projects && d.projects.length > 0 ? d.projects as Project[] : ['rehlethadaf' as Project]
+      }));
+      const sortedDomains = domainsWithProject.sort((a, b) => differenceInDays(parseISO(a.renewalDate as string), new Date()) - differenceInDays(parseISO(b.renewalDate as string), new Date()));
+      setDomains(sortedDomains);
+      
+      const domainIds = sortedDomains.map(d => d.id).filter((id): id is string => !!id);
+      if (domainIds.length > 0) {
+        const todosByDomain = await getTodosForDomains(domainIds);
+        setAllTodos(todosByDomain);
       }
-    };
-    fetchDomainsAndStatuses();
+
+      // Set all to checking initially
+      const initialStatuses: Record<string, DomainStatus> = {};
+      sortedDomains.forEach(d => {
+          if (d.id) initialStatuses[d.id] = 'checking';
+      });
+      setDomainStatuses(initialStatuses);
+      
+      // Check statuses
+      for (const domain of sortedDomains) {
+        if (domain.id) {
+          try {
+            const { isOnline } = await checkDomainStatus({ domainName: domain.domainName });
+            setDomainStatuses(prev => ({ ...prev, [domain.id!]: isOnline ? 'online' : 'offline' }));
+          } catch (e) {
+             setDomainStatuses(prev => ({ ...prev, [domain.id!]: 'offline' }));
+          }
+        }
+      }
+
+    } catch (error) {
+      console.error("Error fetching domains and todos:", error);
+      toast({
+        title: "خطأ",
+        description: "فشل في تحميل البيانات من قاعدة البيانات.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   }, [toast]);
+  
+  React.useEffect(() => {
+    fetchDomainsAndData();
+  }, [fetchDomainsAndData]);
 
   const [newDomain, setNewDomain] = React.useState<{
     domainName: string;
@@ -386,6 +395,11 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
 
   const renderStatusDot = (domainId: string) => {
     const status = domainStatuses[domainId];
+    const hasTodos = allTodos[domainId] && allTodos[domainId].length > 0;
+
+    if (hasTodos) {
+      return <div className="h-2 w-2 rounded-full bg-blue-500" title="يحتوي على مهام"></div>;
+    }
     if (status === 'checking') {
       return <div className="h-2 w-2 rounded-full bg-yellow-500 animate-pulse" title="يتم التحقق..."></div>;
     }
@@ -401,6 +415,11 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
   const getUrl = (domainName: string) => {
     return domainName.startsWith('http') ? domainName : `https://${domainName}`;
   }
+
+  const handleTodoUpdate = () => {
+    // Re-fetch all data to ensure UI is consistent
+    fetchDomainsAndData();
+  };
 
   if (loading) {
     return (
@@ -556,7 +575,11 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                   </div>
                   <CollapsibleContent asChild>
                     <div className="p-4 bg-muted/50">
-                      <TodoList domainId={domain.id!} />
+                      <TodoList 
+                        domainId={domain.id!} 
+                        initialTodos={allTodos[domain.id!] || []}
+                        onUpdate={handleTodoUpdate}
+                      />
                     </div>
                   </CollapsibleContent>
                 </TableCell>
@@ -711,7 +734,11 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <div className="p-4 bg-muted/30 border-t">
-                  <TodoList domainId={domain.id!} />
+                  <TodoList 
+                    domainId={domain.id!}
+                    initialTodos={allTodos[domain.id!] || []}
+                    onUpdate={handleTodoUpdate}
+                   />
                 </div>
               </CollapsibleContent>
             </Card>

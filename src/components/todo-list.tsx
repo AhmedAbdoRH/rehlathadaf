@@ -12,32 +12,23 @@ import type { Todo } from '@/lib/types';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
-export function TodoList({ domainId }: { domainId: string }) {
-  const [todos, setTodos] = React.useState<Todo[]>([]);
-  const [newTodo, setNewTodo] = React.useState('');
-  const [loading, setLoading] = React.useState(true);
-  const { toast } = useToast();
+interface TodoListProps {
+  domainId: string;
+  initialTodos: Todo[];
+  onUpdate: () => void;
+}
 
+export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
+  const [todos, setTodos] = React.useState<Todo[]>(initialTodos);
+  const [newTodo, setNewTodo] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+  const { toast } = useToast();
+  
+  // Sync state if initialTodos prop changes
   React.useEffect(() => {
-    const fetchTodos = async () => {
-      try {
-        setLoading(true);
-        if (!domainId) return;
-        const fetchedTodos = await getTodos(domainId);
-        setTodos(fetchedTodos);
-      } catch (error) {
-        console.error("Error fetching todos:", error);
-        toast({
-          title: "خطأ",
-          description: "فشل في تحميل قائمة المهام.",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchTodos();
-  }, [domainId, toast]);
+    setTodos(initialTodos);
+  }, [initialTodos]);
+
 
   const handleAddTodo = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,17 +36,17 @@ export function TodoList({ domainId }: { domainId: string }) {
     if (!text) return;
 
     try {
-      const addedTodo = await addTodo({
+      await addTodo({
         domainId,
         text,
         completed: false,
       });
-      setTodos(prev => [addedTodo, ...prev]);
       setNewTodo('');
       toast({
         title: "نجاح",
         description: "تمت إضافة المهمة.",
       });
+      onUpdate(); // Notify parent component to re-fetch data
     } catch (error) {
       console.error("Error adding todo:", error);
       toast({
@@ -71,7 +62,7 @@ export function TodoList({ domainId }: { domainId: string }) {
     try {
       const updates = { completed: !todo.completed };
       await updateTodo(todo.id, updates);
-      setTodos(prev => prev.map(t => (t.id === todo.id ? { ...t, ...updates } : t)));
+      onUpdate(); // Notify parent component to re-fetch data
     } catch (error) {
        console.error("Error updating todo:", error);
       toast({
@@ -85,12 +76,12 @@ export function TodoList({ domainId }: { domainId: string }) {
   const handleDeleteTodo = async (todoId: string) => {
     try {
       await deleteTodo(todoId);
-      setTodos(prev => prev.filter(t => t.id !== todoId));
       toast({
         title: "نجاح",
         description: "تم حذف المهمة.",
         variant: "destructive"
       });
+      onUpdate(); // Notify parent component to re-fetch data
     } catch (error) {
       console.error("Error deleting todo:", error);
        toast({
@@ -103,7 +94,6 @@ export function TodoList({ domainId }: { domainId: string }) {
 
   return (
     <div className="space-y-4">
-      <h4 className="font-semibold text-lg text-foreground">قائمة المهام</h4>
       <form onSubmit={handleAddTodo} className="flex gap-2">
         <Input
           type="text"
