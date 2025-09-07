@@ -763,7 +763,7 @@ export function DomainDashboard({
                                     )}
                                 >
                                     <CalendarIcon className="ml-2 h-4 w-4" />
-                                    {newDomain.renewalDate ? format(newDomain.renewalDate, "dd/MM/yyyy") : <span>اختر تاريخًا</span>}
+                                    {newDomain.renewalDate ? format(newDomain.renewalDate, "PPP") : <span>اختر تاريخًا</span>}
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0">
@@ -866,7 +866,7 @@ export function DomainDashboard({
                         )}
                       >
                         <CalendarIcon className="ml-2 h-4 w-4" />
-                        {domainToEdit.renewalDate ? format(domainToEdit.renewalDate as Date, "dd/MM/yyyy") : <span>اختر تاريخًا</span>}
+                        {domainToEdit.renewalDate ? format(domainToEdit.renewalDate as Date, "PPP") : <span>اختر تاريخًا</span>}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
