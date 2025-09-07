@@ -37,6 +37,7 @@ const StatCard = ({ title, value, icon, className }: { title: string, value: str
 export default function WebPage() {
   const [isSecretVisible, setSecretVisible] = React.useState(false);
   const [clickCount, setClickCount] = React.useState(0);
+  const [activeTab, setActiveTab] = React.useState('pova');
   const [allDomains, setAllDomains] = React.useState<Domain[]>([]);
   const [domainStatuses, setDomainStatuses] = React.useState<Record<string, 'checking' | 'online' | 'offline'>>({});
   const [domainTodos, setDomainTodos] = React.useState<Record<string, Todo[]>>({});
@@ -47,6 +48,7 @@ export default function WebPage() {
     setClickCount(newClickCount);
     if (newClickCount >= 2) {
       setSecretVisible(true);
+      setActiveTab('rehlethadaf');
     }
   };
   
@@ -180,7 +182,7 @@ export default function WebPage() {
           <main className="mt-4">
             <Card className="shadow-lg bg-card">
               <CardContent className="p-0 pt-0">
-                <Tabs defaultValue="pova" className="w-full">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="rehlethadaf">رحلة هدف</TabsTrigger>
                     <TabsTrigger value="pova">Pova</TabsTrigger>
