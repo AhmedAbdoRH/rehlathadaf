@@ -5,7 +5,7 @@ import Link from 'next/link';
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
-import { Banknote, HandCoins, LayoutGrid, Globe } from 'lucide-react';
+import { Banknote, HandCoins, Globe } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,15 +15,13 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 
 const NavCard = ({ href, icon: Icon, title, newTab = false }: { href: string, icon: React.ElementType, title: string, newTab?: boolean }) => (
-  <Link href={href} passHref legacyBehavior>
-    <a target={newTab ? "_blank" : "_self"} rel={newTab ? "noopener noreferrer" : ""}>
+  <Link href={href} target={newTab ? "_blank" : "_self"} rel={newTab ? "noopener noreferrer" : ""}>
       <Card className="bg-card hover:bg-muted/50 transition-all duration-200 ease-in-out transform hover:-translate-y-1 hover:shadow-xl w-48 h-48 flex flex-col items-center justify-center text-center cursor-pointer group">
         <CardContent className="flex flex-col items-center justify-center p-6">
           <Icon className="h-16 w-16 text-red-500/90 mb-4 transition-transform duration-300 group-hover:scale-110" />
           <h3 className="text-lg font-semibold text-foreground">{title}</h3>
         </CardContent>
       </Card>
-    </a>
   </Link>
 );
 
