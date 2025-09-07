@@ -201,15 +201,15 @@ export default function WebPage() {
                         <div className="p-4 border-t border-border mt-4">
                             <div className="grid gap-4 md:grid-cols-2">
                                 <StatCard 
-                                    title="إجمالي الدخل السنوي" 
-                                    value={`$${rehlethadafStats.totalIncome.toFixed(2)}`} 
-                                    icon={DollarSign} 
+                                    title="صافي الربح السنوي" 
+                                    value={`$${rehlethadafStats.netProfit.toFixed(2)}`} 
+                                    icon={DollarSign}
                                     className="border-green-500/30"
                                 />
                                 <StatCard 
-                                    title="صافي الربح السنوي" 
-                                    value={`$${rehlethadafStats.netProfit.toFixed(2)}`} 
-                                    icon={PiggyBank}
+                                    title="إجمالي الدخل السنوي" 
+                                    value={`$${rehlethadafStats.totalIncome.toFixed(2)}`} 
+                                    icon={PiggyBank} 
                                     className="border-blue-500/30"
                                 />
                             </div>
