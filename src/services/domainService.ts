@@ -1,6 +1,21 @@
-import { db } from '@/lib/firebase';
+import { initializeApp, getApp, getApps } from 'firebase/app';
+import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import type { Domain } from '@/lib/types';
-import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc, query, where } from 'firebase/firestore';
+
+// This is the correct configuration for the domain service
+const firebaseConfig = {
+  "projectId": "domainview",
+  "appId": "1:226934922867:web:db492564c92b9b95f79406",
+  "storageBucket": "domainview.firebasestorage.app",
+  "apiKey": "AIzaSyA-AuKkPZiuQdA-NIPjObheWabwnrqwG7g",
+  "authDomain": "domainview.firebaseapp.com",
+  "messagingSenderId": "226934922867"
+};
+
+
+// Initialize Firebase
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const db = getFirestore(app);
 
 const domainsCollectionRef = collection(db, 'domains');
 
