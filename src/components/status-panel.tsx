@@ -23,8 +23,12 @@ export function StatusPanel({ domains, domainStatuses, domainTodos }: StatusPane
          <div 
             className={cn(
               baseClasses,
-              "bg-blue-500 shadow-blue-500/60"
+              "bg-blue-500 shadow-blue-500/60 animate-pulse"
             )}
+            style={{ 
+              animationDuration: '2.5s',
+              animationDelay: `${index * 100}ms`
+            }}
           />
       );
     }
