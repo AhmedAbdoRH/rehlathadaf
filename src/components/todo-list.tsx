@@ -1,0 +1,155 @@
+
+"use client";
+
+import * as React from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useToast } from "@/hooks/use-toast";
+import { Loader2, Plus, Trash2 } from 'lucide-react';
+import { getTodos, addTodo, updateTodo, deleteTodo } from '@/services/todoService';
+import type { Todo } from '@/lib/types';
+import { formatDistanceToNow } from 'date-fns';
+import { ar } from 'date-fns/locale';
+
+export function TodoList({ domainId }: { domainId: string }) {
+  const [todos, setTodos] = React.useState<Todo[]>([]);
+  const [newTodo, setNewTodo] = React.useState('');
+  const [loading, setLoading] = React.useState(true);
+  const { toast } = useToast();
+
+  React.useEffect(() => {
+    const fetchTodos = async () => {
+      try {
+        setLoading(true);
+        if (!domainId) return;
+        const fetchedTodos = await getTodos(domainId);
+        setTodos(fetchedTodos);
+      } catch (error) {
+        console.error("Error fetching todos:", error);
+        toast({
+          title: "خطأ",
+          description: "فشل في تحميل قائمة المهام.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTodos();
+  }, [domainId, toast]);
+
+  const handleAddTodo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const text = newTodo.trim();
+    if (!text) return;
+
+    try {
+      const addedTodo = await addTodo({
+        domainId,
+        text,
+        completed: false,
+      });
+      setTodos(prev => [addedTodo, ...prev]);
+      setNewTodo('');
+      toast({
+        title: "نجاح",
+        description: "تمت إضافة المهمة.",
+      });
+    } catch (error) {
+      console.error("Error adding todo:", error);
+      toast({
+        title: "خطأ",
+        description: "فشل في إضافة المهمة.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleToggleTodo = async (todo: Todo) => {
+    if (!todo.id) return;
+    try {
+      const updates = { completed: !todo.completed };
+      await updateTodo(todo.id, updates);
+      setTodos(prev => prev.map(t => (t.id === todo.id ? { ...t, ...updates } : t)));
+    } catch (error) {
+       console.error("Error updating todo:", error);
+      toast({
+        title: "خطأ",
+        description: "فشل في تحديث المهمة.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteTodo = async (todoId: string) => {
+    try {
+      await deleteTodo(todoId);
+      setTodos(prev => prev.filter(t => t.id !== todoId));
+      toast({
+        title: "نجاح",
+        description: "تم حذف المهمة.",
+        variant: "destructive"
+      });
+    } catch (error) {
+      console.error("Error deleting todo:", error);
+       toast({
+        title: "خطأ",
+        description: "فشل في حذف المهمة.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <h4 className="font-semibold text-lg text-foreground">قائمة المهام</h4>
+      <form onSubmit={handleAddTodo} className="flex gap-2">
+        <Input
+          type="text"
+          placeholder="مهمة جديدة..."
+          value={newTodo}
+          onChange={e => setNewTodo(e.target.value)}
+          className="bg-background"
+        />
+        <Button type="submit" size="icon">
+          <Plus className="h-4 w-4" />
+        </Button>
+      </form>
+
+      {loading ? (
+        <div className="flex justify-center items-center h-24">
+          <Loader2 className="h-6 w-6 animate-spin" />
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {todos.map(todo => (
+            <div key={todo.id} className="flex items-center gap-3 p-2 rounded-md bg-background/50 hover:bg-background transition-colors">
+              <Checkbox
+                id={`todo-${todo.id}`}
+                checked={todo.completed}
+                onCheckedChange={() => handleToggleTodo(todo)}
+                aria-label={todo.text}
+              />
+              <label 
+                htmlFor={`todo-${todo.id}`}
+                className={`flex-1 text-sm cursor-pointer ${todo.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}
+              >
+                {todo.text}
+              </label>
+              <span className="text-xs text-muted-foreground">
+                {todo.createdAt ? formatDistanceToNow(new Date(todo.createdAt), { addSuffix: true, locale: ar }) : ''}
+              </span>
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => todo.id && handleDeleteTodo(todo.id)}>
+                <Trash2 className="h-4 w-4 text-destructive/80" />
+              </Button>
+            </div>
+          ))}
+           {todos.length === 0 && (
+             <p className="text-center text-muted-foreground py-4">لا توجد مهام حتى الآن.</p>
+           )}
+        </div>
+      )}
+    </div>
+  );
+}

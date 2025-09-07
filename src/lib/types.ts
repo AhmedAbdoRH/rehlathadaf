@@ -1,3 +1,4 @@
+
 export type Project = 'rehlethadaf' | 'pova' | 'other';
 
 export type Domain = {
@@ -14,4 +15,13 @@ export type Domain = {
   projects?: Project[];
 };
 
+export type Todo = {
+  id?: string;
+  domainId: string;
+  text: string;
+  completed: boolean;
+  createdAt: string; // ISO 8601 string
+};
+
     
+
