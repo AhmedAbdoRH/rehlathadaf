@@ -4,8 +4,8 @@ import { Toaster } from "@/components/ui/toaster"
 import '@/lib/firebase'; // Ensure Firebase is initialized on the server
 
 export const metadata: Metadata = {
-  title: 'رحلة هدف - الأنظمة الداخلية',
-  description: 'بوابة الأنظمة الداخلية لمكتب رحلة هدف',
+  title: 'لوحة تحكم النطاقات',
+  description: 'إدارة النطاقات وتتبع تواريخ التجديد والتكاليف بسهولة.',
 };
 
 export default function RootLayout({
