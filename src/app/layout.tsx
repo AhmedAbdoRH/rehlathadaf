@@ -6,6 +6,9 @@ import '@/lib/firebase'; // Ensure Firebase is initialized on the server
 export const metadata: Metadata = {
   title: 'لوحة تحكم النطاقات',
   description: 'إدارة النطاقات وتتبع تواريخ التجديد والتكاليف بسهولة.',
+  icons: {
+    icon: '/icon.svg',
+  },
 };
 
 export default function RootLayout({
