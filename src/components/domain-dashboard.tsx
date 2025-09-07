@@ -420,45 +420,47 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
           <TableBody>
             {filteredDomains.map(domain => (
              <Collapsible asChild key={domain.id}>
-              <>
               <TableRow>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    {domain.id && renderStatusDot(domain.id)}
-                    <a href={getUrl(domain.domainName)} target="_blank" rel="noopener noreferrer" className="font-medium text-lg" style={{ color: '#90b8f8' }}>{domain.domainName}</a>
-                  </div>
-                  <div className='mt-2'>
-                    <div className="text-right">{`${format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}`}</div>
-                    <Progress value={getRenewalProgress(domain.renewalDate as string)} className="h-2 mt-1" />
-                  </div>
-                </TableCell>
-                {project === 'pova' ? (
-                  <TableCell>
-                      <div className="text-destructive font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
-                      <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
-                      <div className="text-xs text-muted-foreground mt-1">B2B</div>
-                  </TableCell>
-                ) : project !== 'other' && (
-                  <TableCell>
-                      <div className="text-accent font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
-                      <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
-                  </TableCell>
-                )}
-                 {project === 'pova' && (
-                    <TableCell>
-                      <div className="text-accent font-semibold">${Number(domain.renewalCostPova).toFixed(2)}</div>
-                      <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostPova) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
-                      <div className="text-xs text-muted-foreground mt-1">Pova</div>
-                  </TableCell>
-                )}
-                {(project === 'rehlethadaf' || project === 'other') && (
-                  <TableCell>
-                      <div className="text-destructive font-semibold">${Number(domain.renewalCostOffice).toFixed(2)}</div>
-                      <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostOffice) * USD_TO_EGP_RATE_OFFICE).toFixed(2)} ج.م</div>
-                  </TableCell>
-                )}
-                <TableCell className="text-left">
-                  <div className="flex items-center justify-end gap-2">
+                <TableCell colSpan={project === 'pova' ? 5 : 4}>
+                  <div className='flex items-start'>
+                    <div className='flex-grow'>
+                      <div className="flex items-center gap-2">
+                        {domain.id && renderStatusDot(domain.id)}
+                        <a href={getUrl(domain.domainName)} target="_blank" rel="noopener noreferrer" className="font-medium text-lg" style={{ color: '#90b8f8' }}>{domain.domainName}</a>
+                      </div>
+                      <div className='mt-2'>
+                        <div className="text-right">{`${format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}`}</div>
+                        <Progress value={getRenewalProgress(domain.renewalDate as string)} className="h-2 mt-1" />
+                      </div>
+                    </div>
+                    <div className='flex items-center gap-4 px-4'>
+                      {project === 'pova' ? (
+                        <div className="text-center">
+                            <div className="text-destructive font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
+                            <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
+                            <div className="text-xs text-muted-foreground mt-1">B2B</div>
+                        </div>
+                      ) : project !== 'other' && (
+                        <div className="text-center">
+                            <div className="text-accent font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
+                            <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
+                        </div>
+                      )}
+                      {project === 'pova' && (
+                          <div className="text-center">
+                            <div className="text-accent font-semibold">${Number(domain.renewalCostPova).toFixed(2)}</div>
+                            <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostPova) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
+                            <div className="text-xs text-muted-foreground mt-1">Pova</div>
+                        </div>
+                      )}
+                      {(project === 'rehlethadaf' || project === 'other') && (
+                        <div className="text-center">
+                            <div className="text-destructive font-semibold">${Number(domain.renewalCostOffice).toFixed(2)}</div>
+                            <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostOffice) * USD_TO_EGP_RATE_OFFICE).toFixed(2)} ج.م</div>
+                        </div>
+                      )}
+                    </div>
+                     <div className="flex items-center justify-end gap-2">
                    <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button 
@@ -544,27 +546,21 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                   >
                      <FileText className="h-4 w-4 text-purple-500" />
                    </Button>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <CollapsibleTrigger asChild>
+                   <CollapsibleTrigger asChild>
                       <Button variant="ghost" size="sm" className="w-9 p-0 data-[state=open]:rotate-180">
                           <ChevronDown className="h-4 w-4" />
                           <span className="sr-only">Toggle</span>
                       </Button>
-                  </CollapsibleTrigger>
-                </TableCell>
-              </TableRow>
-              <CollapsibleContent asChild>
-                <TableRow>
-                  <TableCell colSpan={6} className="p-0">
+                    </CollapsibleTrigger>
+                  </div>
+                  </div>
+                  <CollapsibleContent asChild>
                     <div className="p-4 bg-muted/50">
                       <TodoList domainId={domain.id!} />
                     </div>
-                  </TableCell>
-                </TableRow>
-              </CollapsibleContent>
-              </>
+                  </CollapsibleContent>
+                </TableCell>
+              </TableRow>
             </Collapsible>
             ))}
           </TableBody>
@@ -989,6 +985,8 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
     </>
   );
 }
+
+    
 
     
 
