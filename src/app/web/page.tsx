@@ -12,6 +12,8 @@ import { checkDomainStatus } from '@/ai/flows/checkDomainStatus';
 import type { Domain } from '@/lib/types';
 import Link from 'next/link';
 import { getTodosForDomains } from '@/services/todoService';
+import { AllTodosPanel } from '@/components/all-todos-panel';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 export default function WebPage() {
   const [isSecretVisible, setSecretVisible] = React.useState(false);
@@ -107,9 +109,19 @@ export default function WebPage() {
             </div>
           </header>
 
-          <div className="w-full mb-2">
-            <StatusPanel domains={allDomains} domainStatuses={domainStatuses} domainTodos={domainTodos} />
-          </div>
+          <Collapsible className="w-full mb-2">
+            <CollapsibleTrigger asChild>
+              <button type="button" className="w-full">
+                <StatusPanel domains={allDomains} domainStatuses={domainStatuses} domainTodos={domainTodos} />
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="mt-2">
+                <AllTodosPanel onUpdate={refreshDomains} />
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+
 
           <main>
             <Card className="shadow-lg bg-card">

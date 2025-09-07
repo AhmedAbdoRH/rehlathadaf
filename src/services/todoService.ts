@@ -1,6 +1,6 @@
 
 import { db } from '@/lib/firebase';
-import type { Todo } from '@/lib/types';
+import type { Todo, Domain } from '@/lib/types';
 import { 
   collection, 
   getDocs, 
@@ -16,6 +16,8 @@ import {
 } from 'firebase/firestore';
 
 const todosCollectionRef = collection(db, 'todos');
+const domainsCollectionRef = collection(db, 'domains');
+
 
 // Helper to convert Firestore timestamp to ISO string
 const todoFromDoc = (doc: any): Todo => {
@@ -79,4 +81,34 @@ export const updateTodo = async (id: string, updates: Partial<Omit<Todo, 'id'>>)
 export const deleteTodo = async (id: string): Promise<void> => {
   const todoDoc = doc(db, 'todos', id);
   await deleteDoc(todoDoc);
+};
+
+// New function to get all todos and group them by domain name
+export const getAllTodosGroupedByDomain = async (): Promise<Record<string, Todo[]>> => {
+    // 1. Fetch all domains to create a map of ID -> Name
+    const domainsSnapshot = await getDocs(domainsCollectionRef);
+    const domainMap = new Map<string, string>();
+    domainsSnapshot.forEach(doc => {
+        const domainData = doc.data() as Domain;
+        domainMap.set(doc.id, domainData.domainName);
+    });
+
+    // 2. Fetch all todos
+    const todosQuery = query(todosCollectionRef, orderBy('createdAt', 'desc'));
+    const todosSnapshot = await getDocs(todosQuery);
+    const todos = todosSnapshot.docs.map(todoFromDoc);
+
+    // 3. Group todos by domain name
+    const groupedTodos: Record<string, Todo[]> = {};
+    todos.forEach(todo => {
+        const domainName = domainMap.get(todo.domainId);
+        if (domainName) {
+            if (!groupedTodos[domainName]) {
+                groupedTodos[domainName] = [];
+            }
+            groupedTodos[domainName].push(todo);
+        }
+    });
+
+    return groupedTodos;
 };
