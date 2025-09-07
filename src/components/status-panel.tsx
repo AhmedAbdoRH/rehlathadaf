@@ -23,7 +23,7 @@ export function StatusPanel({ domains, domainStatuses, domainTodos }: StatusPane
          <div 
             className={cn(
               baseClasses,
-              "bg-blue-500 shadow-blue-500/60 animate-pulse"
+              "bg-blue-500 shadow-[0_0_8px_2px] shadow-blue-500/60 animate-pulse"
             )}
             style={{ 
               animationDuration: '2.5s',
@@ -101,3 +101,5 @@ export function StatusPanel({ domains, domainStatuses, domainTodos }: StatusPane
     </Card>
   );
 }
+
+    

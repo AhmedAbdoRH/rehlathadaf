@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import * as React from 'react';
@@ -400,7 +399,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
     const hasTodos = allTodos[domainId] && allTodos[domainId].length > 0;
 
     if (hasTodos) {
-      return <div className="h-2 w-2 rounded-full bg-blue-500" title="يحتوي على مهام"></div>;
+      return <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" title="يحتوي على مهام"></div>;
     }
     if (status === 'checking') {
       return <div className="h-2 w-2 rounded-full bg-yellow-500 animate-pulse" title="يتم التحقق..."></div>;
@@ -443,8 +442,8 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
         <Table>
           <TableBody>
             {filteredDomains.map(domain => (
-             <Collapsible asChild key={domain.id}>
-              <>
+              <Collapsible asChild key={domain.id}>
+              <React.Fragment key={domain.id}>
               <TableRow>
                 <TableCell colSpan={project === 'pova' ? 6 : 5}>
                   <div className='flex items-start'>
@@ -594,7 +593,7 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
                   </TableCell>
                 </TableRow>
               </CollapsibleContent>
-              </>
+              </React.Fragment>
             </Collapsible>
             ))}
           </TableBody>
@@ -1023,3 +1022,5 @@ export function DomainDashboard({ project, onDomainChange }: { project: Project;
     </>
   );
 }
+
+    
