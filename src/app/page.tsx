@@ -78,9 +78,8 @@ export default function Home() {
         
         {cardsVisible && (
           <div className="flex flex-wrap justify-center gap-6">
-              <NavCard href="/oc" icon={HandCoins} title="الإدارة المالية لأونلاين كاتلوج" />
+              <NavCard href="/web" icon={Globe} title="مشاريع الويب والأونلاين كاتلوج" />
               <NavCard href="/marketing" icon={HandCoins} title="الإدارة المالية لمكتب التسويق" />
-              <NavCard href="/web" icon={Globe} title="مشاريع الويب" />
                <DropdownNavCard 
                   icon={Banknote}
                   title="بيانات التحويل"
