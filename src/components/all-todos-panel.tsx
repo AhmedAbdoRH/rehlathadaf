@@ -144,7 +144,7 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
                     <div className="space-y-4">
                         {uncompletedDomains.map(domainName => (
                             <div key={domainName}>
-                                <h3 className="font-semibold mb-2 flex items-center gap-2">
+                                <h3 className="font-semibold mb-2 flex items-center gap-2 text-lg">
                                     {domainName}
                                     <Badge variant="destructive">
                                         {groupedTodos[domainName].filter(t => !t.completed).length}
