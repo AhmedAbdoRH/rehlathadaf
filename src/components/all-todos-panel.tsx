@@ -41,7 +41,6 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
         }
     }, [toast]);
     
-    // Use onUpdate as a dependency to refetch
     React.useEffect(() => {
         fetchTodos();
     }, [fetchTodos, onUpdate]);
@@ -70,10 +69,11 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
             }
         }
         setGroupedTodos(newGroups);
+        onUpdate();
 
         try {
             await updateTodo(todo.id, { completed: !todo.completed });
-            onUpdate(); // Trigger parent and self refresh on success
+            // onUpdate() is already called for optimistic UI
         } catch (error) {
             setGroupedTodos(originalGroupedTodos); // Revert on error
             onUpdate(); // Revert state in parent too
@@ -100,15 +100,16 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
             }
         }
         setGroupedTodos(newGroups);
+        onUpdate();
         
         try {
             await deleteTodo(todoId);
-            onUpdate(); // Trigger parent and self refresh on success
             toast({
                 title: "نجاح",
                 description: "تم حذف المهمة.",
                 variant: "destructive"
             });
+             // onUpdate() is already called for optimistic UI
         } catch (error) {
             setGroupedTodos(originalGroupedTodos); // Revert on error
             onUpdate(); // Revert state in parent too
@@ -144,7 +145,7 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
                     <div className="space-y-4">
                         {uncompletedDomains.map(domainName => (
                             <div key={domainName}>
-                                <h3 className="font-semibold mb-2 flex items-center gap-2 text-lg">
+                                <h3 className="font-semibold mb-2 flex items-center gap-2">
                                     {domainName}
                                     <Badge variant="destructive">
                                         {groupedTodos[domainName].filter(t => !t.completed).length}
