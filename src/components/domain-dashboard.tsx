@@ -77,11 +77,16 @@ export function DomainDashboard({
   const [dataSheetContent, setDataSheetContent] = React.useState({ title: '', content: '' });
   const [editingDataSheetDomain, setEditingDataSheetDomain] = React.useState<Domain | null>(null);
   const { toast } = useToast();
+  const [initialRenewalDate, setInitialRenewalDate] = React.useState<Date | null>(null);
+  
+    React.useEffect(() => {
+        setInitialRenewalDate(addYears(new Date(), 1));
+    }, []);
 
   const [newDomain, setNewDomain] = React.useState<{
     domainName: string;
     dataSheet: string;
-    renewalDate: Date;
+    renewalDate: Date | null;
     renewalCostClient: number | '';
     renewalCostOffice: number | '';
     renewalCostPova: number | '';
@@ -89,12 +94,18 @@ export function DomainDashboard({
   }>({
     domainName: '',
     dataSheet: '',
-    renewalDate: addYears(new Date(), 1),
+    renewalDate: null,
     renewalCostClient: '',
     renewalCostOffice: '',
     renewalCostPova: '',
     projects: [project]
   });
+  
+  React.useEffect(() => {
+    if (initialRenewalDate) {
+        setNewDomain(prev => ({...prev, renewalDate: initialRenewalDate, projects: [project]}));
+    }
+  }, [initialRenewalDate, project]);
 
   const handleAddDomain = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,6 +125,15 @@ export function DomainDashboard({
         variant: "destructive",
       });
       return;
+    }
+    
+    if (!newDomain.renewalDate) {
+        toast({
+            title: "خطأ",
+            description: "يرجى تحديد تاريخ التجديد.",
+            variant: "destructive",
+        });
+        return;
     }
 
     const newDomainEntry: Omit<Domain, 'id'> = {
@@ -138,7 +158,7 @@ export function DomainDashboard({
       setNewDomain({
           domainName: '',
           dataSheet: '',
-          renewalDate: addYears(new Date(), 1),
+          renewalDate: initialRenewalDate,
           renewalCostClient: '',
           renewalCostOffice: '',
           renewalCostPova: '',
@@ -362,6 +382,15 @@ export function DomainDashboard({
     return domainName.startsWith('http') ? domainName : `https://${domainName}`;
   }
 
+  const [sortedDomains, setSortedDomains] = React.useState<Domain[]>([]);
+
+    React.useEffect(() => {
+        const filtered = allDomains
+            .filter(d => d.projects?.includes(project))
+            .sort((a, b) => differenceInDays(parseISO(a.renewalDate as string), new Date()) - differenceInDays(parseISO(b.renewalDate as string), new Date()));
+        setSortedDomains(filtered);
+    }, [allDomains, project]);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -369,10 +398,6 @@ export function DomainDashboard({
       </div>
     );
   }
-  
-  const filteredDomains = allDomains
-    .filter(d => d.projects?.includes(project))
-    .sort((a, b) => differenceInDays(parseISO(a.renewalDate as string), new Date()) - differenceInDays(parseISO(b.renewalDate as string), new Date()));
 
 
   return (
@@ -381,7 +406,7 @@ export function DomainDashboard({
       <div className="hidden md:block rounded-md border mt-4">
         <Table>
           <TableBody>
-            {filteredDomains.map(domain => (
+            {sortedDomains.map(domain => (
               <Collapsible asChild key={domain.id}>
               <React.Fragment key={domain.id}>
               <TableRow>
@@ -542,7 +567,7 @@ export function DomainDashboard({
 
       {/* Mobile Cards */}
       <div className="md:hidden grid grid-cols-1 gap-4 mt-4">
-        {filteredDomains.map(domain => (
+        {sortedDomains.map(domain => (
           <Collapsible asChild key={domain.id}>
             <Card className="w-full overflow-hidden">
               <div className="bg-muted/50 p-2 flex justify-between items-center">
@@ -698,7 +723,6 @@ export function DomainDashboard({
 
       <Button 
         onClick={() => {
-          setNewDomain(prev => ({ ...prev, renewalDate: addYears(new Date(), 1), projects: [project] }));
           setAddDomainOpen(true);
         }}
         className="fixed bottom-8 left-8 z-50 h-14 w-14 rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
@@ -769,8 +793,8 @@ export function DomainDashboard({
                             <PopoverContent className="w-auto p-0">
                                 <Calendar
                                     mode="single"
-                                    selected={newDomain.renewalDate}
-                                    onSelect={(date) => setNewDomain({...newDomain, renewalDate: date || new Date()})}
+                                    selected={newDomain.renewalDate ?? undefined}
+                                    onSelect={(date) => setNewDomain({...newDomain, renewalDate: date || null})}
                                     initialFocus
                                 />
                             </PopoverContent>

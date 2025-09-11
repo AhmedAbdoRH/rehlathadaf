@@ -54,17 +54,18 @@ export default function WebPage() {
   
   const refreshTodos = React.useCallback(async () => {
     try {
-      const domainIds = allDomains.map(d => d.id).filter((id): id is string => !!id);
-      if (domainIds.length > 0) {
-        const todosByDomain = await getTodosForDomains(domainIds);
-        setDomainTodos(todosByDomain);
-      } else {
-        setDomainTodos({});
-      }
+        const domainsFromDb = await getDomains(); // Re-fetch domains to ensure we have the latest list
+        const domainIds = domainsFromDb.map(d => d.id).filter((id): id is string => !!id);
+        if (domainIds.length > 0) {
+            const todosByDomain = await getTodosForDomains(domainIds);
+            setDomainTodos(todosByDomain);
+        } else {
+            setDomainTodos({});
+        }
     } catch (error) {
-      console.error("Error refreshing todos:", error);
+        console.error("Error refreshing todos:", error);
     }
-  }, [allDomains]);
+  }, []);
 
 
   const refreshDomainsAndStatuses = React.useCallback(async () => {
