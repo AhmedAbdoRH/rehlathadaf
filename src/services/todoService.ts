@@ -87,6 +87,9 @@ export const getAllTodosGroupedByDomain = async (): Promise<Record<string, Todo[
     // 1. Fetch all domains to create a map of ID -> Name
     const domainsSnapshot = await getDocs(domainsCollectionRef);
     const domainMap = new Map<string, string>();
+    if (domainsSnapshot.empty) {
+        return {}; // No domains, so no todos to group.
+    }
     domainsSnapshot.forEach(doc => {
         const domainData = doc.data() as Domain;
         domainMap.set(doc.id, domainData.domainName);
