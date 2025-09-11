@@ -70,7 +70,6 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
             }
         }
         setGroupedTodos(newGroups);
-        // onUpdate(); // This will trigger a refetch via useEffect
 
         try {
             await updateTodo(todo.id, { completed: !todo.completed });
@@ -101,7 +100,6 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
             }
         }
         setGroupedTodos(newGroups);
-        // onUpdate(); // This will trigger a refetch via useEffect
         
         try {
             await deleteTodo(todoId);
