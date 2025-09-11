@@ -80,7 +80,8 @@ export function DomainDashboard({
   const [initialRenewalDate, setInitialRenewalDate] = React.useState<Date | null>(null);
   
     React.useEffect(() => {
-        setInitialRenewalDate(addYears(new Date(), 1));
+      // This will only run on the client, after initial hydration
+      setInitialRenewalDate(addYears(new Date(), 1));
     }, []);
 
   const [newDomain, setNewDomain] = React.useState<{
