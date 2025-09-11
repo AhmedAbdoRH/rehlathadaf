@@ -40,10 +40,12 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
             setLoading(false);
         }
     }, [toast]);
-
+    
+    // Use onUpdate as a dependency to refetch
     React.useEffect(() => {
         fetchTodos();
-    }, [fetchTodos]);
+    }, [fetchTodos, onUpdate]);
+
 
     const handleToggleTodo = async (todo: Todo) => {
         if (!todo.id) return;
@@ -68,10 +70,11 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
             }
         }
         setGroupedTodos(newGroups);
-        onUpdate();
+        // onUpdate(); // This will trigger a refetch via useEffect
 
         try {
             await updateTodo(todo.id, { completed: !todo.completed });
+            onUpdate(); // Trigger parent and self refresh on success
         } catch (error) {
             setGroupedTodos(originalGroupedTodos); // Revert on error
             onUpdate(); // Revert state in parent too
@@ -98,10 +101,11 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
             }
         }
         setGroupedTodos(newGroups);
-        onUpdate(); 
+        // onUpdate(); // This will trigger a refetch via useEffect
         
         try {
             await deleteTodo(todoId);
+            onUpdate(); // Trigger parent and self refresh on success
             toast({
                 title: "نجاح",
                 description: "تم حذف المهمة.",
