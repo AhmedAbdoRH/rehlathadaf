@@ -23,5 +23,7 @@ export type Todo = {
   createdAt: string; // ISO 8601 string
 };
 
-    
-
+export type ApiKeyStatus = {
+  key: string;
+  status: 'checking' | 'online' | 'offline';
+};

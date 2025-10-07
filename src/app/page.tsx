@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from 'react';
@@ -9,7 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getDomains } from '@/services/domainService';
 import { checkDomainStatus } from '@/ai/flows/checkDomainStatus';
-import type { Domain, Todo } from '@/lib/types';
+import { checkApiKeyStatus } from '@/ai/flows/checkApiKeyStatus';
+import type { Domain, Todo, ApiKeyStatus } from '@/lib/types';
 import Link from 'next/link';
 import { getTodosForDomains } from '@/services/todoService';
 import { AllTodosPanel } from '@/components/all-todos-panel';
@@ -40,8 +40,15 @@ export default function WebPage() {
   const [activeTab, setActiveTab] = React.useState('pova');
   const [allDomains, setAllDomains] = React.useState<Domain[]>([]);
   const [domainStatuses, setDomainStatuses] = React.useState<Record<string, 'checking' | 'online' | 'offline'>>({});
+  const [apiKeyStatuses, setApiKeyStatuses] = React.useState<ApiKeyStatus[]>([]);
   const [domainTodos, setDomainTodos] = React.useState<Record<string, Todo[]>>({});
   const [loading, setLoading] = React.useState(true);
+
+  const apiKeys = [
+    'AIzaSyAwPSkhtVxkIHvLEph99ipAcjtq3ZIqjy4',
+    'AIzaSyADRxtILZAQ7EeJA9fKju7tj_YkMErqZH0',
+    'AIzaSyAeMLURr9rdBxyc3ny2fE5p3RebkJDUCds'
+  ];
 
   const handleSecretClick = () => {
     const newClickCount = clickCount + 1;
@@ -68,9 +75,11 @@ export default function WebPage() {
   }, []);
 
 
-  const refreshDomainsAndStatuses = React.useCallback(async () => {
+  const refreshAllStatuses = React.useCallback(async () => {
     try {
       setLoading(true);
+      
+      // Domains
       const domainsFromDb = await getDomains();
       const domainsWithProject = domainsFromDb.map(d => ({
         ...d,
@@ -78,13 +87,16 @@ export default function WebPage() {
       }));
       setAllDomains(domainsWithProject);
 
-      // Set all to checking initially
-      const initialStatuses: Record<string, 'checking' | 'online' | 'offline'> = {};
+      // Set all domains to checking initially
+      const initialDomainStatuses: Record<string, 'checking' | 'online' | 'offline'> = {};
       domainsWithProject.forEach(d => {
-        if (d.id) initialStatuses[d.id] = 'checking';
+        if (d.id) initialDomainStatuses[d.id] = 'checking';
       });
-      setDomainStatuses(initialStatuses);
+      setDomainStatuses(initialDomainStatuses);
       
+      // Set all API keys to checking initially
+      setApiKeyStatuses(apiKeys.map(key => ({ key, status: 'checking' })));
+
       // Refresh todos in parallel
       const domainIds = domainsWithProject.map(d => d.id).filter((id): id is string => !!id);
       if (domainIds.length > 0) {
@@ -94,18 +106,30 @@ export default function WebPage() {
         setDomainTodos({});
       }
 
-
-      // Check statuses
+      // Check domain statuses
       for (const domain of domainsWithProject) {
         if (domain.id) {
-          try {
-            const { isOnline } = await checkDomainStatus({ domainName: domain.domainName });
-            setDomainStatuses(prev => ({ ...prev, [domain.id!]: isOnline ? 'online' : 'offline' }));
-          } catch (e) {
-            setDomainStatuses(prev => ({ ...prev, [domain.id!]: 'offline' }));
-          }
+          checkDomainStatus({ domainName: domain.domainName })
+            .then(({ isOnline }) => {
+              setDomainStatuses(prev => ({ ...prev, [domain.id!]: isOnline ? 'online' : 'offline' }));
+            })
+            .catch(() => {
+              setDomainStatuses(prev => ({ ...prev, [domain.id!]: 'offline' }));
+            });
         }
       }
+
+      // Check API key statuses
+      apiKeys.forEach((key) => {
+        checkApiKeyStatus({ apiKey: key })
+          .then(({ isWorking }) => {
+            setApiKeyStatuses(prev => prev.map(s => s.key === key ? { ...s, status: isWorking ? 'online' : 'offline' } : s));
+          })
+          .catch(() => {
+            setApiKeyStatuses(prev => prev.map(s => s.key === key ? { ...s, status: 'offline' } : s));
+          });
+      });
+
     } catch (error) {
       console.error("Error refreshing domains and statuses:", error);
     } finally {
@@ -115,8 +139,8 @@ export default function WebPage() {
 
   // Initial load
   React.useEffect(() => {
-    refreshDomainsAndStatuses();
-  }, [refreshDomainsAndStatuses]);
+    refreshAllStatuses();
+  }, [refreshAllStatuses]);
   
   const hasTodosMap = React.useMemo(() => {
     const hasTodos: Record<string, boolean> = {};
@@ -160,7 +184,7 @@ export default function WebPage() {
           </header>
 
           <Collapsible className="w-full mb-2">
-            <StatusPanel domains={allDomains} domainStatuses={domainStatuses} domainTodos={hasTodosMap} />
+            <StatusPanel domains={allDomains} domainStatuses={domainStatuses} domainTodos={hasTodosMap} apiKeyStatuses={apiKeyStatuses} />
             <CollapsibleTrigger asChild>
               <div className="w-full h-4 bg-card hover:bg-muted/80 border-x border-b border-border/60 rounded-b-lg flex items-center justify-center cursor-pointer">
                 <ChevronDown className="h-4 w-4 text-muted-foreground opacity-50 transition-transform data-[state=open]:rotate-180" />
@@ -192,7 +216,7 @@ export default function WebPage() {
                           allTodos={domainTodos}
                           domainStatuses={domainStatuses}
                           loading={loading}
-                          onDomainChange={refreshDomainsAndStatuses} 
+                          onDomainChange={refreshAllStatuses} 
                           onTodoChange={refreshTodos} 
                         />
                         <div className="p-4 border-t border-border mt-4">
@@ -225,7 +249,7 @@ export default function WebPage() {
                        allTodos={domainTodos}
                        domainStatuses={domainStatuses}
                        loading={loading}
-                       onDomainChange={refreshDomainsAndStatuses} 
+                       onDomainChange={refreshAllStatuses} 
                        onTodoChange={refreshTodos}
                     />
                   </TabsContent>
@@ -237,7 +261,7 @@ export default function WebPage() {
                          allTodos={domainTodos}
                          domainStatuses={domainStatuses}
                          loading={loading}
-                         onDomainChange={refreshDomainsAndStatuses} 
+                         onDomainChange={refreshAllStatuses} 
                          onTodoChange={refreshTodos} 
                        />
                     ) : (

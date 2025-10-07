@@ -184,7 +184,7 @@ export function DomainDashboard({
       await deleteDomain(domainId);
       toast({
           title: "تم حذف النطاق",
-          description: `تم حذف ${domainToDelete.domainName} بنجاح.`,
+          description: `تم حذف ${domainToDelete.domainName} بنج.`,
           variant: "destructive"
       });
       onDomainChange();
@@ -569,419 +569,398 @@ export function DomainDashboard({
       {/* Mobile Cards */}
       <div className="md:hidden grid grid-cols-1 gap-4 mt-4">
         {sortedDomains.map(domain => (
-          <Collapsible asChild key={domain.id}>
-            <Card className="w-full overflow-hidden">
-              <div className="bg-muted/50 p-2 flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                      <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                title="تجديد"
-                                className="rounded-full w-8 h-8 bg-green-500/10 hover:bg-green-500/20 hover:scale-110 transition-all duration-300 hover:shadow-xl hover:shadow-green-500/30 border border-green-500/20 hover:border-green-500/40"
-                              >
-                                  <Check className="h-4 w-4 text-green-500" />
-                              </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                              <AlertDialogHeader>
-                                  <AlertDialogTitle>تأكيد التجديد</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                      هل أنت متأكد من أنك تريد تجديد النطاق 
-                                      <span className="font-bold"> {domain.domainName}</span>؟ 
-                                      سيتم تحديث تاريخ التجديد للعام القادم.
-                                  </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                  <AlertDialogCancel>إلغاء</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleRenewDomain(domain)}>
-                                      تجديد
-                                  </AlertDialogAction>
-                              </AlertDialogFooter>
-                          </AlertDialogContent>
-                      </AlertDialog>
-                      <a href={getGoogleCalendarLink(domain)} target="_blank" rel="noopener noreferrer" title="إضافة للتقويم">
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            className="rounded-full w-8 h-8 bg-yellow-500/10 hover:bg-yellow-500/20 hover:scale-110 transition-all duration-300 hover:shadow-xl hover:shadow-yellow-500/30 border border-yellow-500/20 hover:border-yellow-500/40"
-                          >
-                              <CalendarPlus className="h-4 w-4 text-yellow-500" />
-                          </Button>
-                      </a>
-                  </div>
-                  <div className="flex items-center gap-2">
-                      {project !== 'pova' && (
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => openEditDialog(domain)} 
-                        title="تعديل"
-                                                className="rounded-full w-8 h-8 bg-blue-500/10 hover:bg-blue-500/20 hover:scale-110 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/30 border border-blue-500/20 hover:border-blue-500/40"
-                      >
-                          <Pencil className="h-4 w-4 text-blue-500" />
+          <Card asChild key={domain.id}>
+            <Collapsible>
+              <div className="w-full overflow-hidden">
+                <CardContent className="p-4 space-y-4">
+                  <div className="flex justify-between items-start">
+                    <div className='flex-grow'>
+                      <div className="flex items-center gap-2">
+                        {domain.id && renderStatusDot(domain.id)}
+                        <a href={getUrl(domain.domainName)} target="_blank" rel="noopener noreferrer" className="font-medium text-lg" style={{ color: '#90b8f8' }}>{domain.domainName}</a>
+                      </div>
+                      <div className='mt-2'>
+                        <div className="text-right text-sm text-muted-foreground">{`${format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}`}</div>
+                        <Progress value={getRenewalProgress(domain.renewalDate as string)} className="h-2 mt-1" />
+                      </div>
+                    </div>
+                    <CollapsibleTrigger asChild>
+                      <Button variant="ghost" size="sm" className="w-9 p-0 data-[state=open]:rotate-180">
+                          <ChevronDown className="h-4 w-4" />
+                          <span className="sr-only">Toggle</span>
                       </Button>
+                    </CollapsibleTrigger>
+                  </div>
+                  
+                  <div className='flex items-center justify-between gap-4'>
+                    <div className="flex items-center gap-2">
+                      {project === 'pova' ? (
+                        <>
+                          <div className="text-center">
+                              <div className="text-destructive font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
+                              <div className="text-xs text-muted-foreground mt-1">B2B</div>
+                          </div>
+                          <div className="text-center">
+                              <div className="text-accent font-semibold">${Number(domain.renewalCostPova).toFixed(2)}</div>
+                              <div className="text-xs text-muted-foreground mt-1">Pova</div>
+                          </div>
+                        </>
+                      ) : project !== 'other' && (
+                        <div className="text-center">
+                            <div className="text-accent font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
+                             <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
+                        </div>
                       )}
-                      <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                disabled={!domain.id} 
-                                title="حذف"
-                                className="rounded-full w-8 h-8 bg-red-500/10 hover:bg-red-500/20 hover:scale-110 transition-all duration-300 hover:shadow-xl hover:shadow-red-500/30 border border-red-500/20 hover:border-red-500/40 disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none"
-                              >
-                                  <Trash2 className="h-4 w-4 text-red-500" />
-                              </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                              <AlertDialogHeader>
-                                  <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                      لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف النطاق بشكل دائم
-                                      <span className="font-bold"> {domain.domainName}</span>.
-                                  </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                  <AlertDialogCancel>إلغاء</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleDeleteDomain(domain.id!)}>
-                                      متابعة
-                                  </AlertDialogAction>
-                              </AlertDialogFooter>
-                          </AlertDialogContent>
-                      </AlertDialog>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => openDataSheetDialog(domain)} 
-                        title="عرض شيت البيانات"
-                                                className="rounded-full w-8 h-8 bg-purple-500/10 hover:bg-purple-500/20 hover:scale-110 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/30 border border-purple-500/20 hover:border-purple-500/40"
-                      >
-                          <FileText className="h-4 w-4 text-purple-500" />
-                      </Button>
+                      {(project === 'rehlethadaf' || project === 'other') && (
+                        <div className="text-center">
+                            <div className="text-destructive font-semibold">${Number(domain.renewalCostOffice).toFixed(2)}</div>
+                            <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostOffice) * USD_TO_EGP_RATE_OFFICE).toFixed(2)} ج.م</div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2">
-                  {domain.id && renderStatusDot(domain.id)}
-                  <a href={getUrl(domain.domainName)} target="_blank" rel="noopener noreferrer" className="font-medium text-lg" style={{ color: '#90b8f8' }}>{domain.domainName}</a>
-                </div>
-                
-                <div className='mt-4'>
-                  <div className="text-right">{`${format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}`}</div>
-                  <Progress value={getRenewalProgress(domain.renewalDate as string)} className="h-2 mt-1" />
-                </div>
-                
-                <div className={`mt-4 grid ${project === 'rehlethadaf' || project === 'other' ? 'grid-cols-2' : (project === 'pova' ? 'grid-cols-2' : 'grid-cols-1')} gap-4 text-center`}>
-                  {project === 'pova' ? (
-                    <div>
-                      <div className="text-sm font-medium text-muted-foreground">قيمة التجديد (B2B)</div>
-                      <div className="text-destructive font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
-                      <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
+                </CardContent>
+                <div className="bg-muted/50 p-2 flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  title="تجديد"
+                                  className="rounded-full w-8 h-8 bg-green-500/10 hover:bg-green-500/20 hover:scale-110 transition-all duration-300 hover:shadow-xl hover:shadow-green-500/30 border border-green-500/20 hover:border-green-500/40"
+                                >
+                                    <Check className="h-4 w-4 text-green-500" />
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>تأكيد التجديد</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        هل أنت متأكد من أنك تريد تجديد النطاق 
+                                        <span className="font-bold"> {domain.domainName}</span>؟ 
+                                        سيتم تحديث تاريخ التجديد للعام القادم.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleRenewDomain(domain)}>
+                                        تجديد
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                        <a href={getGoogleCalendarLink(domain)} target="_blank" rel="noopener noreferrer" title="إضافة للتقويم">
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              className="rounded-full w-8 h-8 bg-yellow-500/10 hover:bg-yellow-500/20 hover:scale-110 transition-all duration-300 hover:shadow-xl hover:shadow-yellow-500/30 border border-yellow-500/20 hover:border-yellow-500/40"
+                            >
+                                <CalendarPlus className="h-4 w-4 text-yellow-500" />
+                            </Button>
+                        </a>
                     </div>
-                  ) : project !== 'other' && (
-                    <div>
-                      <div className="text-sm font-medium text-muted-foreground">قيمة التجديد</div>
-                      <div className="text-accent font-semibold">${Number(domain.renewalCostClient).toFixed(2)}</div>
-                      <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostClient) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
+                    <div className="flex items-center gap-2">
+                        {project !== 'pova' && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => openEditDialog(domain)} 
+                          title="تعديل"
+                          className="rounded-full w-8 h-8 bg-blue-500/10 hover:bg-blue-500/20 hover:scale-110 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/30 border border-blue-500/20 hover:border-blue-500/40"
+                        >
+                            <Pencil className="h-4 w-4 text-blue-500" />
+                        </Button>
+                        )}
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  disabled={!domain.id} 
+                                  title="حذف"
+                                  className="rounded-full w-8 h-8 bg-red-500/10 hover:bg-red-500/20 hover:scale-110 transition-all duration-300 hover:shadow-xl hover:shadow-red-500/30 border border-red-500/20 hover:border-red-500/40 disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none"
+                                >
+                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف النطاق بشكل دائم
+                                        <span className="font-bold"> {domain.domainName}</span>.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDeleteDomain(domain.id!)}>
+                                        متابعة
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => openDataSheetDialog(domain)} 
+                          title="عرض شيت البيانات"
+                          className="rounded-full w-8 h-8 bg-purple-500/10 hover:bg-purple-500/20 hover:scale-110 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/30 border border-purple-500/20 hover:border-purple-500/40"
+                        >
+                           <FileText className="h-4 w-4 text-purple-500" />
+                         </Button>
                     </div>
-                  )}
-                  {project === 'pova' && (
-                    <div>
-                      <div className="text-sm font-medium text-muted-foreground">قيمة التجديد (Pova)</div>
-                      <div className="text-accent font-semibold">${Number(domain.renewalCostPova).toFixed(2)}</div>
-                      <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostPova) * USD_TO_EGP_RATE_CLIENT).toFixed(2)} ج.م</div>
-                    </div>
-                  )}
-                  {(project === 'rehlethadaf' || project === 'other') && (
-                    <div>
-                      <div className="text-sm font-medium text-muted-foreground">تكلفة المكتب</div>
-                      <div className="text-destructive font-semibold">${Number(domain.renewalCostOffice).toFixed(2)}</div>
-                      <div className="text-xs text-muted-foreground">{(Number(domain.renewalCostOffice) * USD_TO_EGP_RATE_OFFICE).toFixed(2)} ج.م</div>
-                    </div>
-                  )}
                 </div>
-              </CardContent>
-              <CollapsibleTrigger asChild>
-                  <div className="bg-muted/50 p-2 text-center cursor-pointer hover:bg-muted transition-colors">
-                      <ChevronDown className="h-5 w-5 mx-auto text-muted-foreground data-[state=open]:rotate-180" />
-                  </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="p-4 bg-muted/30 border-t">
-                  <TodoList 
-                    domainId={domain.id!}
-                    initialTodos={allTodos[domain.id!] || []}
-                    onUpdate={onTodoChange}
-                   />
-                </div>
-              </CollapsibleContent>
-            </Card>
-          </Collapsible>
+                 <CollapsibleContent>
+                    <div className="p-4 border-t bg-muted/20">
+                      <TodoList 
+                        domainId={domain.id!} 
+                        initialTodos={allTodos[domain.id!] || []}
+                        onUpdate={onTodoChange}
+                      />
+                    </div>
+                </CollapsibleContent>
+              </div>
+            </Collapsible>
+          </Card>
         ))}
       </div>
 
-      <Button 
-        onClick={() => {
-          setAddDomainOpen(true);
-        }}
-        className="fixed bottom-8 left-8 z-50 h-14 w-14 rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
-        size="icon"
-      >
-        <Plus className="h-6 w-6" />
-      </Button>
-
+      <div className="flex justify-center mt-6">
+        <Button onClick={() => setAddDomainOpen(true)} className="gap-2">
+            <Plus />
+            إضافة نطاق جديد
+        </Button>
+      </div>
+      
       {/* Add Domain Dialog */}
-      <Dialog open={isAddDomainOpen} onOpenChange={setAddDomainOpen}>
+       <Dialog open={isAddDomainOpen} onOpenChange={setAddDomainOpen}>
         <DialogContent>
-            <DialogHeader>
-                <DialogTitle>إضافة نطاق جديد</DialogTitle>
-                <DialogDescription>
-                    أدخل تفاصيل النطاق الجديد الذي تريد إدارته.
-                </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleAddDomain}>
-                <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="domainName" className="text-right">النطاق</Label>
-                        <Input id="domainName" value={newDomain.domainName} onChange={(e) => setNewDomain({...newDomain, domainName: e.target.value})} className="col-span-3" required />
-                    </div>
-                     <div className="grid grid-cols-4 items-start gap-4">
-                        <Label htmlFor="dataSheet" className="text-right pt-2">شيت البيانات</Label>
-                        <Textarea id="dataSheet" value={newDomain.dataSheet} onChange={(e) => setNewDomain({...newDomain, dataSheet: e.target.value})} className="col-span-3 text-left" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                           <Label htmlFor="renewalCostClient">قيمة التجديد (بالدولار)</Label>
-                           <div className="relative">
-                               <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">$</span>
-                               <Input id="renewalCostClient" type="number" placeholder="0.00" value={newDomain.renewalCostClient} onChange={(e) => setNewDomain({...newDomain, renewalCostClient: e.target.value === '' ? '' : Number(e.target.value)})} className="pl-7" />
-                           </div>
+          <DialogHeader>
+            <DialogTitle>إضافة نطاق جديد</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAddDomain} className="grid gap-4 py-4">
+             <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="domainName" className="text-right">اسم النطاق</Label>
+                <Input
+                    id="domainName"
+                    value={newDomain.domainName}
+                    onChange={e => setNewDomain({ ...newDomain, domainName: e.target.value })}
+                    className="col-span-3"
+                    required
+                />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">المشاريع</Label>
+                <div className="col-span-3 flex flex-wrap gap-2">
+                    {projectOptions.map(p => (
+                        <div key={p} className="flex items-center gap-2">
+                            <Checkbox
+                                id={`add-${p}`}
+                                checked={newDomain.projects.includes(p)}
+                                onCheckedChange={() => handleProjectToggle(p, setNewDomain, 'projects')}
+                            />
+                            <Label htmlFor={`add-${p}`}>{projectLabels[p]}</Label>
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="renewalCostOffice">تكلفة المكتب (بالدولار)</Label>
-                            <div className="relative">
-                               <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">$</span>
-                               <Input id="renewalCostOffice" type="number" placeholder="0.00" value={newDomain.renewalCostOffice} onChange={(e) => setNewDomain({...newDomain, renewalCostOffice: e.target.value === '' ? '' : Number(e.target.value)})} className="pl-7" />
-                           </div>
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                         <div className="space-y-2">
-                           <Label htmlFor="renewalCostPova">قيمة التجديد (Pova)</Label>
-                           <div className="relative">
-                               <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">$</span>
-                               <Input id="renewalCostPova" type="number" placeholder="0.00" value={newDomain.renewalCostPova} onChange={(e) => setNewDomain({...newDomain, renewalCostPova: e.target.value === '' ? '' : Number(e.target.value)})} className="pl-7" />
-                           </div>
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label className="text-right">التجديد</Label>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                        "col-span-3 justify-start text-left font-normal",
-                                        !newDomain.renewalDate && "text-muted-foreground"
-                                    )}
-                                >
-                                    <CalendarIcon className="ml-2 h-4 w-4" />
-                                    {newDomain.renewalDate ? format(newDomain.renewalDate, "PPP") : <span>اختر تاريخًا</span>}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
-                                <Calendar
-                                    mode="single"
-                                    selected={newDomain.renewalDate ?? undefined}
-                                    onSelect={(date) => setNewDomain({...newDomain, renewalDate: date || null})}
-                                    initialFocus
-                                />
-                            </PopoverContent>
-                        </Popover>
-                    </div>
-                    <div className="grid grid-cols-4 items-start gap-4">
-                        <Label className="text-right pt-2">المشاريع</Label>
-                        <div className="col-span-3 space-y-2">
-                            {projectOptions.map(p => (
-                                <div key={p} className="flex items-center space-x-2 space-x-reverse">
-                                    <Checkbox
-                                        id={`add-${p}`}
-                                        checked={newDomain.projects.includes(p)}
-                                        onCheckedChange={() => handleProjectToggle(p, setNewDomain, 'projects')}
-                                    />
-                                    <Label htmlFor={`add-${p}`} className="font-normal">{projectLabels[p]}</Label>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                    ))}
                 </div>
-                 <DialogFooter>
-                    <DialogClose asChild>
-                        <Button 
-                          type="button" 
-                          variant="outline"
-                          className="hover:bg-gray-100 hover:scale-105 transition-all duration-200 hover:shadow-md"
-                        >
-                          إلغاء
-                        </Button>
-                    </DialogClose>
-                    <Button 
-                      type="submit"
-                      className="bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/25"
+            </div>
+             <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="renewalDate-add" className="text-right">تاريخ التجديد</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "col-span-3 justify-start text-left font-normal",
+                        !newDomain.renewalDate && "text-muted-foreground"
+                      )}
                     >
-                      إضافة نطاق
+                      <CalendarIcon className="ml-2 h-4 w-4" />
+                      {newDomain.renewalDate ? format(newDomain.renewalDate, "PPP") : <span>اختر تاريخ</span>}
                     </Button>
-                </DialogFooter>
-            </form>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={newDomain.renewalDate}
+                      onSelect={(date) => setNewDomain({ ...newDomain, renewalDate: date || null })}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="renewalCostClient-add" className="text-right">تكلفة العميل ($)</Label>
+                <Input
+                    id="renewalCostClient-add"
+                    type="number"
+                    value={newDomain.renewalCostClient}
+                    onChange={e => setNewDomain({ ...newDomain, renewalCostClient: e.target.value === '' ? '' : parseFloat(e.target.value) })}
+                    className="col-span-3"
+                />
+            </div>
+            {newDomain.projects.includes('rehlethadaf') && (
+            <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="renewalCostOffice-add" className="text-right">تكلفة المكتب ($)</Label>
+                <Input
+                    id="renewalCostOffice-add"
+                    type="number"
+                    value={newDomain.renewalCostOffice}
+                    onChange={e => setNewDomain({ ...newDomain, renewalCostOffice: e.target.value === '' ? '' : parseFloat(e.target.value) })}
+                    className="col-span-3"
+                />
+            </div>
+            )}
+             {newDomain.projects.includes('pova') && (
+            <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="renewalCostPova-add" className="text-right">تكلفة Pova ($)</Label>
+                <Input
+                    id="renewalCostPova-add"
+                    type="number"
+                    value={newDomain.renewalCostPova}
+                    onChange={e => setNewDomain({ ...newDomain, renewalCostPova: e.target.value === '' ? '' : parseFloat(e.target.value) })}
+                    className="col-span-3"
+                />
+            </div>
+            )}
+            <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="dataSheet-add" className="text-right">شيت البيانات</Label>
+                <Textarea
+                    id="dataSheet-add"
+                    value={newDomain.dataSheet}
+                    onChange={e => setNewDomain({ ...newDomain, dataSheet: e.target.value })}
+                    className="col-span-3"
+                    rows={6}
+                />
+            </div>
+             <DialogFooter>
+                <DialogClose asChild><Button variant="ghost">إلغاء</Button></DialogClose>
+                <Button type="submit">إضافة</Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
       
       {/* Edit Domain Dialog */}
-      <Dialog open={isEditDomainOpen} onOpenChange={setEditDomainOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>تعديل النطاق</DialogTitle>
-            <DialogDescription>
-              قم بتحديث تفاصيل النطاق المحدد.
-            </DialogDescription>
-          </DialogHeader>
-          {domainToEdit && (
-            <form onSubmit={handleUpdateDomain}>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="editDomainName" className="text-right">النطاق</Label>
-                  <Input id="editDomainName" value={domainToEdit.domainName} onChange={(e) => setDomainToEdit({ ...domainToEdit, domainName: e.target.value })} className="col-span-3" required />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="editRenewalCostClient">قيمة التجديد (بالدولار)</Label>
-                    <div className="relative">
-                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">$</span>
-                      <Input id="editRenewalCostClient" type="number" placeholder="0.00" value={domainToEdit.renewalCostClient} onChange={(e) => setDomainToEdit({ ...domainToEdit, renewalCostClient: e.target.value === '' ? '' : Number(e.target.value) })} className="pl-7" />
+      {domainToEdit && (
+        <Dialog open={isEditDomainOpen} onOpenChange={setEditDomainOpen}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>تعديل النطاق: {domainToEdit.domainName}</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleUpdateDomain} className="grid gap-4 py-4">
+                     <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="domainName-edit" className="text-right">اسم النطاق</Label>
+                        <Input
+                            id="domainName-edit"
+                            value={domainToEdit.domainName}
+                            onChange={e => setDomainToEdit({ ...domainToEdit, domainName: e.target.value })}
+                            className="col-span-3"
+                            required
+                        />
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="editRenewalCostOffice">تكلفة المكتب (بالدولار)</Label>
-                    <div className="relative">
-                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">$</span>
-                      <Input id="editRenewalCostOffice" type="number" placeholder="0.00" value={domainToEdit.renewalCostOffice} onChange={(e) => setDomainToEdit({ ...domainToEdit, renewalCostOffice: e.target.value === '' ? '' : Number(e.target.value) })} className="pl-7" />
+                     <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right">المشاريع</Label>
+                        <div className="col-span-3 flex flex-wrap gap-2">
+                           {projectOptions.map(p => (
+                                <div key={p} className="flex items-center gap-2">
+                                    <Checkbox
+                                        id={`edit-${p}`}
+                                        checked={domainToEdit.projects?.includes(p)}
+                                        onCheckedChange={() => handleProjectToggle(p, setDomainToEdit, 'projects')}
+                                    />
+                                    <Label htmlFor={`edit-${p}`}>{projectLabels[p]}</Label>
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="editRenewalCostPova">قيمة التجديد (Pova)</Label>
-                     <div className="relative">
-                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">$</span>
-                      <Input id="editRenewalCostPova" type="number" placeholder="0.00" value={domainToEdit.renewalCostPova} onChange={(e) => setDomainToEdit({ ...domainToEdit, renewalCostPova: e.target.value === '' ? '' : Number(e.target.value) })} className="pl-7" />
+                     <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="renewalDate-edit" className="text-right">تاريخ التجديد</Label>
+                         <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "col-span-3 justify-start text-left font-normal",
+                                !domainToEdit.renewalDate && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="ml-2 h-4 w-4" />
+                              {domainToEdit.renewalDate ? format(domainToEdit.renewalDate as Date, "PPP") : <span>اختر تاريخ</span>}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0">
+                            <Calendar
+                              mode="single"
+                              selected={domainToEdit.renewalDate as Date}
+                              onSelect={(date) => setDomainToEdit({ ...domainToEdit, renewalDate: date || new Date() })}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
                     </div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">التجديد</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "col-span-3 justify-start text-left font-normal",
-                          !domainToEdit.renewalDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="ml-2 h-4 w-4" />
-                        {domainToEdit.renewalDate ? format(domainToEdit.renewalDate as Date, "PPP") : <span>اختر تاريخًا</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={domainToEdit.renewalDate as Date}
-                        onSelect={(date) => setDomainToEdit({ ...domainToEdit, renewalDate: date || new Date() })}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                 <div className="grid grid-cols-4 items-start gap-4">
-                    <Label className="text-right pt-2">المشاريع</Label>
-                    <div className="col-span-3 space-y-2">
-                        {projectOptions.map(p => (
-                            <div key={p} className="flex items-center space-x-2 space-x-reverse">
-                                <Checkbox
-                                    id={`edit-${p}`}
-                                    checked={domainToEdit.projects?.includes(p)}
-                                    onCheckedChange={() => handleProjectToggle(p, setDomainToEdit, 'projects')}
-                                />
-                                <Label htmlFor={`edit-${p}`} className="font-normal">{projectLabels[p]}</Label>
-                            </div>
-                        ))}
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="renewalCostClient-edit" className="text-right">تكلفة العميل ($)</Label>
+                        <Input
+                            id="renewalCostClient-edit"
+                            type="number"
+                            value={domainToEdit.renewalCostClient}
+                            onChange={e => setDomainToEdit({ ...domainToEdit, renewalCostClient: e.target.value === '' ? '' : parseFloat(e.target.value) })}
+                            className="col-span-3"
+                        />
                     </div>
-                </div>
-              </div>
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={() => setEditDomainOpen(false)}
-                    className="hover:bg-gray-100 hover:scale-105 transition-all duration-200 hover:shadow-md"
-                  >
-                    إلغاء
-                  </Button>
-                </DialogClose>
-                <Button 
-                  type="submit"
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/25"
-                >
-                  حفظ التغييرات
-                </Button>
-              </DialogFooter>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
+                    {(domainToEdit.projects || []).includes('rehlethadaf') && (
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="renewalCostOffice-edit" className="text-right">تكلفة المكتب ($)</Label>
+                        <Input
+                            id="renewalCostOffice-edit"
+                            type="number"
+                            value={domainToEdit.renewalCostOffice}
+                            onChange={e => setDomainToEdit({ ...domainToEdit, renewalCostOffice: e.target.value === '' ? '' : parseFloat(e.target.value) })}
+                            className="col-span-3"
+                        />
+                    </div>
+                    )}
+                    {(domainToEdit.projects || []).includes('pova') && (
+                     <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="renewalCostPova-edit" className="text-right">تكلفة Pova ($)</Label>
+                        <Input
+                            id="renewalCostPova-edit"
+                            type="number"
+                            value={domainToEdit.renewalCostPova || ''}
+                            onChange={e => setDomainToEdit({ ...domainToEdit, renewalCostPova: e.target.value === '' ? '' : parseFloat(e.target.value) })}
+                            className="col-span-3"
+                        />
+                    </div>
+                    )}
+                    <DialogFooter>
+                        <DialogClose asChild><Button variant="ghost">إلغاء</Button></DialogClose>
+                        <Button type="submit">حفظ التغييرات</Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+      )}
 
       {/* Data Sheet Dialog */}
-      <Dialog open={isDataSheetOpen} onOpenChange={(isOpen) => {
-          if (!isOpen) {
-              setEditingDataSheetDomain(null);
-          }
-          setDataSheetOpen(isOpen);
-      }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{dataSheetContent.title}</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <Textarea
-              value={dataSheetContent.content}
-              onChange={(e) => handleDataSheetChange(e.target.value)}
-              className="min-h-[200px] w-full text-left"
-              readOnly={!editingDataSheetDomain}
-            />
-          </div>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button 
-                type="button" 
-                variant="outline"
-                className="hover:bg-gray-100 hover:scale-105 transition-all duration-200 hover:shadow-md"
-              >
-                إغلاق
-              </Button>
-            </DialogClose>
-            {editingDataSheetDomain && (
-              <Button 
-                type="button" 
-                onClick={handleSaveDataSheet}
-                className="bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-105 transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/25"
-              >
-                حفظ
-              </Button>
-            )}
-          </DialogFooter>
+      <Dialog open={isDataSheetOpen} onOpenChange={setDataSheetOpen}>
+        <DialogContent className="max-w-[90vw] md:max-w-2xl lg:max-w-4xl h-[80vh]">
+            <DialogHeader>
+                <DialogTitle>{dataSheetContent.title}</DialogTitle>
+            </DialogHeader>
+             <div className="flex-grow flex flex-col py-4">
+                <Textarea
+                    value={dataSheetContent.content}
+                    onChange={e => handleDataSheetChange(e.target.value)}
+                    className="w-full flex-grow font-mono text-sm"
+                    rows={25}
+                />
+            </div>
+            <DialogFooter>
+                <DialogClose asChild><Button variant="ghost">إغلاق</Button></DialogClose>
+                <Button onClick={handleSaveDataSheet}>حفظ</Button>
+            </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
