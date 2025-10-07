@@ -1,32 +1,29 @@
 'use server';
 /**
- * @fileOverview A flow to check the status of a Google AI API key.
- *
- * - checkApiKeyStatus - A function that checks if an API key is valid.
- * - CheckApiKeyStatusInput - The input type for the checkApiKeyStatus function.
- * - CheckApiKeyyStatusOutput - The return type for the checkApiKeyStatus function.
+ * @fileOverview
+ * A realistic Gemini API key validator.
+ * This version simulates the same type of request a chatbot would send,
+ * so only truly working keys will pass (not just valid ones).
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
-import {genkit} from 'genkit';
-import {googleAI} from '@genkit-ai/googleai';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
 
 const CheckApiKeyStatusInputSchema = z.object({
-  apiKey: z.string().describe('The API key to check.'),
+  apiKey: z.string().describe('The Gemini API key to check.'),
 });
 export type CheckApiKeyStatusInput = z.infer<typeof CheckApiKeyStatusInputSchema>;
 
 const CheckApiKeyStatusOutputSchema = z.object({
-  isWorking: z.boolean().describe('Whether the API key is working or not.'),
+  isWorking: z.boolean().describe('Whether the API key is truly working in chatbot context.'),
+  statusCode: z.number().optional(),
+  message: z.string().optional(),
 });
-export type CheckApiKeyyStatusOutput = z.infer<
-  typeof CheckApiKeyStatusOutputSchema
->;
+export type CheckApiKeyStatusOutput = z.infer<typeof CheckApiKeyStatusOutputSchema>;
 
 export async function checkApiKeyStatus(
   input: CheckApiKeyStatusInput
-): Promise<CheckApiKeyyStatusOutput> {
+): Promise<CheckApiKeyStatusOutput> {
   return checkApiKeyStatusFlow(input);
 }
 
@@ -36,31 +33,47 @@ const checkApiKeyStatusFlow = ai.defineFlow(
     inputSchema: CheckApiKeyStatusInputSchema,
     outputSchema: CheckApiKeyStatusOutputSchema,
   },
-  async ({apiKey}) => {
+  async ({ apiKey }) => {
+    const GEMINI_MODEL = 'gemini-2.5-flash';
+    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+
     try {
-      // Create a temporary Genkit instance with the provided API key
-      const tempAi = genkit({
-        plugins: [googleAI({apiKey})],
+      // نرسل طلب بنفس طريقة البوت الحقيقي
+      const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: 'user',
+              parts: [{ text: 'اختبار اتصال API للدردشة' }],
+            },
+          ],
+        }),
       });
 
-      // Make a simple, low-cost request to validate the key
-      const response = await tempAi.generate({
-        model: 'gemini-1.0-pro',
-        prompt: 'test',
-        config: {
-          maxOutputTokens: 1,
-        },
-      });
+      const data = await response.json();
 
-      // If we get a response, the key is working.
-      return {
-        isWorking: !!response.text,
-      };
-    } catch (error) {
-      // Any error during generation means the key is likely invalid or has issues.
-      console.error(`Error checking API key ending with ...${apiKey.slice(-4)}:`, error);
+      // ✅ تحقق واقعي: لازم يرجع candidates مع output text
+      if (response.ok && Array.isArray(data?.candidates) && data.candidates[0]?.content?.parts?.[0]?.text) {
+        return {
+          isWorking: true,
+          statusCode: response.status,
+          message: 'API key works properly in chatbot context.',
+        };
+      }
+
+      // ❌ مفتاح غير شغال فعليًا
       return {
         isWorking: false,
+        statusCode: response.status,
+        message: data?.error?.message || 'API key not functional in chatbot context.',
+      };
+    } catch (error: any) {
+      console.error(`Error validating key ending with ...${apiKey.slice(-4)}:`, error);
+      return {
+        isWorking: false,
+        message: 'Network or unexpected error occurred.',
       };
     }
   }
