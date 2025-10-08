@@ -59,21 +59,31 @@ const checkApiKeyStatusFlow = ai.defineFlow(
         return {
           isWorking: true,
           statusCode: response.status,
-          message: 'API key works properly in chatbot context.',
+          message: `API key works properly. Response: ${data.candidates[0].content.parts[0].text.substring(0, 50)}...`,
         };
       }
 
       // ❌ مفتاح غير شغال فعليًا
+      console.log(`API Key validation failed for key ending with ...${apiKey.slice(-4)}:`, {
+        status: response.status,
+        statusText: response.statusText,
+        error: data?.error
+      });
+      
       return {
         isWorking: false,
         statusCode: response.status,
-        message: data?.error?.message || 'API key not functional in chatbot context.',
+        message: data?.error?.message || `API key not functional. Status: ${response.status}`,
       };
     } catch (error: any) {
-      console.error(`Error validating key ending with ...${apiKey.slice(-4)}:`, error);
+      console.error(`Error validating key ending with ...${apiKey.slice(-4)}:`, {
+        error: error.message,
+        type: error.name,
+        stack: error.stack
+      });
       return {
         isWorking: false,
-        message: 'Network or unexpected error occurred.',
+        message: `Network or unexpected error: ${error.message}`,
       };
     }
   }

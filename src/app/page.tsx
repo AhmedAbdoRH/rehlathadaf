@@ -44,11 +44,14 @@ export default function WebPage() {
   const [domainTodos, setDomainTodos] = React.useState<Record<string, Todo[]>>({});
   const [loading, setLoading] = React.useState(true);
 
-  const apiKeys = [
-    'AIzaSyAwPSkhtVxkIHvLEph99ipAcjtq3ZIqjy4',
-    'AIzaSyADRxtILZAQ7EeJA9fKju7tj_YkMErqZH0',
-    'AIzaSyAeMLURr9rdBxyc3ny2fE5p3RebkJDUCds'
+  const apiKeysData = [
+    { key: 'AIzaSyAwPSkhtVxkIHvLEph99ipAcjtq3ZIqjy4', name: 'سمارت تيم' },
+    { key: 'AIzaSyADRxtILZAQ7EeJA9fKju7tj_YkMErqZH0', name: 'السماح للمفروشات' },
+    { key: 'AIzaSyAY7XTQpSR4nws-xRIhABZn3f3kYdGIVDs', name: 'بيرفيوم امبسدور' },
+    { key: 'AIzaSyDohlhUWuaygB35M2EY-JB1_F1xztx_lO4', name: 'سمارت تيم ماسنجر' }
   ];
+  
+  const apiKeys = apiKeysData.map(item => item.key);
 
   const handleSecretClick = () => {
     const newClickCount = clickCount + 1;
@@ -95,7 +98,7 @@ export default function WebPage() {
       setDomainStatuses(initialDomainStatuses);
       
       // Set all API keys to checking initially
-      setApiKeyStatuses(apiKeys.map(key => ({ key, status: 'checking' })));
+      setApiKeyStatuses(apiKeysData.map(item => ({ key: item.key, name: item.name, status: 'checking' as const })));
 
       // Refresh todos in parallel
       const domainIds = domainsWithProject.map(d => d.id).filter((id): id is string => !!id);
@@ -120,13 +123,13 @@ export default function WebPage() {
       }
 
       // Check API key statuses
-      apiKeys.forEach((key) => {
-        checkApiKeyStatus({ apiKey: key })
+      apiKeysData.forEach((item) => {
+        checkApiKeyStatus({ apiKey: item.key })
           .then(({ isWorking }) => {
-            setApiKeyStatuses(prev => prev.map(s => s.key === key ? { ...s, status: isWorking ? 'online' : 'offline' } : s));
+            setApiKeyStatuses(prev => prev.map(s => s.key === item.key ? { ...s, status: isWorking ? 'online' : 'offline' } : s));
           })
           .catch(() => {
-            setApiKeyStatuses(prev => prev.map(s => s.key === key ? { ...s, status: 'offline' } : s));
+            setApiKeyStatuses(prev => prev.map(s => s.key === item.key ? { ...s, status: 'offline' } : s));
           });
       });
 

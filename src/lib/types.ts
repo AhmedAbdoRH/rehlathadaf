@@ -25,5 +25,6 @@ export type Todo = {
 
 export type ApiKeyStatus = {
   key: string;
+  name: string;
   status: 'checking' | 'online' | 'offline';
 };
