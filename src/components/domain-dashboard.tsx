@@ -276,18 +276,20 @@ export function DomainDashboard({
     }
   };
 
-  const handleCollectInstallment = async (domain: Domain) => {
+  const handleCollectInstallment = async (domain: Domain, installmentIndex: number) => {
     if (!domain.id || !domain.hasInstallments) return;
 
     const paidCount = domain.installmentsPaid || 0;
     const totalCount = domain.installmentCount || 0;
 
-    if (paidCount >= totalCount) {
-        toast({ title: "اكتملت الأقساط", description: "تم تحصيل جميع الأقساط بالفعل.", variant: "default" });
+    // Only allow collecting the next due installment
+    if (installmentIndex !== paidCount) {
+        toast({ title: "خطأ", description: "يرجى تحصيل الأقساط بالترتيب.", variant: "destructive" });
         return;
     }
 
     const newPaidCount = paidCount + 1;
+    if (newPaidCount > totalCount) return;
 
     try {
         await updateDomain(domain.id, { installmentsPaid: newPaidCount });
@@ -450,23 +452,27 @@ export function DomainDashboard({
     return (
         <div className="mt-4 pt-4 border-t border-border/50">
             <div className="flex flex-wrap justify-center gap-2">
-                {Array.from({ length: total }, (_, i) => (
-                    <div key={i} className={cn(
-                        "p-2 rounded-md text-xs text-center w-24",
-                        i < paid ? "bg-green-500/20 text-green-300" : "bg-muted/50 text-muted-foreground"
-                    )}>
-                        <div>قسط {i + 1}</div>
-                        <div className="font-bold">${installmentAmount}</div>
-                    </div>
-                ))}
+                {Array.from({ length: total }, (_, i) => {
+                    const isPaid = i < paid;
+                    const isNext = i === paid;
+                    return (
+                        <div 
+                            key={i} 
+                            onClick={() => !isPaid && handleCollectInstallment(domain, i)}
+                            className={cn(
+                                "p-2 rounded-md text-xs text-center w-24 transition-colors",
+                                isPaid 
+                                  ? "bg-green-500/20 text-green-300" 
+                                  : "bg-muted/50 text-muted-foreground",
+                                isNext && "cursor-pointer hover:bg-muted/80"
+                            )}
+                        >
+                            <div>قسط {i + 1}</div>
+                            <div className="font-bold">${installmentAmount}</div>
+                        </div>
+                    );
+                })}
             </div>
-             {paid < total && (
-                 <div className="text-center mt-3">
-                    <Button size="sm" variant="outline" onClick={() => handleCollectInstallment(domain)}>
-                        تحصيل القسط التالي
-                    </Button>
-                </div>
-            )}
         </div>
     );
 };
@@ -1089,5 +1095,7 @@ export function DomainDashboard({
     </>
   );
 }
+
+    
 
     
