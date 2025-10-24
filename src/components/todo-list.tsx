@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Trash2, ListPlus } from 'lucide-react';
+import { Loader2, Plus, Trash2, ListPlus, Copy } from 'lucide-react';
 import { addTodo, updateTodo, deleteTodo } from '@/services/todoService';
 import type { Todo } from '@/lib/types';
 import { formatDistanceToNow } from 'date-fns';
@@ -28,7 +28,7 @@ const defaultTodos = [
     "الشغل على تصميم الهوية والبانرات",
     "حول المعلومات الموجودة في ملفات الاكواد الخاصة بمجال المتجر لتناسب نشاط : \nوليس النشاط الحالي",
     "اختبار المستخدم",
-];
+].reverse();
 
 
 export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
@@ -167,6 +167,22 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
     }
   };
 
+   const handleCopyTodo = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      toast({
+        title: "تم النسخ",
+        description: "تم نسخ نص المهمة إلى الحافظة.",
+      });
+    }).catch(err => {
+      console.error('Failed to copy: ', err);
+      toast({
+        title: "خطأ",
+        description: "فشل في نسخ نص المهمة.",
+        variant: "destructive",
+      });
+    });
+  };
+
   const uncompletedTodos = todos.filter(todo => !todo.completed);
 
   return (
@@ -194,7 +210,7 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
       ) : (
         <div className="space-y-2">
           {uncompletedTodos.map(todo => (
-            <div key={todo.id} className="flex items-center gap-3 p-2 rounded-md bg-background/50 hover:bg-background transition-colors">
+            <div key={todo.id} className="flex items-center gap-3 p-2 rounded-md bg-background/50 hover:bg-background transition-colors group">
               <Checkbox
                 id={`todo-${todo.id}`}
                 checked={todo.completed}
@@ -210,7 +226,10 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
               <span className="text-xs text-muted-foreground">
                 {todo.createdAt ? formatDistanceToNow(new Date(todo.createdAt), { addSuffix: true, locale: ar }) : ''}
               </span>
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => todo.id && handleDeleteTodo(todo.id)}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => handleCopyTodo(todo.text)}>
+                <Copy className="h-4 w-4 text-blue-500/80" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => todo.id && handleDeleteTodo(todo.id)}>
                 <Trash2 className="h-4 w-4 text-destructive/80" />
               </Button>
             </div>
