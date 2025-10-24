@@ -167,49 +167,20 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
     }
   };
 
-   const handleCopyTodo = (text: string) => {
-    // navigator.clipboard is available only in secure contexts (HTTPS)
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(text)
-        .then(() => {
-          toast({
-            title: "تم النسخ",
-            description: "تم نسخ نص المهمة إلى الحافظة.",
-          });
-        })
-        .catch(err => {
-          console.error('Failed to copy using navigator: ', err);
-           toast({
-            title: "خطأ",
-            description: "فشل في نسخ نص المهمة.",
-            variant: "destructive",
-          });
-        });
-    } else {
-      // Fallback for insecure contexts or older browsers
-      const textArea = document.createElement("textarea");
-      textArea.value = text;
-      // Make the textarea out of sight
-      textArea.style.position = "absolute";
-      textArea.style.left = "-9999px";
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      try {
-        document.execCommand('copy');
-        toast({
-          title: "تم النسخ",
-          description: "تم نسخ نص المهمة إلى الحافظة.",
-        });
-      } catch (err) {
-        console.error('Fallback: Oops, unable to copy', err);
-        toast({
-          title: "خطأ",
-          description: "فشل في نسخ نص المهمة.",
-          variant: "destructive",
-        });
-      }
-      document.body.removeChild(textArea);
+  const handleCopyTodo = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({
+        title: "تم النسخ",
+        description: "تم نسخ نص المهمة إلى الحافظة.",
+      });
+    } catch (err) {
+      console.error('Failed to copy: ', err);
+      toast({
+        title: "خطأ",
+        description: "فشل في نسخ نص المهمة.",
+        variant: "destructive",
+      });
     }
   };
 
