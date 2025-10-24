@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Trash2, ListPlus, Copy } from 'lucide-react';
+import { Loader2, Plus, Trash2, ListPlus } from 'lucide-react';
 import { addTodo, updateTodo, deleteTodo } from '@/services/todoService';
 import type { Todo } from '@/lib/types';
 import { formatDistanceToNow } from 'date-fns';
@@ -167,20 +167,13 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
     }
   };
 
-  const handleCopyTodo = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      toast({
-        title: "تم النسخ",
-        description: "تم نسخ نص المهمة إلى الحافظة.",
-      });
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-      toast({
-        title: "خطأ",
-        description: "فشل في نسخ نص المهمة.",
-        variant: "destructive",
-      });
+  const handleLabelClick = (e: React.MouseEvent<HTMLLabelElement>) => {
+    const range = document.createRange();
+    range.selectNodeContents(e.currentTarget);
+    const selection = window.getSelection();
+    if (selection) {
+      selection.removeAllRanges();
+      selection.addRange(range);
     }
   };
 
@@ -220,16 +213,14 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
               />
               <label 
                 htmlFor={`todo-${todo.id}`}
-                className={`flex-1 text-sm cursor-pointer ${todo.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}
+                onClick={handleLabelClick}
+                className={`flex-1 text-sm select-all ${todo.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}
               >
                 {todo.text}
               </label>
               <span className="text-xs text-muted-foreground">
                 {todo.createdAt ? formatDistanceToNow(new Date(todo.createdAt), { addSuffix: true, locale: ar }) : ''}
               </span>
-              <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => handleCopyTodo(todo.text)}>
-                <Copy className="h-4 w-4 text-blue-500/80" />
-              </Button>
               <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => todo.id && handleDeleteTodo(todo.id)}>
                 <Trash2 className="h-4 w-4 text-destructive/80" />
               </Button>
