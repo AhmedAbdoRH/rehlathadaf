@@ -810,12 +810,13 @@ export function DomainDashboard({
         ))}
       </div>
 
-      <div className="flex justify-center mt-6">
-        <Button onClick={() => setAddDomainOpen(true)} className="gap-2">
-            <Plus />
-            إضافة نطاق جديد
-        </Button>
-      </div>
+      <Button
+        onClick={() => setAddDomainOpen(true)}
+        className="fixed bottom-4 left-4 h-16 w-16 rounded-full bg-primary/80 text-primary-foreground shadow-lg shadow-primary/40 backdrop-blur-sm transition-all hover:bg-primary/90 hover:scale-105 active:scale-95 z-50"
+        aria-label="إضافة نطاق جديد"
+      >
+        <Plus className="h-8 w-8" />
+      </Button>
       
       {/* Add Domain Dialog */}
        <Dialog open={isAddDomainOpen} onOpenChange={setAddDomainOpen}>
@@ -1104,3 +1105,4 @@ export function DomainDashboard({
     
 
     
+
