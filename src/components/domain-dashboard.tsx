@@ -622,7 +622,7 @@ export function DomainDashboard({
                     <TableRow>
                       <TableCell colSpan={project === 'pova' ? 6 : 5} className="p-0">
                         <div className="p-4 bg-muted/50">
-                           {domain.hasInstallments && renderInstallments(domain)}
+                           {renderInstallments(domain)}
                             <TodoList 
                               domainId={domain.id!} 
                               initialTodos={allTodos[domain.id!] || []}
@@ -786,7 +786,7 @@ export function DomainDashboard({
                 </div>
                  <CollapsibleContent>
                     <div className="p-4 border-t bg-muted/20">
-                      {domain.hasInstallments && renderInstallments(domain)}
+                      {renderInstallments(domain)}
                       <TodoList 
                         domainId={domain.id!} 
                         initialTodos={allTodos[domain.id!] || []}
@@ -1090,3 +1090,5 @@ export function DomainDashboard({
     </>
   );
 }
+
+    
