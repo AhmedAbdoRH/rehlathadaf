@@ -810,13 +810,13 @@ export function DomainDashboard({
         ))}
       </div>
 
-      <Button
+      <button
         onClick={() => setAddDomainOpen(true)}
-        className="fixed bottom-4 left-4 h-16 w-16 rounded-full bg-primary/80 text-primary-foreground shadow-lg shadow-primary/40 backdrop-blur-sm transition-all hover:bg-primary/90 hover:scale-105 active:scale-95 z-50"
+        className="fab-button"
         aria-label="إضافة نطاق جديد"
       >
         <Plus className="h-8 w-8" />
-      </Button>
+      </button>
       
       {/* Add Domain Dialog */}
        <Dialog open={isAddDomainOpen} onOpenChange={setAddDomainOpen}>
@@ -1105,4 +1105,3 @@ export function DomainDashboard({
     
 
     
-

@@ -83,3 +83,42 @@
     font-family: 'Inter', sans-serif;
   }
 }
+
+@layer utilities {
+  @keyframes gradient-animation {
+    0% { background-position: left center; }
+    50% { background-position: right center; }
+    100% { background-position: left center; }
+  }
+
+  .fab-button {
+    @apply fixed bottom-4 left-4 h-16 w-16 rounded-full flex items-center justify-center cursor-pointer border-none shadow-lg z-50 text-white;
+    text-shadow: 2px 2px 3px rgb(136 0 136 / 50%);
+    background: linear-gradient(
+        15deg,
+        #880088,
+        #aa2068,
+        #cc3f47,
+        #de6f3d,
+        #f09f33,
+        #de6f3d,
+        #cc3f47,
+        #aa2068,
+        #880088
+      )
+      no-repeat;
+    background-size: 300%;
+    animation: gradient-animation 8s linear infinite;
+    transition: all 0.3s ease;
+  }
+
+  .fab-button:hover {
+    transform: scale(1.05);
+    background-size: 320%;
+    box-shadow: 0 10px 20px rgba(204, 63, 71, 0.4);
+  }
+
+  .fab-button:active {
+    transform: scale(0.95);
+  }
+}
