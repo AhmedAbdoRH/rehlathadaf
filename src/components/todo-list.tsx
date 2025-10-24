@@ -204,21 +204,22 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
       ) : (
         <div className="space-y-2">
           {uncompletedTodos.map(todo => (
-            <div key={todo.id} className="flex items-center gap-3 p-2 rounded-md bg-background/50 hover:bg-background transition-colors group">
+            <div key={todo.id} className="flex items-start gap-3 p-2 rounded-md bg-background/50 hover:bg-background transition-colors group">
               <Checkbox
                 id={`todo-${todo.id}`}
                 checked={todo.completed}
                 onCheckedChange={() => handleToggleTodo(todo)}
                 aria-label={todo.text}
+                className="mt-1"
               />
               <label 
                 htmlFor={`todo-${todo.id}`}
                 onClick={handleLabelClick}
-                className={`flex-1 text-sm select-all ${todo.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}
+                className={`flex-1 text-sm select-all whitespace-pre-wrap ${todo.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}
               >
                 {todo.text}
               </label>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-muted-foreground mt-1">
                 {todo.createdAt ? formatDistanceToNow(new Date(todo.createdAt), { addSuffix: true, locale: ar }) : ''}
               </span>
               <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => todo.id && handleDeleteTodo(todo.id)}>
