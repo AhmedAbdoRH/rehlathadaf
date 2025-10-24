@@ -85,37 +85,32 @@
 }
 
 @layer utilities {
-  @keyframes gradient-animation {
-    0% { background-position: left center; }
-    50% { background-position: right center; }
-    100% { background-position: left center; }
+  @keyframes pulse-blue-glow {
+    0% {
+      box-shadow: 0 0 5px #007cf0, 0 0 10px #007cf0, 0 0 15px #007cf0;
+    }
+    50% {
+      box-shadow: 0 0 10px #007cf0, 0 0 20px #007cf0, 0 0 30px #007cf0;
+    }
+    100% {
+      box-shadow: 0 0 5px #007cf0, 0 0 10px #007cf0, 0 0 15px #007cf0;
+    }
   }
 
   .fab-button {
-    @apply fixed bottom-4 left-4 h-16 w-16 rounded-full flex items-center justify-center cursor-pointer border-none shadow-lg z-50 text-white;
-    text-shadow: 2px 2px 3px rgb(136 0 136 / 50%);
-    background: linear-gradient(
-        15deg,
-        #880088,
-        #aa2068,
-        #cc3f47,
-        #de6f3d,
-        #f09f33,
-        #de6f3d,
-        #cc3f47,
-        #aa2068,
-        #880088
-      )
-      no-repeat;
-    background-size: 300%;
-    animation: gradient-animation 8s linear infinite;
+    @apply fixed bottom-4 left-4 h-16 w-16 rounded-full flex items-center justify-center cursor-pointer z-50 text-white;
+    background-color: rgba(0, 124, 240, 0.2); /* Semi-transparent blue background */
+    border: 2px solid #007cf0; /* Electric blue border */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    animation: pulse-blue-glow 2.5s infinite ease-in-out;
     transition: all 0.3s ease;
   }
 
   .fab-button:hover {
     transform: scale(1.05);
-    background-size: 320%;
-    box-shadow: 0 10px 20px rgba(204, 63, 71, 0.4);
+    background-color: rgba(0, 124, 240, 0.3);
+    box-shadow: 0 0 15px #007cf0, 0 0 25px #007cf0, 0 0 35px #007cf0;
   }
 
   .fab-button:active {
