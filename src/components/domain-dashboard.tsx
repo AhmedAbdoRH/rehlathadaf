@@ -26,7 +26,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import type { Domain, Project, Todo } from '@/lib/types';
 import { format, parseISO, formatISO, differenceInDays, subYears, addYears } from 'date-fns';
-import { Plus, Trash2, Calendar as CalendarIcon, Loader2, Pencil, Check, FileText, CalendarPlus, ChevronDown } from 'lucide-react';
+import { Plus, Trash2, Calendar as CalendarIcon, Loader2, Pencil, Check, FileText, CalendarPlus, ChevronDown, Copy } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Calendar } from './ui/calendar';
 import { Progress } from './ui/progress';
@@ -449,7 +449,6 @@ export function DomainDashboard({
 
     return (
         <div className="mt-4 pt-4 border-t border-border/50">
-            <h4 className="text-sm font-semibold mb-2 text-center">نظام الأقساط ({paid}/{total})</h4>
             <div className="flex flex-wrap justify-center gap-2">
                 {Array.from({ length: total }, (_, i) => (
                     <div key={i} className={cn(
@@ -494,6 +493,7 @@ export function DomainDashboard({
                             <div className="text-right">{`${format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}`}</div>
                             <Progress value={getRenewalProgress(domain.renewalDate as string)} className="h-2 mt-1" />
                           </div>
+                           {renderInstallments(domain)}
                         </div>
                         <div className='flex items-center gap-4 px-4'>
                           {project === 'pova' ? (
@@ -622,7 +622,6 @@ export function DomainDashboard({
                     <TableRow>
                       <TableCell colSpan={project === 'pova' ? 6 : 5} className="p-0">
                         <div className="p-4 bg-muted/50">
-                           {renderInstallments(domain)}
                             <TodoList 
                               domainId={domain.id!} 
                               initialTodos={allTodos[domain.id!] || []}
@@ -656,6 +655,7 @@ export function DomainDashboard({
                         <div className="text-right text-sm text-muted-foreground">{`${format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}`}</div>
                         <Progress value={getRenewalProgress(domain.renewalDate as string)} className="h-2 mt-1" />
                       </div>
+                      {renderInstallments(domain)}
                     </div>
                     <CollapsibleTrigger asChild>
                       <Button variant="ghost" size="sm" className="w-9 p-0 data-[state=open]:rotate-180">
@@ -786,7 +786,6 @@ export function DomainDashboard({
                 </div>
                  <CollapsibleContent>
                     <div className="p-4 border-t bg-muted/20">
-                      {renderInstallments(domain)}
                       <TodoList 
                         domainId={domain.id!} 
                         initialTodos={allTodos[domain.id!] || []}

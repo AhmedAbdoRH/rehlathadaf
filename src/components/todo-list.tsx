@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Trash2, ListPlus } from 'lucide-react';
+import { Loader2, Plus, Trash2, ListPlus, Copy } from 'lucide-react';
 import { addTodo, updateTodo, deleteTodo } from '@/services/todoService';
 import type { Todo } from '@/lib/types';
 import { formatDistanceToNow } from 'date-fns';
