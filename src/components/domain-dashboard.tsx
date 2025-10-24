@@ -26,7 +26,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import type { Domain, Project, Todo } from '@/lib/types';
 import { format, parseISO, formatISO, differenceInDays, subYears, addYears } from 'date-fns';
-import { Plus, Trash2, Calendar as CalendarIcon, Loader2, Pencil, Check, FileText, CalendarPlus, ChevronDown, Copy, LayoutGrid } from 'lucide-react';
+import { Plus, Trash2, Calendar as CalendarIcon, Loader2, Pencil, Check, FileText, CalendarPlus, ChevronDown, Copy, Grid2x2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Calendar } from './ui/calendar';
 import { Progress } from './ui/progress';
@@ -506,7 +506,7 @@ export function DomainDashboard({
                             {domain.id && renderStatusDot(domain.id)}
                              <a href={getUrl(domain.domainName)} target="_blank" rel="noopener noreferrer" className="font-medium text-lg flex items-center gap-2" style={{ color: '#90b8f8' }}>
                               {domain.domainName}
-                              {domain.isOnlineCatalog && <LayoutGrid className="h-4 w-4 text-cyan-400" />}
+                              {domain.isOnlineCatalog && <Grid2x2 className="h-4 w-4 text-cyan-400" />}
                             </a>
                           </div>
                           <div className='mt-2'>
@@ -671,7 +671,7 @@ export function DomainDashboard({
                         {domain.id && renderStatusDot(domain.id)}
                         <a href={getUrl(domain.domainName)} target="_blank" rel="noopener noreferrer" className="font-medium text-lg flex items-center gap-2" style={{ color: '#90b8f8' }}>
                           {domain.domainName}
-                          {domain.isOnlineCatalog && <LayoutGrid className="h-4 w-4 text-cyan-400" />}
+                          {domain.isOnlineCatalog && <Grid2x2 className="h-4 w-4 text-cyan-400" />}
                         </a>
                       </div>
                       <div className='mt-2'>
@@ -1140,5 +1140,6 @@ export function DomainDashboard({
     
 
     
+
 
 
