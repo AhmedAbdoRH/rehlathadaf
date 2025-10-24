@@ -261,7 +261,10 @@ export function DomainDashboard({
     const nextRenewalDateISO = formatISO(nextRenewalDate);
 
     try {
-        await updateDomain(domain.id, { renewalDate: nextRenewalDateISO });
+        await updateDomain(domain.id, { 
+          renewalDate: nextRenewalDateISO,
+          installmentsPaid: 0 // Reset installments on renewal
+        });
         toast({
             title: "تم تجديد النطاق",
             description: `تم تحديث تاريخ تجديد ${domain.domainName} إلى ${format(nextRenewalDate, 'dd/MM/yyyy')}.`,
@@ -272,6 +275,7 @@ export function DomainDashboard({
         toast({
             title: "خطأ",
             description: "فشل في تجديد النطاق.",
+            variant: "destructive"
         });
     }
   };
@@ -349,6 +353,7 @@ export function DomainDashboard({
         toast({
             title: "خطأ",
             description: "فشل في حفظ شيت البيانات.",
+            variant: "destructive"
         });
     }
   };
@@ -546,7 +551,7 @@ export function DomainDashboard({
                             <AlertDialogDescription>
                               هل أنت متأكد من أنك تريد تجديد النطاق 
                               <span className="font-bold"> {domain.domainName}</span>؟ 
-                              سيتم تحديث تاريخ التجديد للعام القادم.
+                              سيتم تحديث تاريخ التجديد للعام القادم وسيتم إعادة تعيين الأقساط.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -718,7 +723,7 @@ export function DomainDashboard({
                                     <AlertDialogDescription>
                                         هل أنت متأكد من أنك تريد تجديد النطاق 
                                         <span className="font-bold"> {domain.domainName}</span>؟ 
-                                        سيتم تحديث تاريخ التجديد للعام القادم.
+                                        سيتم تحديث تاريخ التجديد للعام القادم وسيتم إعادة تعيين الأقساط.
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
