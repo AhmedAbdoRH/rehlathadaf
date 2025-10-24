@@ -19,7 +19,7 @@ export const deleteDomain = async (id: string): Promise<void> => {
   await deleteDoc(domainDoc);
 };
 
-export const updateDomain = async (id: string, updatedDomain: Partial<Omit<Domain, 'id'>>): Promise<void> => {
+export const updateDomain = async (id: string, updatedDomain: Partial<Omit<Domain, 'id' | 'installmentCount'>> & { installmentCount?: number | '' }): Promise<void> => {
   const domainDoc = doc(db, 'domains', id);
   await updateDoc(domainDoc, updatedDomain);
 };

@@ -26,7 +26,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import type { Domain, Project, Todo } from '@/lib/types';
 import { format, parseISO, formatISO, differenceInDays, subYears, addYears } from 'date-fns';
-import { Plus, Trash2, Calendar as CalendarIcon, Loader2, Pencil, Check, FileText, CalendarPlus, ChevronDown, Copy } from 'lucide-react';
+import { Plus, Trash2, Calendar as CalendarIcon, Loader2, Pencil, Check, FileText, CalendarPlus, ChevronDown, Copy, LayoutGrid } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Calendar } from './ui/calendar';
 import { Progress } from './ui/progress';
@@ -94,6 +94,7 @@ export function DomainDashboard({
     projects: Project[];
     hasInstallments: boolean;
     installmentCount: number | '';
+    isOnlineCatalog: boolean;
   }>({
     domainName: '',
     dataSheet: '',
@@ -104,6 +105,7 @@ export function DomainDashboard({
     projects: [project],
     hasInstallments: false,
     installmentCount: '',
+    isOnlineCatalog: false,
   });
   
   React.useEffect(() => {
@@ -154,6 +156,7 @@ export function DomainDashboard({
       hasInstallments: newDomain.hasInstallments,
       installmentCount: newDomain.hasInstallments ? Number(newDomain.installmentCount) || 0 : 0,
       installmentsPaid: 0,
+      isOnlineCatalog: newDomain.isOnlineCatalog,
     };
     
     try {
@@ -173,6 +176,7 @@ export function DomainDashboard({
           projects: [project],
           hasInstallments: false,
           installmentCount: '',
+          isOnlineCatalog: false,
       });
       onDomainChange();
     } catch (error) {
@@ -233,6 +237,7 @@ export function DomainDashboard({
           renewalCostPova: Number(updatedData.renewalCostPova) || 0,
           hasInstallments: updatedData.hasInstallments,
           installmentCount: updatedData.hasInstallments ? Number(updatedData.installmentCount) || 0 : 0,
+          isOnlineCatalog: updatedData.isOnlineCatalog,
       };
 
       await updateDomain(id, finalData);
@@ -319,6 +324,7 @@ export function DomainDashboard({
         projects: domain.projects || [],
         hasInstallments: domain.hasInstallments || false,
         installmentCount: domain.installmentCount || '',
+        isOnlineCatalog: domain.isOnlineCatalog || false,
     });
     setEditDomainOpen(true);
   };
@@ -451,7 +457,7 @@ export function DomainDashboard({
     if (!domain.hasInstallments || !domain.installmentCount) return null;
 
     const paid = domain.installmentsPaid || 0;
-    const total = domain.installmentCount;
+    const total = Number(domain.installmentCount);
     const installmentAmount = (Number(domain.renewalCostClient) / total).toFixed(2);
 
     return (
@@ -498,7 +504,10 @@ export function DomainDashboard({
                         <div className='flex-grow'>
                           <div className="flex items-center gap-2">
                             {domain.id && renderStatusDot(domain.id)}
-                            <a href={getUrl(domain.domainName)} target="_blank" rel="noopener noreferrer" className="font-medium text-lg" style={{ color: '#90b8f8' }}>{domain.domainName}</a>
+                             <a href={getUrl(domain.domainName)} target="_blank" rel="noopener noreferrer" className="font-medium text-lg flex items-center gap-2" style={{ color: '#90b8f8' }}>
+                              {domain.domainName}
+                              {domain.isOnlineCatalog && <LayoutGrid className="h-4 w-4 text-cyan-400" />}
+                            </a>
                           </div>
                           <div className='mt-2'>
                             <div className="text-right">{`${format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}`}</div>
@@ -660,7 +669,10 @@ export function DomainDashboard({
                     <div className='flex-grow'>
                       <div className="flex items-center gap-2">
                         {domain.id && renderStatusDot(domain.id)}
-                        <a href={getUrl(domain.domainName)} target="_blank" rel="noopener noreferrer" className="font-medium text-lg" style={{ color: '#90b8f8' }}>{domain.domainName}</a>
+                        <a href={getUrl(domain.domainName)} target="_blank" rel="noopener noreferrer" className="font-medium text-lg flex items-center gap-2" style={{ color: '#90b8f8' }}>
+                          {domain.domainName}
+                          {domain.isOnlineCatalog && <LayoutGrid className="h-4 w-4 text-cyan-400" />}
+                        </a>
                       </div>
                       <div className='mt-2'>
                         <div className="text-right text-sm text-muted-foreground">{`${format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}`}</div>
@@ -934,6 +946,17 @@ export function DomainDashboard({
                     />
                 </div>
             )}
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="isOnlineCatalog-add" className="text-right">اونلاين كتلوج</Label>
+                <div className="col-span-3 flex items-center">
+                    <Checkbox
+                        id="isOnlineCatalog-add"
+                        checked={newDomain.isOnlineCatalog}
+                        onCheckedChange={checked => setNewDomain({ ...newDomain, isOnlineCatalog: !!checked })}
+                    />
+                </div>
+            </div>
 
             <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="dataSheet-add" className="text-right">شيت البيانات</Label>
@@ -1069,6 +1092,18 @@ export function DomainDashboard({
                             />
                         </div>
                     )}
+
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="isOnlineCatalog-edit" className="text-right">اونلاين كتلوج</Label>
+                        <div className="col-span-3 flex items-center">
+                            <Checkbox
+                                id="isOnlineCatalog-edit"
+                                checked={domainToEdit.isOnlineCatalog}
+                                onCheckedChange={checked => setDomainToEdit({ ...domainToEdit, isOnlineCatalog: !!checked })}
+                            />
+                        </div>
+                    </div>
+
                     <DialogFooter>
                         <DialogClose asChild><Button variant="ghost">إلغاء</Button></DialogClose>
                         <Button type="submit">حفظ التغييرات</Button>
@@ -1105,4 +1140,5 @@ export function DomainDashboard({
     
 
     
+
 
