@@ -85,32 +85,49 @@
 }
 
 @layer utilities {
-  @keyframes pulse-blue-glow {
+  @keyframes ripple-wave {
     0% {
-      box-shadow: 0 0 5px #007cf0, 0 0 10px #007cf0, 0 0 15px #007cf0;
-    }
-    50% {
-      box-shadow: 0 0 10px #007cf0, 0 0 20px #007cf0, 0 0 30px #007cf0;
+      transform: scale(0.9);
+      opacity: 0.8;
     }
     100% {
-      box-shadow: 0 0 5px #007cf0, 0 0 10px #007cf0, 0 0 15px #007cf0;
+      transform: scale(2);
+      opacity: 0;
     }
   }
 
   .fab-button {
     @apply fixed bottom-4 left-4 h-16 w-16 rounded-full flex items-center justify-center cursor-pointer z-50 text-white;
-    background-color: rgba(0, 124, 240, 0.4); /* Semi-transparent blue background */
-    border: 2px solid #007cf0; /* Electric blue border */
+    background-color: rgba(0, 124, 240, 0.4);
+    border: 2px solid #007cf0;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    animation: pulse-blue-glow 2.5s infinite ease-in-out;
     transition: all 0.3s ease;
+    overflow: visible; /* Allow pseudo-elements to be visible */
   }
+  
+  .fab-button::before,
+  .fab-button::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 50%;
+    border: 2px solid #007cf0;
+    animation: ripple-wave 2s infinite ease-out;
+  }
+
+  .fab-button::after {
+    animation-delay: -1s;
+  }
+
 
   .fab-button:hover {
     transform: scale(1.05);
     background-color: rgba(0, 124, 240, 0.5);
-    box-shadow: 0 0 15px #007cf0, 0 0 25px #007cf0, 0 0 35px #007cf0;
+    box-shadow: 0 0 15px #007cf0, 0 0 25px #007cf0;
   }
 
   .fab-button:active {
