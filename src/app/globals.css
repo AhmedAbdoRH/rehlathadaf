@@ -99,7 +99,7 @@
 
   .fab-button {
     @apply fixed bottom-4 left-4 h-16 w-16 rounded-full flex items-center justify-center cursor-pointer z-50 text-white;
-    background-color: rgba(0, 124, 240, 0.2); /* Semi-transparent blue background */
+    background-color: rgba(0, 124, 240, 0.4); /* Semi-transparent blue background */
     border: 2px solid #007cf0; /* Electric blue border */
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -109,7 +109,7 @@
 
   .fab-button:hover {
     transform: scale(1.05);
-    background-color: rgba(0, 124, 240, 0.3);
+    background-color: rgba(0, 124, 240, 0.5);
     box-shadow: 0 0 15px #007cf0, 0 0 25px #007cf0, 0 0 35px #007cf0;
   }
 
