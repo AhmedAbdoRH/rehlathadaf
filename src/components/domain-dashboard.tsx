@@ -472,7 +472,7 @@ export function DomainDashboard({
                             key={i} 
                             onClick={() => !isPaid && handleCollectInstallment(domain, i)}
                             className={cn(
-                                "p-1 md:p-2 rounded-md text-xs text-center w-20 md:w-24 transition-colors",
+                                "p-1 rounded-md text-xs text-center w-16 md:w-24 transition-colors",
                                 isPaid 
                                   ? "bg-green-500/20 text-green-300" 
                                   : "bg-muted/50 text-muted-foreground",
@@ -1141,6 +1141,7 @@ export function DomainDashboard({
     
 
     
+
 
 
 
