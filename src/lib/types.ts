@@ -13,6 +13,9 @@ export type Domain = {
   renewalCostOffice: number | '';
   renewalCostPova?: number | '';
   projects?: Project[];
+  hasInstallments?: boolean;
+  installmentCount?: number;
+  installmentsPaid?: number;
 };
 
 export type Todo = {

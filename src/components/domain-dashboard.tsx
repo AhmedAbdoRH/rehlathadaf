@@ -92,6 +92,8 @@ export function DomainDashboard({
     renewalCostOffice: number | '';
     renewalCostPova: number | '';
     projects: Project[];
+    hasInstallments: boolean;
+    installmentCount: number | '';
   }>({
     domainName: '',
     dataSheet: '',
@@ -99,7 +101,9 @@ export function DomainDashboard({
     renewalCostClient: '',
     renewalCostOffice: '',
     renewalCostPova: '',
-    projects: [project]
+    projects: [project],
+    hasInstallments: false,
+    installmentCount: '',
   });
   
   React.useEffect(() => {
@@ -146,7 +150,10 @@ export function DomainDashboard({
       renewalCostPova: Number(newDomain.renewalCostPova) || 0,
       status: 'active',
       collectionDate: formatISO(new Date()),
-      projects: newDomain.projects
+      projects: newDomain.projects,
+      hasInstallments: newDomain.hasInstallments,
+      installmentCount: newDomain.hasInstallments ? Number(newDomain.installmentCount) || 0 : 0,
+      installmentsPaid: 0,
     };
     
     try {
@@ -164,6 +171,8 @@ export function DomainDashboard({
           renewalCostOffice: '',
           renewalCostPova: '',
           projects: [project],
+          hasInstallments: false,
+          installmentCount: '',
       });
       onDomainChange();
     } catch (error) {
@@ -222,6 +231,8 @@ export function DomainDashboard({
           renewalCostClient: Number(updatedData.renewalCostClient) || 0,
           renewalCostOffice: Number(updatedData.renewalCostOffice) || 0,
           renewalCostPova: Number(updatedData.renewalCostPova) || 0,
+          hasInstallments: updatedData.hasInstallments,
+          installmentCount: updatedData.hasInstallments ? Number(updatedData.installmentCount) || 0 : 0,
       };
 
       await updateDomain(id, finalData);
@@ -265,6 +276,33 @@ export function DomainDashboard({
     }
   };
 
+  const handleCollectInstallment = async (domain: Domain) => {
+    if (!domain.id || !domain.hasInstallments) return;
+
+    const paidCount = domain.installmentsPaid || 0;
+    const totalCount = domain.installmentCount || 0;
+
+    if (paidCount >= totalCount) {
+        toast({ title: "اكتملت الأقساط", description: "تم تحصيل جميع الأقساط بالفعل.", variant: "default" });
+        return;
+    }
+
+    const newPaidCount = paidCount + 1;
+
+    try {
+        await updateDomain(domain.id, { installmentsPaid: newPaidCount });
+        toast({
+            title: "تم تحصيل القسط",
+            description: `تم تحصيل القسط رقم ${newPaidCount} لـ ${domain.domainName}.`,
+        });
+        onDomainChange();
+    } catch (error) {
+        console.error("Error collecting installment:", error);
+        toast({ title: "خطأ", description: "فشل في تحصيل القسط.", variant: "destructive" });
+    }
+};
+
+
   const openEditDialog = (domain: Domain) => {
     setDomainToEdit({
         ...domain,
@@ -273,6 +311,8 @@ export function DomainDashboard({
         renewalCostOffice: domain.renewalCostOffice || '',
         renewalCostPova: domain.renewalCostPova || '',
         projects: domain.projects || [],
+        hasInstallments: domain.hasInstallments || false,
+        installmentCount: domain.installmentCount || '',
     });
     setEditDomainOpen(true);
   };
@@ -399,6 +439,38 @@ export function DomainDashboard({
       </div>
     );
   }
+
+  const renderInstallments = (domain: Domain) => {
+    if (!domain.hasInstallments || !domain.installmentCount) return null;
+
+    const paid = domain.installmentsPaid || 0;
+    const total = domain.installmentCount;
+    const installmentAmount = (Number(domain.renewalCostClient) / total).toFixed(2);
+
+    return (
+        <div className="mt-4 pt-4 border-t border-border/50">
+            <h4 className="text-sm font-semibold mb-2 text-center">نظام الأقساط ({paid}/{total})</h4>
+            <div className="flex flex-wrap justify-center gap-2">
+                {Array.from({ length: total }, (_, i) => (
+                    <div key={i} className={cn(
+                        "p-2 rounded-md text-xs text-center w-24",
+                        i < paid ? "bg-green-500/20 text-green-300" : "bg-muted/50 text-muted-foreground"
+                    )}>
+                        <div>قسط {i + 1}</div>
+                        <div className="font-bold">${installmentAmount}</div>
+                    </div>
+                ))}
+            </div>
+             {paid < total && (
+                 <div className="text-center mt-3">
+                    <Button size="sm" variant="outline" onClick={() => handleCollectInstallment(domain)}>
+                        تحصيل القسط التالي
+                    </Button>
+                </div>
+            )}
+        </div>
+    );
+};
 
 
   return (
@@ -550,6 +622,7 @@ export function DomainDashboard({
                     <TableRow>
                       <TableCell colSpan={project === 'pova' ? 6 : 5} className="p-0">
                         <div className="p-4 bg-muted/50">
+                           {domain.hasInstallments && renderInstallments(domain)}
                             <TodoList 
                               domainId={domain.id!} 
                               initialTodos={allTodos[domain.id!] || []}
@@ -713,6 +786,7 @@ export function DomainDashboard({
                 </div>
                  <CollapsibleContent>
                     <div className="p-4 border-t bg-muted/20">
+                      {domain.hasInstallments && renderInstallments(domain)}
                       <TodoList 
                         domainId={domain.id!} 
                         initialTodos={allTodos[domain.id!] || []}
@@ -824,6 +898,32 @@ export function DomainDashboard({
                 />
             </div>
             )}
+
+            <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="hasInstallments-add" className="text-right">تحصيل بالأقساط</Label>
+                <div className="col-span-3 flex items-center">
+                    <Checkbox
+                        id="hasInstallments-add"
+                        checked={newDomain.hasInstallments}
+                        onCheckedChange={checked => setNewDomain({ ...newDomain, hasInstallments: !!checked })}
+                    />
+                </div>
+            </div>
+
+            {newDomain.hasInstallments && (
+                 <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="installmentCount-add" className="text-right">عدد الأقساط</Label>
+                    <Input
+                        id="installmentCount-add"
+                        type="number"
+                        value={newDomain.installmentCount}
+                        onChange={e => setNewDomain({ ...newDomain, installmentCount: e.target.value === '' ? '' : parseInt(e.target.value, 10) })}
+                        className="col-span-3"
+                        min="1"
+                    />
+                </div>
+            )}
+
             <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="dataSheet-add" className="text-right">شيت البيانات</Label>
                 <Textarea
@@ -933,6 +1033,30 @@ export function DomainDashboard({
                             className="col-span-3"
                         />
                     </div>
+                    )}
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="hasInstallments-edit" className="text-right">تحصيل بالأقساط</Label>
+                        <div className="col-span-3 flex items-center">
+                            <Checkbox
+                                id="hasInstallments-edit"
+                                checked={domainToEdit.hasInstallments}
+                                onCheckedChange={checked => setDomainToEdit({ ...domainToEdit, hasInstallments: !!checked })}
+                            />
+                        </div>
+                    </div>
+
+                    {domainToEdit.hasInstallments && (
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="installmentCount-edit" className="text-right">عدد الأقساط</Label>
+                            <Input
+                                id="installmentCount-edit"
+                                type="number"
+                                value={domainToEdit.installmentCount || ''}
+                                onChange={e => setDomainToEdit({ ...domainToEdit, installmentCount: e.target.value === '' ? '' : parseInt(e.target.value, 10) })}
+                                className="col-span-3"
+                                min="1"
+                            />
+                        </div>
                     )}
                     <DialogFooter>
                         <DialogClose asChild><Button variant="ghost">إلغاء</Button></DialogClose>
