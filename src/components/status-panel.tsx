@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from 'react';
@@ -71,7 +72,22 @@ export function StatusPanel({ domains, domainStatuses, domainTodos, apiKeyStatus
   const getStatusLight = (status: 'checking' | 'online' | 'offline', index: number, hasTodos?: boolean, isApiKey: boolean = false) => {
     const baseClasses = isApiKey ? "w-4 h-1.5 rounded-sm" : "w-2.5 h-2.5 rounded-full";
     
-    if (hasTodos && !isApiKey) {
+    if (isApiKey) {
+      return (
+          <div 
+            className={cn(
+              baseClasses,
+              "bg-yellow-500 shadow-yellow-500/60 animate-pulse"
+            )}
+            style={{ 
+              animationDuration: '1.5s',
+              animationDelay: `${index * 100}ms`
+            }}
+          />
+      );
+    }
+
+    if (hasTodos) {
       return (
          <div 
             className={cn(
