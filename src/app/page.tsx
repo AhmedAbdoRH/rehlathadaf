@@ -15,8 +15,9 @@ import { getTodosForDomains } from '@/services/todoService';
 import { AllTodosPanel } from '@/components/all-todos-panel';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from '@/components/ui/button';
-import { ChevronDown, DollarSign, PiggyBank } from 'lucide-react';
+import { ChevronDown, DollarSign, PiggyBank, ShieldAlert } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { FaultsSheet } from '@/components/faults-sheet';
 
 const StatCard = ({ title, value, icon, className }: { title: string, value: string, icon: React.ElementType, className?: string }) => {
     const Icon = icon;
@@ -43,6 +44,8 @@ export default function WebPage() {
   const [apiKeyStatuses, setApiKeyStatuses] = React.useState<ApiKeyStatus[]>([]);
   const [domainTodos, setDomainTodos] = React.useState<Record<string, Todo[]>>({});
   const [loading, setLoading] = React.useState(true);
+  const [isFaultsSheetOpen, setFaultsSheetOpen] = React.useState(false);
+
 
   const apiKeysData = [
     { key: 'AIzaSyAwPSkhtVxkIHvLEph99ipAcjtq3ZIqjy4', name: 'سمارت تيم' },
@@ -172,6 +175,17 @@ export default function WebPage() {
         className="fixed left-0 top-0 h-full w-4 cursor-pointer z-10"
         title="Secret"
       />
+      <Button 
+        variant="ghost" 
+        size="icon" 
+        className="fixed top-4 left-4 z-20 h-10 w-10 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500/20 hover:text-red-400"
+        onClick={() => setFaultsSheetOpen(true)}
+        >
+        <ShieldAlert className="h-5 w-5" />
+      </Button>
+
+      <FaultsSheet open={isFaultsSheetOpen} onOpenChange={setFaultsSheetOpen} />
+
       <div className="min-h-screen bg-background text-foreground">
         <div className="container mx-auto p-4 sm:p-6 lg:p-8">
           

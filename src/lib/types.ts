@@ -32,3 +32,9 @@ export type ApiKeyStatus = {
   name: string;
   status: 'checking' | 'online' | 'offline';
 };
+
+export type Fault = {
+  id?: string;
+  text: string;
+  createdAt: string; // ISO 8601 string
+};
