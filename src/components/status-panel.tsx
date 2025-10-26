@@ -5,7 +5,7 @@ import * as React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type { Domain, ApiKeyStatus } from '@/lib/types';
-import { differenceInDays, addDays, getMonth, getYear, subMonths } from 'date-fns';
+import { differenceInDays, addDays, getMonth, getYear, subMonths, startOfMonth, endOfMonth, differenceInCalendarDays, sub, add } from 'date-fns';
 
 interface StatusPanelProps {
   domains: Domain[];
@@ -17,21 +17,33 @@ interface StatusPanelProps {
 export function StatusPanel({ domains, domainStatuses, domainTodos, apiKeyStatuses }: StatusPanelProps) {
   const [clickedApiKey, setClickedApiKey] = React.useState<string | null>(null);
   const [showCountdownName, setShowCountdownName] = React.useState<boolean>(false);
-  const [daysRemaining, setDaysRemaining] = React.useState<number>(30);
+  const [daysRemaining, setDaysRemaining] = React.useState<number>(0);
   const [countdownPercentage, setCountdownPercentage] = React.useState(100);
 
   // Countdown logic for Smart Team Messenger
   React.useEffect(() => {
     const calculateCountdown = () => {
       const now = new Date();
-      // The countdown period is 30 days, starting from the 11th of the previous month.
-      const lastMonth = subMonths(now, 1);
-      const startDate = new Date(getYear(lastMonth), getMonth(lastMonth), 11);
-      const endDate = addDays(startDate, 30);
-      
-      const remaining = differenceInDays(endDate, now);
+      let endDate: Date;
+      let startDate: Date;
+
+      // The period ends on the 10th of each month.
+      if (now.getDate() <= 10) {
+        // We are in the countdown period for the current month's 10th.
+        endDate = new Date(now.getFullYear(), now.getMonth(), 10);
+        startDate = new Date(now.getFullYear(), now.getMonth() - 1, 11);
+      } else {
+        // The countdown for this month is over, now counting for next month's 10th.
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 10);
+        startDate = new Date(now.getFullYear(), now.getMonth(), 11);
+      }
+
+      const totalDaysInPeriod = differenceInCalendarDays(endDate, startDate);
+      const remaining = differenceInCalendarDays(endDate, now);
       const validRemainingDays = Math.max(0, remaining);
-      const percentage = (validRemainingDays / 30) * 100;
+
+      // We want the bar to be full at the beginning and empty at the end.
+      const percentage = totalDaysInPeriod > 0 ? (validRemainingDays / totalDaysInPeriod) * 100 : 0;
       
       setDaysRemaining(validRemainingDays);
       setCountdownPercentage(percentage);
