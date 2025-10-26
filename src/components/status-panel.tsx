@@ -5,6 +5,7 @@ import * as React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type { Domain, ApiKeyStatus } from '@/lib/types';
+import { differenceInDays, addDays, getMonth, getYear, subMonths } from 'date-fns';
 
 interface StatusPanelProps {
   domains: Domain[];
@@ -16,37 +17,31 @@ interface StatusPanelProps {
 export function StatusPanel({ domains, domainStatuses, domainTodos, apiKeyStatuses }: StatusPanelProps) {
   const [clickedApiKey, setClickedApiKey] = React.useState<string | null>(null);
   const [showCountdownName, setShowCountdownName] = React.useState<boolean>(false);
-  const [daysRemaining, setDaysRemaining] = React.useState<number>(0);
+  const [daysRemaining, setDaysRemaining] = React.useState<number>(30);
+  const [countdownPercentage, setCountdownPercentage] = React.useState(100);
 
-  // Calculate days remaining from 11th of previous month (30 days countdown)
+  // Countdown logic for Smart Team Messenger
   React.useEffect(() => {
-    const calculateDaysRemaining = () => {
+    const calculateCountdown = () => {
       const now = new Date();
-      const currentMonth = now.getMonth();
-      const currentYear = now.getFullYear();
+      // The countdown period is 30 days, starting from the 11th of the previous month.
+      const lastMonth = subMonths(now, 1);
+      const startDate = new Date(getYear(lastMonth), getMonth(lastMonth), 11);
+      const endDate = addDays(startDate, 30);
       
-      // Get 11th of previous month
-      const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-      const yearForPreviousMonth = currentMonth === 0 ? currentYear - 1 : currentYear;
+      const remaining = differenceInDays(endDate, now);
+      const validRemainingDays = Math.max(0, remaining);
+      const percentage = (validRemainingDays / 30) * 100;
       
-      const startDate = new Date(yearForPreviousMonth, previousMonth, 11);
-      const endDate = new Date(startDate);
-      endDate.setDate(startDate.getDate() + 30); // 30 days from 11th
-      
-      const timeDiff = endDate.getTime() - now.getTime();
-      const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
-      
-      return Math.max(0, daysDiff); // Don't show negative days
+      setDaysRemaining(validRemainingDays);
+      setCountdownPercentage(percentage);
     };
 
-    setDaysRemaining(calculateDaysRemaining());
-    
-    // Update every day at midnight
-    const updateTimer = setInterval(() => {
-      setDaysRemaining(calculateDaysRemaining());
-    }, 24 * 60 * 60 * 1000);
+    calculateCountdown();
+    // Update the countdown every hour to be more precise
+    const intervalId = setInterval(calculateCountdown, 1000 * 60 * 60);
 
-    return () => clearInterval(updateTimer);
+    return () => clearInterval(intervalId);
   }, []);
 
   // Close popup when clicking outside
@@ -69,6 +64,7 @@ export function StatusPanel({ domains, domainStatuses, domainTodos, apiKeyStatus
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, [clickedApiKey, showCountdownName]);
+  
   const getStatusLight = (status: 'checking' | 'online' | 'offline', index: number, hasTodos?: boolean, isApiKey: boolean = false) => {
     const baseClasses = isApiKey ? "w-4 h-1.5 rounded-sm" : "w-2.5 h-2.5 rounded-full";
     
@@ -189,13 +185,12 @@ export function StatusPanel({ domains, domainStatuses, domainTodos, apiKeyStatus
             <div 
               className="h-1 bg-gray-700/50 rounded-full overflow-hidden relative cursor-pointer hover:bg-gray-600/50 transition-colors"
               onClick={() => setShowCountdownName(!showCountdownName)}
-              title="اضغط لعرض الاسم: سمارت تيم ماسنجر"
+              title={`اضغط لعرض الاسم. متبقي ${daysRemaining} يوم.`}
             >
               <div 
-                className="absolute top-0 right-0 h-full bg-green-500/50 transition-all duration-1000 ease-out"
+                className="absolute top-0 right-0 h-full bg-green-500/50 transition-all duration-1000 ease-linear"
                 style={{ 
-                  width: `${(daysRemaining / 30) * 100}%`,
-                  maxWidth: '100%'
+                  width: `${countdownPercentage}%`,
                 }}
               />
             </div>
