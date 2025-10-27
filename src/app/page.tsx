@@ -15,7 +15,7 @@ import { getTodosForDomains } from '@/services/todoService';
 import { AllTodosPanel } from '@/components/all-todos-panel';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from '@/components/ui/button';
-import { ChevronDown, DollarSign, PiggyBank, ShieldAlert } from 'lucide-react';
+import { ChevronDown, DollarSign, PiggyBank, ShieldAlert, ShoppingCart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FaultsSheet } from '@/components/faults-sheet';
 
@@ -175,14 +175,27 @@ export default function WebPage() {
         className="fixed left-0 top-0 h-full w-4 cursor-pointer z-10"
         title="Secret"
       />
-      <Button 
-        variant="ghost" 
-        size="icon" 
-        className="fixed top-4 left-4 z-20 h-10 w-10 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500/20 hover:text-red-400"
-        onClick={() => setFaultsSheetOpen(true)}
-        >
-        <ShieldAlert className="h-5 w-5" />
-      </Button>
+      <div className="fixed top-4 left-4 z-20 flex gap-2">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-10 w-10 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500/20 hover:text-red-400"
+          onClick={() => setFaultsSheetOpen(true)}
+          title="الأعطال"
+          >
+          <ShieldAlert className="h-5 w-5" />
+        </Button>
+        <Link href="https://rhsales.netlify.app" target="_blank" rel="noopener noreferrer">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-10 w-10 rounded-full bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 hover:text-blue-400"
+            title="لوحة إدارة المبيعات"
+            >
+            <ShoppingCart className="h-5 w-5" />
+          </Button>
+        </Link>
+      </div>
 
       <FaultsSheet open={isFaultsSheetOpen} onOpenChange={setFaultsSheetOpen} />
 
@@ -294,4 +307,3 @@ export default function WebPage() {
       </div>
     </>
   );
-}
