@@ -1,5 +1,5 @@
 'use client';
-import { db } from '@/lib/firebase';
+import { db } from '@/firebase';
 import type { Fault } from '@/lib/types';
 import {
   collection,
