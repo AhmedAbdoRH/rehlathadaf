@@ -15,7 +15,7 @@ import { getTodosForDomains } from '@/services/todoService';
 import { AllTodosPanel } from '@/components/all-todos-panel';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from '@/components/ui/button';
-import { ChevronDown, DollarSign, PiggyBank, ShieldAlert, ShoppingCart } from 'lucide-react';
+import { ChevronDown, DollarSign, PiggyBank, ShieldAlert, BarChart2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FaultsSheet } from '@/components/faults-sheet';
 
@@ -189,10 +189,10 @@ export default function WebPage() {
           <Button 
             variant="ghost" 
             size="icon" 
-            className="h-10 w-10 rounded-full bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 hover:text-blue-400"
+            className="h-10 w-10 rounded-full bg-purple-500/10 text-purple-500 hover:bg-purple-500/20 hover:text-purple-400"
             title="لوحة إدارة المبيعات"
             >
-            <ShoppingCart className="h-5 w-5" />
+            <BarChart2 className="h-5 w-5" />
           </Button>
         </Link>
       </div>
@@ -307,3 +307,5 @@ export default function WebPage() {
       </div>
     </>
   );
+
+    
