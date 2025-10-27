@@ -1,7 +1,7 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
-import '@/lib/firebase'; // Ensure Firebase is initialized on the server
+import '@/lib/firebase'; // Ensure Firebase is initialized
 
 export const metadata: Metadata = {
   title: 'لوحة تحكم النطاقات',
