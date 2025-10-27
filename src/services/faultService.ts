@@ -1,17 +1,20 @@
+'use client';
 import { db } from '@/lib/firebase';
 import type { Fault } from '@/lib/types';
-import { 
-  collection, 
-  getDocs, 
-  addDoc, 
-  deleteDoc, 
-  doc, 
+import {
+  collection,
+  getDocs,
+  addDoc,
+  deleteDoc,
+  doc,
   orderBy,
   serverTimestamp,
   Timestamp,
   getDoc,
-  query
+  query,
 } from 'firebase/firestore';
+import { errorEmitter } from '@/lib/error-emitter';
+import { FirestorePermissionError } from '@/lib/errors';
 
 const faultsCollectionRef = collection(db, 'faults');
 
@@ -19,29 +22,66 @@ const faultsCollectionRef = collection(db, 'faults');
 const faultFromDoc = (doc: any): Fault => {
   const data = doc.data();
   return {
-    ...data,
+    ...(data as Omit<Fault, 'createdAt'>),
     id: doc.id,
-    createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
-  } as Fault;
+    createdAt:
+      (data.createdAt as Timestamp)?.toDate().toISOString() ||
+      new Date().toISOString(),
+  };
 };
 
 export const getFaults = async (): Promise<Fault[]> => {
   const q = query(faultsCollectionRef, orderBy('createdAt', 'desc'));
-  const data = await getDocs(q);
-  return data.docs.map(faultFromDoc);
+  try {
+    const data = await getDocs(q);
+    return data.docs.map(faultFromDoc);
+  } catch (serverError: any) {
+     const permissionError = new FirestorePermissionError({
+      path: faultsCollectionRef.path,
+      operation: 'list',
+    });
+    errorEmitter.emit('permission-error', permissionError);
+    return [];
+  }
 };
 
-export const addFault = async (fault: Omit<Fault, 'id' | 'createdAt'>): Promise<Fault> => {
-  const newFaultData = {
-    ...fault,
-    createdAt: serverTimestamp(),
-  };
-  const docRef = await addDoc(faultsCollectionRef, newFaultData);
-  const newDoc = await getDoc(docRef);
-  return faultFromDoc(newDoc);
+export const addFault = (
+  fault: Omit<Fault, 'id' | 'createdAt'>
+): Promise<Fault> => {
+  return new Promise(async (resolve, reject) => {
+    const newFaultData = {
+      ...fault,
+      createdAt: serverTimestamp(),
+    };
+    addDoc(faultsCollectionRef, newFaultData)
+      .then(async (docRef) => {
+        const newDoc = await getDoc(docRef);
+        resolve(faultFromDoc(newDoc));
+      })
+      .catch((serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: faultsCollectionRef.path,
+          operation: 'create',
+          requestResourceData: newFaultData,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        reject(permissionError);
+      });
+  });
 };
 
-export const deleteFault = async (id: string): Promise<void> => {
-  const faultDoc = doc(db, 'faults', id);
-  await deleteDoc(faultDoc);
+export const deleteFault = (id: string): Promise<void> => {
+    return new Promise(async (resolve, reject) => {
+        const faultDoc = doc(db, 'faults', id);
+        deleteDoc(faultDoc).then(() => {
+            resolve();
+        }).catch(serverError => {
+            const permissionError = new FirestorePermissionError({
+                path: faultDoc.path,
+                operation: 'delete',
+            });
+            errorEmitter.emit('permission-error', permissionError);
+            reject(permissionError);
+        });
+    });
 };
