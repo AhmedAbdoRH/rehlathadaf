@@ -6,7 +6,7 @@ export type Domain = {
   domainName: string;
   status: 'active' | 'inactive';
   collectionDate: string; // ISO 8601 format
-  renewalDate: string | Date; // Allow Date for component state, string for DB
+  renewalDate: string; // ISO 8601 format
   dataSheet: string;
   outstandingBalance?: number;
   renewalCostClient: number | '';
