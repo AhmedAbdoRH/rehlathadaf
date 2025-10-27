@@ -15,18 +15,16 @@ import { FirestorePermissionError } from '@/firebase/errors';
 const domainsCollectionRef = collection(db, 'domains');
 
 export const getDomains = async (): Promise<Domain[]> => {
-  try {
-    const data = await getDocs(domainsCollectionRef);
-    return data.docs.map((doc) => ({ ...(doc.data() as Domain), id: doc.id }));
-  } catch (serverError: any) {
+  const data = await getDocs(domainsCollectionRef).catch((serverError) => {
     const permissionError = new FirestorePermissionError({
       path: domainsCollectionRef.path,
       operation: 'list',
     });
     errorEmitter.emit('permission-error', permissionError);
     // Return empty array or handle as per app's requirement on permission error
-    return [];
-  }
+    throw permissionError;
+  });
+  return data.docs.map((doc) => ({ ...(doc.data() as Domain), id: doc.id }));
 };
 
 export const addDomain = (
