@@ -3,28 +3,9 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Helper functions
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    // Rules for 'domains' collection
-    match /domains/{domainId} {
-      allow read: if true;
-      allow write: if true;
-    }
-
-    // Rules for 'todos' collection
-    match /todos/{todoId} {
-      allow read: if true;
-      allow write: if true;
-    }
-
-    // Rules for 'faults' collection
-    match /faults/{faultId} {
-      allow read: if true;
-      allow write: if true;
+    // Allow read and write access only to authenticated users
+    match /{document=**} {
+      allow read, write: if request.auth != null;
     }
   }
 }
