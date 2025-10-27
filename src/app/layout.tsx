@@ -2,6 +2,7 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { FirebaseProvider } from '@/firebase/provider';
+import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 export const metadata: Metadata = {
   title: 'لوحة تحكم النطاقات',
@@ -25,7 +26,9 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased">
         <FirebaseProvider>
-          {children}
+          <FirebaseClientProvider>
+            {children}
+          </FirebaseClientProvider>
         </FirebaseProvider>
         <Toaster />
       </body>
