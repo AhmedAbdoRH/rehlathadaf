@@ -15,8 +15,8 @@ import {
   Timestamp,
   getDoc,
 } from 'firebase/firestore';
-import { errorEmitter } from '@/lib/error-emitter';
-import { FirestorePermissionError } from '@/lib/errors';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 const todosCollectionRef = collection(db, 'todos');
 const domainsCollectionRef = collection(db, 'domains');
