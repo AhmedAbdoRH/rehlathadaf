@@ -262,7 +262,7 @@ export function DomainDashboard({
   const handleRenewDomain = async (domain: Domain) => {
     if (!domain.id) return;
 
-    const currentRenewalDate = parseISO(domain.renewalDate as string);
+    const currentRenewalDate = parseISO(domain.renewalDate);
     const nextRenewalDate = addYears(currentRenewalDate, 1);
     const nextRenewalDateISO = formatISO(nextRenewalDate);
 
@@ -318,7 +318,7 @@ export function DomainDashboard({
   const openEditDialog = (domain: Domain) => {
     setDomainToEdit({
         ...domain,
-        renewalDate: parseISO(domain.renewalDate as string),
+        renewalDate: parseISO(domain.renewalDate),
         renewalCostClient: domain.renewalCostClient || '',
         renewalCostOffice: domain.renewalCostOffice || '',
         renewalCostPova: domain.renewalCostPova || '',
@@ -366,7 +366,7 @@ export function DomainDashboard({
   };
 
   const getGoogleCalendarLink = (domain: Domain) => {
-    const renewalDate = parseISO(domain.renewalDate as string);
+    const renewalDate = parseISO(domain.renewalDate);
     const dateStr = format(renewalDate, 'yyyyMMdd');
     const title = encodeURIComponent(`تذكير تجديد نطاق: ${domain.domainName}`);
     const details = encodeURIComponent(
@@ -442,7 +442,7 @@ export function DomainDashboard({
     React.useEffect(() => {
         const filtered = allDomains
             .filter(d => d.projects?.includes(project))
-            .sort((a, b) => differenceInDays(parseISO(a.renewalDate as string), new Date()) - differenceInDays(parseISO(b.renewalDate as string), new Date()));
+            .sort((a, b) => differenceInDays(parseISO(a.renewalDate), new Date()) - differenceInDays(parseISO(b.renewalDate), new Date()));
         setSortedDomains(filtered);
     }, [allDomains, project]);
 
@@ -497,7 +497,7 @@ export function DomainDashboard({
         <Table>
           <TableBody>
             {sortedDomains.map(domain => {
-              const progress = getRenewalProgress(domain.renewalDate as string);
+              const progress = getRenewalProgress(domain.renewalDate);
               return (
               <Collapsible asChild key={domain.id}>
                 <>
@@ -513,8 +513,8 @@ export function DomainDashboard({
                             </a>
                           </div>
                           <div className='mt-2'>
-                            <div className="text-right">{`${format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}`}</div>
-                            <Progress value={progress} className={cn("h-2 mt-1", progress === 100 && "bg-orange-800")} />
+                            <div className="text-right">{`${format(parseISO(domain.renewalDate), 'dd/MM/yyyy')}`}</div>
+                            <Progress value={progress} className={cn("h-2 mt-1", progress === 100 && "bg-orange-600")} />
                           </div>
                            {renderInstallments(domain)}
                         </div>
@@ -664,7 +664,7 @@ export function DomainDashboard({
       {/* Mobile Cards */}
       <div className="md:hidden grid grid-cols-1 gap-4 mt-4">
         {sortedDomains.map(domain => {
-          const progress = getRenewalProgress(domain.renewalDate as string);
+          const progress = getRenewalProgress(domain.renewalDate);
           return (
           <Card asChild key={domain.id}>
             <Collapsible>
@@ -680,8 +680,8 @@ export function DomainDashboard({
                         </a>
                       </div>
                       <div className='mt-2'>
-                        <div className="text-right text-sm text-muted-foreground">{`${format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}`}</div>
-                        <Progress value={progress} className={cn("h-2 mt-1", progress === 100 && "bg-orange-800")} />
+                        <div className="text-right text-sm text-muted-foreground">{`${format(parseISO(domain.renewalDate), 'dd/MM/yyyy')}`}</div>
+                        <Progress value={progress} className={cn("h-2 mt-1", progress === 100 && "bg-orange-600")} />
                       </div>
                       {renderInstallments(domain)}
                     </div>
@@ -1145,6 +1145,7 @@ export function DomainDashboard({
     
 
     
+
 
 
 
