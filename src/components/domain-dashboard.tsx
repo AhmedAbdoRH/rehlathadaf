@@ -496,7 +496,9 @@ export function DomainDashboard({
       <div className="hidden md:block rounded-md border mt-4">
         <Table>
           <TableBody>
-            {sortedDomains.map(domain => (
+            {sortedDomains.map(domain => {
+              const progress = getRenewalProgress(domain.renewalDate as string);
+              return (
               <Collapsible asChild key={domain.id}>
                 <>
                   <TableRow>
@@ -512,7 +514,7 @@ export function DomainDashboard({
                           </div>
                           <div className='mt-2'>
                             <div className="text-right">{`${format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}`}</div>
-                            <Progress value={getRenewalProgress(domain.renewalDate as string)} className="h-2 mt-1" />
+                            <Progress value={progress} className={cn("h-2 mt-1", progress === 100 && "bg-orange-800")} />
                           </div>
                            {renderInstallments(domain)}
                         </div>
@@ -654,14 +656,16 @@ export function DomainDashboard({
                   </CollapsibleContent>
                 </>
               </Collapsible>
-            ))}
+            )})}
           </TableBody>
         </Table>
       </div>
 
       {/* Mobile Cards */}
       <div className="md:hidden grid grid-cols-1 gap-4 mt-4">
-        {sortedDomains.map(domain => (
+        {sortedDomains.map(domain => {
+          const progress = getRenewalProgress(domain.renewalDate as string);
+          return (
           <Card asChild key={domain.id}>
             <Collapsible>
               <div className="w-full overflow-hidden">
@@ -677,7 +681,7 @@ export function DomainDashboard({
                       </div>
                       <div className='mt-2'>
                         <div className="text-right text-sm text-muted-foreground">{`${format(parseISO(domain.renewalDate as string), 'dd/MM/yyyy')}`}</div>
-                        <Progress value={getRenewalProgress(domain.renewalDate as string)} className="h-2 mt-1" />
+                        <Progress value={progress} className={cn("h-2 mt-1", progress === 100 && "bg-orange-800")} />
                       </div>
                       {renderInstallments(domain)}
                     </div>
@@ -820,7 +824,7 @@ export function DomainDashboard({
               </div>
             </Collapsible>
           </Card>
-        ))}
+        )})}
       </div>
 
       <button
@@ -1141,6 +1145,7 @@ export function DomainDashboard({
     
 
     
+
 
 
 
