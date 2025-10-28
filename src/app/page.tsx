@@ -181,14 +181,47 @@ export default function WebPage() {
       <div className="min-h-screen bg-background text-foreground pb-4">
         <div className="container mx-auto p-4 sm:p-6 lg:p-8">
           
-          <header className="mb-4 flex items-center gap-4">
-            <div className="relative cursor-pointer" onClick={handleSecretClick}>
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
-                <Icons.logo className="h-8 w-8 text-primary-foreground" />
+          <header className="mb-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="relative cursor-pointer" onClick={handleSecretClick}>
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
+                  <Icons.logo className="h-8 w-8 text-primary-foreground" />
+                </div>
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-foreground">لوحة  المواقع وتطبيقات الويب</h1>
               </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">لوحة  المواقع وتطبيقات الويب</h1>
+            <div className="flex items-center gap-2">
+               <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-10 w-10 rounded-full bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                onClick={() => setFaultsSheetOpen(true)}
+                title="الأعطال"
+                >
+                <ShieldAlert className="h-5 w-5" />
+              </Button>
+              <Link href="https://rhsales.netlify.app" target="_blank" rel="noopener noreferrer">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-10 w-10 rounded-full bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  title="لوحة إدارة المبيعات"
+                  >
+                  <FileText className="h-5 w-5" />
+                </Button>
+              </Link>
+              <Link href="https://studio.firebase.google.com/u/1/studio-256607151" target="_blank" rel="noopener noreferrer">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-10 w-10 rounded-full bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  title="بيئة التطوير"
+                  >
+                  <Code2 className="h-5 w-5" />
+                </Button>
+              </Link>
             </div>
           </header>
 
@@ -284,40 +317,6 @@ export default function WebPage() {
           </main>
         </div>
       </div>
-      
-      <footer className="mt-8 border-t border-border/60 p-4">
-        <div className="container mx-auto flex justify-center items-center gap-4">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-10 w-10 rounded-full bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
-              onClick={() => setFaultsSheetOpen(true)}
-              title="الأعطال"
-              >
-              <ShieldAlert className="h-5 w-5" />
-            </Button>
-            <Link href="https://rhsales.netlify.app" target="_blank" rel="noopener noreferrer">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-10 w-10 rounded-full bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
-                title="لوحة إدارة المبيعات"
-                >
-                <FileText className="h-5 w-5" />
-              </Button>
-            </Link>
-            <Link href="https://studio.firebase.google.com/u/1/studio-256607151" target="_blank" rel="noopener noreferrer">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-10 w-10 rounded-full bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
-                title="بيئة التطوير"
-                >
-                <Code2 className="h-5 w-5" />
-              </Button>
-            </Link>
-        </div>
-      </footer>
     </>
   );
 }
