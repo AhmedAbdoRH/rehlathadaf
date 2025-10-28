@@ -15,7 +15,7 @@ import { getTodosForDomains } from '@/services/todoService';
 import { AllTodosPanel } from '@/components/all-todos-panel';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from '@/components/ui/button';
-import { ChevronDown, DollarSign, PiggyBank, ShieldAlert, BarChart2 } from 'lucide-react';
+import { ChevronDown, DollarSign, PiggyBank, ShieldAlert, AreaChart, Code2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FaultsSheet } from '@/components/faults-sheet';
 
@@ -192,7 +192,17 @@ export default function WebPage() {
             className="h-10 w-10 rounded-full bg-purple-500/10 text-purple-500 hover:bg-purple-500/20 hover:text-purple-400"
             title="لوحة إدارة المبيعات"
             >
-            <BarChart2 className="h-5 w-5" />
+            <AreaChart className="h-5 w-5" />
+          </Button>
+        </Link>
+        <Link href="https://studio.firebase.google.com/u/1/studio-256607151" target="_blank" rel="noopener noreferrer">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-10 w-10 rounded-full bg-green-500/10 text-green-500 hover:bg-green-500/20 hover:text-green-400"
+            title="بيئة التطوير"
+            >
+            <Code2 className="h-5 w-5" />
           </Button>
         </Link>
       </div>
