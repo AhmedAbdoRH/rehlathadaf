@@ -85,17 +85,6 @@
 }
 
 @layer utilities {
-  @keyframes ripple-wave {
-    0% {
-      transform: scale(0.9);
-      opacity: 0.6;
-    }
-    100% {
-      transform: scale(1.6);
-      opacity: 0;
-    }
-  }
-
   .fab-button {
     @apply fixed bottom-4 left-4 h-16 w-16 rounded-full flex items-center justify-center cursor-pointer z-50 text-white;
     background-color: rgba(0, 124, 240, 0.4);
@@ -103,26 +92,7 @@
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     transition: all 0.3s ease;
-    overflow: visible; /* Allow pseudo-elements to be visible */
   }
-  
-  .fab-button::before,
-  .fab-button::after {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    border-radius: 50%;
-    border: 2px solid #007cf0;
-    animation: ripple-wave 4s infinite ease-out;
-  }
-
-  .fab-button::after {
-    animation-delay: -2s;
-  }
-
 
   .fab-button:hover {
     transform: scale(1.05);
