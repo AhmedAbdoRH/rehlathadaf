@@ -178,7 +178,7 @@ export default function WebPage() {
       
       <FaultsSheet open={isFaultsSheetOpen} onOpenChange={setFaultsSheetOpen} />
 
-      <div className="min-h-screen bg-background text-foreground pb-16">
+      <div className="min-h-screen bg-background text-foreground pb-4">
         <div className="container mx-auto p-4 sm:p-6 lg:p-8">
           
           <header className="mb-4 flex items-center gap-4">
@@ -285,12 +285,12 @@ export default function WebPage() {
         </div>
       </div>
       
-      <footer className="fixed bottom-0 left-0 w-full bg-background/80 backdrop-blur-sm border-t border-border/60 p-2 z-50">
+      <footer className="mt-8 border-t border-border/60 p-4">
         <div className="container mx-auto flex justify-center items-center gap-4">
             <Button 
               variant="ghost" 
               size="icon" 
-              className="h-10 w-10 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500/20 hover:text-red-400"
+              className="h-10 w-10 rounded-full bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
               onClick={() => setFaultsSheetOpen(true)}
               title="الأعطال"
               >
@@ -300,7 +300,7 @@ export default function WebPage() {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-10 w-10 rounded-full bg-purple-500/10 text-purple-500 hover:bg-purple-500/20 hover:text-purple-400"
+                className="h-10 w-10 rounded-full bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
                 title="لوحة إدارة المبيعات"
                 >
                 <FileText className="h-5 w-5" />
@@ -310,7 +310,7 @@ export default function WebPage() {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-10 w-10 rounded-full bg-green-500/10 text-green-500 hover:bg-green-500/20 hover:text-green-400"
+                className="h-10 w-10 rounded-full bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
                 title="بيئة التطوير"
                 >
                 <Code2 className="h-5 w-5" />
