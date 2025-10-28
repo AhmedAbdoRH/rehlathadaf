@@ -15,7 +15,7 @@ import { getTodosForDomains } from '@/services/todoService';
 import { AllTodosPanel } from '@/components/all-todos-panel';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from '@/components/ui/button';
-import { ChevronDown, DollarSign, PiggyBank, ShieldAlert, AreaChart, Code2 } from 'lucide-react';
+import { ChevronDown, DollarSign, PiggyBank, ShieldAlert, Code2, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FaultsSheet } from '@/components/faults-sheet';
 
@@ -175,41 +175,10 @@ export default function WebPage() {
         className="fixed left-0 top-0 h-full w-4 cursor-pointer z-10"
         title="Secret"
       />
-      <div className="fixed top-4 left-4 z-20 flex gap-2">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-10 w-10 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500/20 hover:text-red-400"
-          onClick={() => setFaultsSheetOpen(true)}
-          title="الأعطال"
-          >
-          <ShieldAlert className="h-5 w-5" />
-        </Button>
-        <Link href="https://rhsales.netlify.app" target="_blank" rel="noopener noreferrer">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-10 w-10 rounded-full bg-purple-500/10 text-purple-500 hover:bg-purple-500/20 hover:text-purple-400"
-            title="لوحة إدارة المبيعات"
-            >
-            <AreaChart className="h-5 w-5" />
-          </Button>
-        </Link>
-        <Link href="https://studio.firebase.google.com/u/1/studio-256607151" target="_blank" rel="noopener noreferrer">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-10 w-10 rounded-full bg-green-500/10 text-green-500 hover:bg-green-500/20 hover:text-green-400"
-            title="بيئة التطوير"
-            >
-            <Code2 className="h-5 w-5" />
-          </Button>
-        </Link>
-      </div>
-
+      
       <FaultsSheet open={isFaultsSheetOpen} onOpenChange={setFaultsSheetOpen} />
 
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="min-h-screen bg-background text-foreground pb-16">
         <div className="container mx-auto p-4 sm:p-6 lg:p-8">
           
           <header className="mb-4 flex items-center gap-4">
@@ -315,7 +284,40 @@ export default function WebPage() {
           </main>
         </div>
       </div>
+      
+      <footer className="fixed bottom-0 left-0 w-full bg-background/80 backdrop-blur-sm border-t border-border/60 p-2 z-50">
+        <div className="container mx-auto flex justify-center items-center gap-4">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-10 w-10 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500/20 hover:text-red-400"
+              onClick={() => setFaultsSheetOpen(true)}
+              title="الأعطال"
+              >
+              <ShieldAlert className="h-5 w-5" />
+            </Button>
+            <Link href="https://rhsales.netlify.app" target="_blank" rel="noopener noreferrer">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-10 w-10 rounded-full bg-purple-500/10 text-purple-500 hover:bg-purple-500/20 hover:text-purple-400"
+                title="لوحة إدارة المبيعات"
+                >
+                <TrendingUp className="h-5 w-5" />
+              </Button>
+            </Link>
+            <Link href="https://studio.firebase.google.com/u/1/studio-256607151" target="_blank" rel="noopener noreferrer">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-10 w-10 rounded-full bg-green-500/10 text-green-500 hover:bg-green-500/20 hover:text-green-400"
+                title="بيئة التطوير"
+                >
+                <Code2 className="h-5 w-5" />
+              </Button>
+            </Link>
+        </div>
+      </footer>
     </>
   );
-
-    
+}
