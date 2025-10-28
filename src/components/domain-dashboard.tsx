@@ -514,7 +514,7 @@ export function DomainDashboard({
                           </div>
                           <div className='mt-2'>
                             <div className="text-right">{`${format(parseISO(domain.renewalDate), 'dd/MM/yyyy')}`}</div>
-                            <Progress value={progress} className={cn("h-2 mt-1", progress === 100 && "bg-orange-600")} />
+                            <Progress value={progress} className={cn("h-2 mt-1", progress === 100 && "bg-blue-800")} />
                           </div>
                            {renderInstallments(domain)}
                         </div>
@@ -681,7 +681,7 @@ export function DomainDashboard({
                       </div>
                       <div className='mt-2'>
                         <div className="text-right text-sm text-muted-foreground">{`${format(parseISO(domain.renewalDate), 'dd/MM/yyyy')}`}</div>
-                        <Progress value={progress} className={cn("h-2 mt-1", progress === 100 && "bg-orange-600")} />
+                        <Progress value={progress} className={cn("h-2 mt-1", progress === 100 && "bg-blue-800")} />
                       </div>
                       {renderInstallments(domain)}
                     </div>
@@ -1145,6 +1145,7 @@ export function DomainDashboard({
     
 
     
+
 
 
 
