@@ -21,7 +21,7 @@ export type Domain = {
 
 export type Todo = {
   id?: string;
-  domainId: string;
+  domainId?: string; // Optional for general todos
   text: string;
   completed: boolean;
   createdAt: string; // ISO 8601 string

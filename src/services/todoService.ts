@@ -65,10 +65,12 @@ export const getTodosForDomains = async (
 
     const todosByDomain: Record<string, Todo[]> = {};
     todos.forEach((todo) => {
-      if (!todosByDomain[todo.domainId]) {
-        todosByDomain[todo.domainId] = [];
+      if (todo.domainId) {
+        if (!todosByDomain[todo.domainId]) {
+          todosByDomain[todo.domainId] = [];
+        }
+        todosByDomain[todo.domainId].push(todo);
       }
-      todosByDomain[todo.domainId].push(todo);
     });
 
     // Sort todos within each domain
@@ -153,6 +155,8 @@ export const deleteTodo = (id: string): Promise<void> => {
     });
 };
 
+export const GENERAL_TASKS_KEY = 'مهام عامة';
+
 // New function to get all todos and group them by domain name
 export const getAllTodosGroupedByDomain = async (): Promise<
   Record<string, Todo[]>
@@ -167,9 +171,6 @@ export const getAllTodosGroupedByDomain = async (): Promise<
     throw permissionError;
   });
   const domainMap = new Map<string, string>();
-  if (domainsSnapshot.empty) {
-    return {}; // No domains, so no todos to group.
-  }
   domainsSnapshot.forEach((doc) => {
     const domainData = doc.data() as Domain;
     domainMap.set(doc.id, domainData.domainName);
@@ -189,17 +190,28 @@ export const getAllTodosGroupedByDomain = async (): Promise<
     .map(todoFromDoc)
     .filter((todo) => !todo.completed);
 
-  // 3. Group todos by domain name
-  const groupedTodos: Record<string, Todo[]> = {};
+  // 3. Group todos by domain name or as general tasks
+  const groupedTodos: Record<string, Todo[]> = {
+    [GENERAL_TASKS_KEY]: []
+  };
   todos.forEach((todo) => {
-    const domainName = domainMap.get(todo.domainId);
-    if (domainName) {
-      if (!groupedTodos[domainName]) {
-        groupedTodos[domainName] = [];
-      }
-      groupedTodos[domainName].push(todo);
+    if (todo.domainId) {
+        const domainName = domainMap.get(todo.domainId);
+        if (domainName) {
+            if (!groupedTodos[domainName]) {
+                groupedTodos[domainName] = [];
+            }
+            groupedTodos[domainName].push(todo);
+        }
+    } else {
+        // This is a general task
+        groupedTodos[GENERAL_TASKS_KEY].push(todo);
     }
   });
+  
+  if(groupedTodos[GENERAL_TASKS_KEY].length === 0){
+    delete groupedTodos[GENERAL_TASKS_KEY];
+  }
 
   return groupedTodos;
 };
