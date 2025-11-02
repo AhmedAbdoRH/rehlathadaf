@@ -193,15 +193,6 @@ export default function WebPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-               <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-10 w-10 rounded-full bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
-                onClick={() => setFaultsSheetOpen(true)}
-                title="الأعطال"
-                >
-                <ShieldAlert className="h-5 w-5" />
-              </Button>
               <Link href="https://rhsales.netlify.app" target="_blank" rel="noopener noreferrer">
                 <Button 
                   variant="ghost" 
@@ -232,6 +223,15 @@ export default function WebPage() {
                   <Code2 className="h-5 w-5" />
                 </Button>
               </Link>
+               <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-10 w-10 rounded-full bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                onClick={() => setFaultsSheetOpen(true)}
+                title="الأعطال"
+                >
+                <ShieldAlert className="h-5 w-5" />
+              </Button>
             </div>
           </header>
 
@@ -330,5 +330,7 @@ export default function WebPage() {
     </>
   );
 }
+
+    
 
     
