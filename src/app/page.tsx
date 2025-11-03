@@ -203,7 +203,7 @@ export default function WebPage() {
                   <User className="h-5 w-5" />
                 </Button>
               </Link>
-               <Link href="https://rh-fattura.netlify.app" target="_blank" rel="noopener noreferrer">
+               <Link href="https://rhfattura.netlify.app" target="_blank" rel="noopener noreferrer">
                 <Button 
                   variant="ghost" 
                   size="icon" 
@@ -330,7 +330,3 @@ export default function WebPage() {
     </>
   );
 }
-
-    
-
-    
