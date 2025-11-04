@@ -233,9 +233,6 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
                             <div key={domainName}>
                                 <h3 className="font-semibold mb-2 flex items-center gap-2">
                                     {domainName}
-                                    <Badge variant="destructive">
-                                        {groupedTodos[domainName].filter(t => !t.completed).length}
-                                    </Badge>
                                 </h3>
                                 <ul className="space-y-2">
                                     {groupedTodos[domainName].filter(t => !t.completed).map(todo => (
