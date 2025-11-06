@@ -121,7 +121,7 @@
   }
 
   .slide-out-and-fade {
-    animation: slideOutAndFade 0.3s ease-out forwards;
+    animation: slideOutAndFade 0.2s ease-out forwards;
     overflow: hidden;
   }
 
@@ -144,12 +144,12 @@
     left: 0;
     width: 0;
     height: 2px;
-    background: hsl(var(--primary));
-    animation: strike 0.3s ease-out forwards;
+    background: hsl(var(--chart-2));
+    animation: strike 0.2s ease-out forwards;
     transform: translateY(-50%);
   }
 
   .completed-animation-checkbox {
-    animation: checkbox-pop 0.3s ease-out;
+    animation: checkbox-pop 0.2s ease-out;
   }
 }
