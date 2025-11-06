@@ -29,6 +29,7 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
     const [newGeneralTodo, setNewGeneralTodo] = React.useState('');
     const [addingTodo, setAddingTodo] = React.useState(false);
     const [exitingTodos, setExitingTodos] = React.useState<string[]>([]);
+    const [completingTodo, setCompletingTodo] = React.useState<string | null>(null);
     const audioRef = React.useRef<HTMLAudioElement | null>(null);
     const { toast } = useToast();
 
@@ -52,7 +53,8 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
     React.useEffect(() => {
         // Pre-load the audio
         if (typeof window !== 'undefined') {
-            audioRef.current = new Audio("data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tAmXAADDSAHAAAPwX/v8p4j+CEb8AIARIAAAAAAHQYwHAAAGgAAAAAASwgj/we44G3pXGhA3lAAAAAEAAA//v9ZwBQCwADnAAAHoAAA//v/ZwBQCwADnAAAHoAAA//v/ZwBQCwADnAAAHoAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV-Jarry_Fes-4654_hifi.mp3");
+            audioRef.current = new Audio("data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tAnRABiFADgAANqiv//zFAREFVAAAAgAAA+jTEFImAAK4AABNEMkCSJ1YgJgAABRgAAAAnY1NTAVEAAAABAAAADkxBVkMAAAA5OC4xMDguMTAwAAAA//sQjxADeALgAABpAiv//wAAN9gAADCem8pXlRzYQCAAAAAAAAAAAAAFlVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVpVoA="
+            );
             audioRef.current.volume = 0.5;
         }
         fetchTodos();
@@ -62,8 +64,12 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
     const handleToggleTodo = async (todo: Todo) => {
         if (!todo.id || exitingTodos.includes(todo.id)) return;
 
+        setCompletingTodo(todo.id);
         audioRef.current?.play().catch(e => console.log("Audio play failed", e));
-        setExitingTodos(prev => [...prev, todo.id!]);
+        
+        setTimeout(() => {
+            setExitingTodos(prev => [...prev, todo.id!]);
+        }, 300); // Start fade out after strikethrough
 
         setTimeout(async () => {
             const originalGroupedTodos = { ...groupedTodos };
@@ -91,6 +97,7 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
             
             setGroupedTodos(newGroups);
             setExitingTodos(prev => prev.filter(id => id !== todo.id));
+            setCompletingTodo(null);
             onUpdate();
 
             try {
@@ -104,7 +111,7 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
                     variant: "destructive",
                 });
             }
-        }, 500); // Wait for animation to finish
+        }, 600); // Wait for all animations to finish
     };
 
     const handleDeleteTodo = async (todo: Todo) => {
@@ -194,6 +201,25 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
         key => key !== GENERAL_TASKS_KEY && groupedTodos[key].length > 0
     );
 
+    const renderTodoItem = (todo: Todo) => {
+      const isCompleting = completingTodo === todo.id;
+      return (
+        <li key={todo.id} className={cn("flex items-center gap-3 p-2 rounded-md bg-background/50 hover:bg-background transition-colors", exitingTodos.includes(todo.id!) && "slide-out-and-fade")}>
+            <Checkbox
+                id={`all-todo-${todo.id}`}
+                checked={todo.completed}
+                onCheckedChange={() => handleToggleTodo(todo)}
+                className={cn(isCompleting && "completed-animation-checkbox")}
+            />
+            <label htmlFor={`all-todo-${todo.id}`} className={cn("flex-1 text-sm relative", isCompleting && "strikethrough-label")}>
+                {todo.text}
+            </label>
+            <button onClick={() => handleDeleteTodo(todo)}>
+                <Trash2 className="h-4 w-4 text-destructive/80" />
+            </button>
+        </li>
+      );
+    }
 
     return (
         <Card className="bg-card/80 backdrop-blur-sm">
@@ -222,19 +248,7 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
                                     {GENERAL_TASKS_KEY}
                                 </h3>
                                 <ul className="space-y-2">
-                                    {generalTodos.map(todo => (
-                                        <li key={todo.id} className={cn("flex items-center gap-3 p-2 rounded-md bg-background/50 hover:bg-background transition-colors", exitingTodos.includes(todo.id!) && "slide-out-and-fade")}>
-                                            <Checkbox
-                                                id={`all-todo-${todo.id}`}
-                                                checked={todo.completed}
-                                                onCheckedChange={() => handleToggleTodo(todo)}
-                                            />
-                                            <label htmlFor={`all-todo-${todo.id}`} className="flex-1 text-sm">{todo.text}</label>
-                                            <button onClick={() => handleDeleteTodo(todo)}>
-                                                <Trash2 className="h-4 w-4 text-destructive/80" />
-                                            </button>
-                                        </li>
-                                    ))}
+                                    {generalTodos.map(renderTodoItem)}
                                 </ul>
                             </div>
                         )}
@@ -247,19 +261,7 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
                                     {domainName}
                                 </h3>
                                 <ul className="space-y-2">
-                                    {groupedTodos[domainName].filter(t => !t.completed).map(todo => (
-                                        <li key={todo.id} className={cn("flex items-center gap-3 p-2 rounded-md bg-background/50 hover:bg-background transition-colors", exitingTodos.includes(todo.id!) && "slide-out-and-fade")}>
-                                            <Checkbox
-                                                id={`all-todo-${todo.id}`}
-                                                checked={todo.completed}
-                                                onCheckedChange={() => handleToggleTodo(todo)}
-                                            />
-                                            <label htmlFor={`all-todo-${todo.id}`} className="flex-1 text-sm">{todo.text}</label>
-                                            <button onClick={() => handleDeleteTodo(todo)}>
-                                                <Trash2 className="h-4 w-4 text-destructive/80" />
-                                            </button>
-                                        </li>
-                                    ))}
+                                    {groupedTodos[domainName].filter(t => !t.completed).map(renderTodoItem)}
                                 </ul>
                             </div>
                         ))}

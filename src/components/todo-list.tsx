@@ -39,13 +39,15 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
   const [loading, setLoading] = React.useState(false);
   const [bulkLoading, setBulkLoading] = React.useState(false);
   const [exitingTodos, setExitingTodos] = React.useState<string[]>([]);
+  const [completingTodo, setCompletingTodo] = React.useState<string | null>(null);
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
   
   React.useEffect(() => {
     // Pre-load the audio
     if (typeof window !== 'undefined') {
-        audioRef.current = new Audio("data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tAmXAADDSAHAAAPwX/v8p4j+CEb8AIARIAAAAAAHQYwHAAAGgAAAAAASwgj/we44G3pXGhA3lAAAAAEAAA//v9ZwBQCwADnAAAHoAAA//v/ZwBQCwADnAAAHoAAA//v/ZwBQCwADnAAAHoAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV-Jarry_Fes-4654_hifi.mp3");
+        audioRef.current = new Audio("data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tAnRABiFADgAANqiv//zFAREFVAAAAgAAA+jTEFImAAK4AABNEMkCSJ1YgJgAABRgAAAAnY1NTAVEAAAABAAAADkxBVkMAAAA5OC4xMDguMTAwAAAA//sQjxADeALgAABpAiv//wAAN9gAADCem8pXlRzYQCAAAAAAAAAAAAAFlVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVpVoA="
+        );
         audioRef.current.volume = 0.5;
     }
     setTodos(initialTodos);
@@ -123,14 +125,20 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
   const handleToggleTodo = async (todoToToggle: Todo) => {
     if (!todoToToggle.id || todoToToggle.id.startsWith('temp-') || exitingTodos.includes(todoToToggle.id)) return;
   
+    setCompletingTodo(todoToToggle.id);
     audioRef.current?.play().catch(e => console.log("Audio play failed", e));
-    setExitingTodos(prev => [...prev, todoToToggle.id!]);
+    
+    // Start exit animation after a short delay to let the strikethrough animation play
+    setTimeout(() => {
+        setExitingTodos(prev => [...prev, todoToToggle.id!]);
+    }, 300); // This delay should be roughly the duration of the strikethrough
 
-    // Wait for animation to finish before removing from state and calling DB
+    // Wait for fade out animation to finish before removing from state and calling DB
     setTimeout(async () => {
         const originalTodos = todos;
         setTodos(prev => prev.filter(t => t.id !== todoToToggle.id));
         setExitingTodos(prev => prev.filter(id => id !== todoToToggle.id));
+        setCompletingTodo(null);
         onUpdate();
     
         try {
@@ -145,7 +153,7 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
                 variant: "destructive",
             });
         }
-    }, 500); // This duration should match the CSS animation duration
+    }, 600); // This duration should be strikethrough + fadeout
   };
   
   const handleDeleteTodo = async (todoId: string) => {
@@ -213,30 +221,33 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
         </div>
       ) : (
         <div className="space-y-2">
-          {uncompletedTodos.map(todo => (
-            <div key={todo.id} className={cn("flex items-start gap-3 p-2 rounded-md bg-background/50 hover:bg-background transition-colors group", exitingTodos.includes(todo.id!) && "slide-out-and-fade")}>
-              <Checkbox
-                id={`todo-${todo.id}`}
-                checked={todo.completed}
-                onCheckedChange={() => handleToggleTodo(todo)}
-                aria-label={todo.text}
-                className="mt-1"
-              />
-              <label 
-                htmlFor={`todo-${todo.id}`}
-                onClick={handleLabelClick}
-                className={`flex-1 text-sm select-all whitespace-pre-wrap ${todo.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}
-              >
-                {todo.text}
-              </label>
-              <span className="text-xs text-muted-foreground mt-1">
-                {todo.createdAt ? formatDistanceToNow(new Date(todo.createdAt), { addSuffix: true, locale: ar }) : ''}
-              </span>
-              <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => todo.id && handleDeleteTodo(todo.id)}>
-                <Trash2 className="h-4 w-4 text-destructive/80" />
-              </Button>
-            </div>
-          ))}
+          {uncompletedTodos.map(todo => {
+            const isCompleting = completingTodo === todo.id;
+            return (
+              <div key={todo.id} className={cn("flex items-start gap-3 p-2 rounded-md bg-background/50 hover:bg-background transition-colors group", exitingTodos.includes(todo.id!) && "slide-out-and-fade")}>
+                <Checkbox
+                  id={`todo-${todo.id}`}
+                  checked={todo.completed}
+                  onCheckedChange={() => handleToggleTodo(todo)}
+                  aria-label={todo.text}
+                  className={cn("mt-1", isCompleting && "completed-animation-checkbox")}
+                />
+                <label 
+                  htmlFor={`todo-${todo.id}`}
+                  onClick={handleLabelClick}
+                  className={cn("flex-1 text-sm select-all whitespace-pre-wrap relative", isCompleting && "strikethrough-label", todo.completed ? 'line-through text-muted-foreground' : 'text-foreground' )}
+                >
+                  {todo.text}
+                </label>
+                <span className="text-xs text-muted-foreground mt-1">
+                  {todo.createdAt ? formatDistanceToNow(new Date(todo.createdAt), { addSuffix: true, locale: ar }) : ''}
+                </span>
+                <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => todo.id && handleDeleteTodo(todo.id)}>
+                  <Trash2 className="h-4 w-4 text-destructive/80" />
+                </Button>
+              </div>
+            )
+          })}
            {uncompletedTodos.length === 0 && (
              <p className="text-center text-muted-foreground py-4">لا توجد مهام حتى الآن.</p>
            )}
