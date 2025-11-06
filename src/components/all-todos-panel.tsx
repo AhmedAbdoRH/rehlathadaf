@@ -12,6 +12,8 @@ import { Checkbox } from './ui/checkbox';
 import { updateTodo } from '@/services/todoService';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
+import { cn } from '@/lib/utils';
+
 
 interface GroupedTodos {
     [domainName: string]: Todo[];
@@ -26,6 +28,8 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
     const [loading, setLoading] = React.useState(true);
     const [newGeneralTodo, setNewGeneralTodo] = React.useState('');
     const [addingTodo, setAddingTodo] = React.useState(false);
+    const [exitingTodos, setExitingTodos] = React.useState<string[]>([]);
+    const audioRef = React.useRef<HTMLAudioElement | null>(null);
     const { toast } = useToast();
 
     const fetchTodos = React.useCallback(async () => {
@@ -46,50 +50,61 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
     }, [toast]);
     
     React.useEffect(() => {
+        // Pre-load the audio
+        if (typeof window !== 'undefined') {
+            audioRef.current = new Audio("data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tAmXAADDSAHAAAPwX/v8p4j+CEb8AIARIAAAAAAHQYwHAAAGgAAAAAASwgj/we44G3pXGhA3lAAAAAEAAA//v9ZwBQCwADnAAAHoAAA//v/ZwBQCwADnAAAHoAAA//v/ZwBQCwADnAAAHoAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV-Jarry_Fes-4654_hifi.mp3");
+            audioRef.current.volume = 0.5;
+        }
         fetchTodos();
     }, [fetchTodos, onUpdate]);
 
 
     const handleToggleTodo = async (todo: Todo) => {
-        if (!todo.id) return;
-        
-        const originalGroupedTodos = { ...groupedTodos };
-        const newGroups = {...originalGroupedTodos};
-        let groupKey: string | null = null;
+        if (!todo.id || exitingTodos.includes(todo.id)) return;
 
-        if (todo.domainId) {
-            for (const domainName in newGroups) {
-                const todoIndex = newGroups[domainName].findIndex(t => t.id === todo.id);
-                if (todoIndex > -1) {
-                    groupKey = domainName;
-                    break;
+        audioRef.current?.play().catch(e => console.log("Audio play failed", e));
+        setExitingTodos(prev => [...prev, todo.id!]);
+
+        setTimeout(async () => {
+            const originalGroupedTodos = { ...groupedTodos };
+            const newGroups = {...originalGroupedTodos};
+            let groupKey: string | null = null;
+
+            if (todo.domainId) {
+                for (const domainName in newGroups) {
+                    const todoIndex = newGroups[domainName].findIndex(t => t.id === todo.id);
+                    if (todoIndex > -1) {
+                        groupKey = domainName;
+                        break;
+                    }
+                }
+            } else {
+                 groupKey = GENERAL_TASKS_KEY;
+            }
+
+            if (groupKey && newGroups[groupKey]) {
+                newGroups[groupKey] = newGroups[groupKey].filter(t => t.id !== todo.id);
+                if (newGroups[groupKey].length === 0) {
+                    delete newGroups[groupKey];
                 }
             }
-        } else {
-             groupKey = GENERAL_TASKS_KEY;
-        }
-
-        if (groupKey && newGroups[groupKey]) {
-            newGroups[groupKey] = newGroups[groupKey].filter(t => t.id !== todo.id);
-            if (newGroups[groupKey].length === 0) {
-                delete newGroups[groupKey];
-            }
-        }
-        
-        setGroupedTodos(newGroups);
-        onUpdate();
-
-        try {
-            await updateTodo(todo.id, { completed: !todo.completed });
-        } catch (error) {
-            setGroupedTodos(originalGroupedTodos);
+            
+            setGroupedTodos(newGroups);
+            setExitingTodos(prev => prev.filter(id => id !== todo.id));
             onUpdate();
-            toast({
-                title: "خطأ",
-                description: "فشل في تحديث المهمة.",
-                variant: "destructive",
-            });
-        }
+
+            try {
+                await updateTodo(todo.id!, { completed: !todo.completed });
+            } catch (error) {
+                setGroupedTodos(originalGroupedTodos);
+                onUpdate();
+                toast({
+                    title: "خطأ",
+                    description: "فشل في تحديث المهمة.",
+                    variant: "destructive",
+                });
+            }
+        }, 500); // Wait for animation to finish
     };
 
     const handleDeleteTodo = async (todo: Todo) => {
@@ -205,13 +220,10 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
                             <div>
                                 <h3 className="font-semibold mb-2 flex items-center gap-2">
                                     {GENERAL_TASKS_KEY}
-                                    <Badge variant="secondary">
-                                        {generalTodos.length}
-                                    </Badge>
                                 </h3>
                                 <ul className="space-y-2">
                                     {generalTodos.map(todo => (
-                                        <li key={todo.id} className="flex items-center gap-3 p-2 rounded-md bg-background/50 hover:bg-background transition-colors">
+                                        <li key={todo.id} className={cn("flex items-center gap-3 p-2 rounded-md bg-background/50 hover:bg-background transition-colors", exitingTodos.includes(todo.id!) && "slide-out-and-fade")}>
                                             <Checkbox
                                                 id={`all-todo-${todo.id}`}
                                                 checked={todo.completed}
@@ -236,7 +248,7 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
                                 </h3>
                                 <ul className="space-y-2">
                                     {groupedTodos[domainName].filter(t => !t.completed).map(todo => (
-                                        <li key={todo.id} className="flex items-center gap-3 p-2 rounded-md bg-background/50 hover:bg-background transition-colors">
+                                        <li key={todo.id} className={cn("flex items-center gap-3 p-2 rounded-md bg-background/50 hover:bg-background transition-colors", exitingTodos.includes(todo.id!) && "slide-out-and-fade")}>
                                             <Checkbox
                                                 id={`all-todo-${todo.id}`}
                                                 checked={todo.completed}

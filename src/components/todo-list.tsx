@@ -11,6 +11,7 @@ import { addTodo, updateTodo, deleteTodo } from '@/services/todoService';
 import type { Todo } from '@/lib/types';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
 interface TodoListProps {
   domainId: string;
@@ -37,10 +38,16 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
   const [newTodo, setNewTodo] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [bulkLoading, setBulkLoading] = React.useState(false);
+  const [exitingTodos, setExitingTodos] = React.useState<string[]>([]);
+  const audioRef = React.useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
   
-  // Sync state if initialTodos prop changes
   React.useEffect(() => {
+    // Pre-load the audio
+    if (typeof window !== 'undefined') {
+        audioRef.current = new Audio("data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tAmXAADDSAHAAAPwX/v8p4j+CEb8AIARIAAAAAAHQYwHAAAGgAAAAAASwgj/we44G3pXGhA3lAAAAAEAAA//v9ZwBQCwADnAAAHoAAA//v/ZwBQCwADnAAAHoAAA//v/ZwBQCwADnAAAHoAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV-Jarry_Fes-4654_hifi.mp3");
+        audioRef.current.volume = 0.5;
+    }
     setTodos(initialTodos);
   }, [initialTodos]);
 
@@ -114,29 +121,31 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
   };
 
   const handleToggleTodo = async (todoToToggle: Todo) => {
-    if (!todoToToggle.id || todoToToggle.id.startsWith('temp-')) return;
+    if (!todoToToggle.id || todoToToggle.id.startsWith('temp-') || exitingTodos.includes(todoToToggle.id)) return;
   
-    // Optimistic update
-    const originalTodos = todos;
-    setTodos(prev => 
-      prev.filter(t => t.id !== todoToToggle.id)
-    );
-    onUpdate();
-  
-    try {
-      await updateTodo(todoToToggle.id, { completed: !todoToToggle.completed });
-      // No need to call onUpdate() again unless there is a success state to show
-    } catch (error) {
-      // Revert on error
-      setTodos(originalTodos);
-      onUpdate();
-      console.error("Error updating todo:", error);
-      toast({
-        title: "خطأ",
-        description: "فشل في تحديث المهمة.",
-        variant: "destructive",
-      });
-    }
+    audioRef.current?.play().catch(e => console.log("Audio play failed", e));
+    setExitingTodos(prev => [...prev, todoToToggle.id!]);
+
+    // Wait for animation to finish before removing from state and calling DB
+    setTimeout(async () => {
+        const originalTodos = todos;
+        setTodos(prev => prev.filter(t => t.id !== todoToToggle.id));
+        setExitingTodos(prev => prev.filter(id => id !== todoToToggle.id));
+        onUpdate();
+    
+        try {
+            await updateTodo(todoToToggle.id!, { completed: !todoToToggle.completed });
+        } catch (error) {
+            setTodos(originalTodos); // Revert on DB error
+            onUpdate();
+            console.error("Error updating todo:", error);
+            toast({
+                title: "خطأ",
+                description: "فشل في تحديث المهمة.",
+                variant: "destructive",
+            });
+        }
+    }, 500); // This duration should match the CSS animation duration
   };
   
   const handleDeleteTodo = async (todoId: string) => {
@@ -205,7 +214,7 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
       ) : (
         <div className="space-y-2">
           {uncompletedTodos.map(todo => (
-            <div key={todo.id} className="flex items-start gap-3 p-2 rounded-md bg-background/50 hover:bg-background transition-colors group">
+            <div key={todo.id} className={cn("flex items-start gap-3 p-2 rounded-md bg-background/50 hover:bg-background transition-colors group", exitingTodos.includes(todo.id!) && "slide-out-and-fade")}>
               <Checkbox
                 id={`todo-${todo.id}`}
                 checked={todo.completed}
