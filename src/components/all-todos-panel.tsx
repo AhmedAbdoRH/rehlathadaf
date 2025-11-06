@@ -28,8 +28,7 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
     const [loading, setLoading] = React.useState(true);
     const [newGeneralTodo, setNewGeneralTodo] = React.useState('');
     const [addingTodo, setAddingTodo] = React.useState(false);
-    const [exitingTodos, setExitingTodos] = React.useState<string[]>([]);
-    const [completingTodo, setCompletingTodo] = React.useState<string | null>(null);
+    const [toggledTodos, setToggledTodos] = React.useState<string[]>([]);
     const audioRef = React.useRef<HTMLAudioElement | null>(null);
     const { toast } = useToast();
 
@@ -53,64 +52,64 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
     React.useEffect(() => {
         // Pre-load the audio
         if (typeof window !== 'undefined') {
-            audioRef.current = new Audio("data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tAnRABiFADgAANqiv//zFAREFVAAAAgAAA+jTEFImAAK4AABNEMkCSJ1YgJgAABRgAAAAnY1NTAVEAAAABAAAADkxBVkMAAAA5OC4xMDguMTAwAAAA//sQjxADeALgAABpAiv//wAAN9gAADCem8pXlRzYQCAAAAAAAAAAAAAFlVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVpVoA=");
+            audioRef.current = new Audio("data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tAnRABiFADgAANqiv//zFAREFVAAAAgAAA+jTEFImAAK4AABNEMkCSJ1YgJgAABRgAAAAnY1NTAVEAAAABAAAADkxBVkMAAAA5OC4xMDguMTAwAAAA//sQjxADeALgAABpAiv//wAAN9gAADCem8pXlRzYQCAAAAAAAAAAAAAFlVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVpVoA=");
             audioRef.current.volume = 0.5;
         }
         fetchTodos();
-    }, [fetchTodos, onUpdate]);
+    }, [fetchTodos]);
 
 
-    const handleToggleTodo = async (todo: Todo) => {
-        if (!todo.id || exitingTodos.includes(todo.id)) return;
+    const handleToggleTodo = async (todoId: string) => {
+        if (!todoId || toggledTodos.includes(todoId)) return;
 
-        setCompletingTodo(todo.id);
+        // --- Immediate Visual Update ---
+        setToggledTodos(prev => [...prev, todoId]);
         audioRef.current?.play().catch(e => console.log("Audio play failed", e));
         
-        setTimeout(() => {
-            setExitingTodos(prev => [...prev, todo.id!]);
-        }, 200); // Start fade out after strikethrough
+        // Find which group the todo is in and update its 'completed' state for immediate UI feedback
+        const newGroupedTodos = { ...groupedTodos };
+        let originalTodo: Todo | null = null;
+        let groupKey: string | null = null;
 
-        setTimeout(async () => {
-            const originalGroupedTodos = { ...groupedTodos };
-            const newGroups = {...originalGroupedTodos};
-            let groupKey: string | null = null;
-
-            if (todo.domainId) {
-                for (const domainName in newGroups) {
-                    const todoIndex = newGroups[domainName].findIndex(t => t.id === todo.id);
-                    if (todoIndex > -1) {
-                        groupKey = domainName;
-                        break;
-                    }
-                }
-            } else {
-                 groupKey = GENERAL_TASKS_KEY;
+        for (const key in newGroupedTodos) {
+            const todoIndex = newGroupedTodos[key].findIndex(t => t.id === todoId);
+            if (todoIndex !== -1) {
+                groupKey = key;
+                originalTodo = { ...newGroupedTodos[key][todoIndex] };
+                newGroupedTodos[key][todoIndex] = { ...newGroupedTodos[key][todoIndex], completed: true };
+                break;
             }
+        }
+        setGroupedTodos(newGroupedTodos);
+        // --- End Immediate Visual Update ---
 
-            if (groupKey && newGroups[groupKey]) {
-                newGroups[groupKey] = newGroups[groupKey].filter(t => t.id !== todo.id);
-                if (newGroups[groupKey].length === 0) {
-                    delete newGroups[groupKey];
+        // Wait for animations to finish before removing the item
+        setTimeout(async () => {
+            const finalGroupedTodos = { ...groupedTodos };
+            if (groupKey && finalGroupedTodos[groupKey]) {
+                finalGroupedTodos[groupKey] = finalGroupedTodos[groupKey].filter(t => t.id !== todoId);
+                 if (finalGroupedTodos[groupKey].length === 0) {
+                    delete finalGroupedTodos[groupKey];
                 }
             }
             
-            setGroupedTodos(newGroups);
-            setExitingTodos(prev => prev.filter(id => id !== todo.id));
-            setCompletingTodo(null);
-            onUpdate();
+            setGroupedTodos(finalGroupedTodos);
+            setToggledTodos(prev => prev.filter(id => id !== todoId));
+            onUpdate(); // Notify parent of the change
 
+            // Now, update the database
             try {
-                await updateTodo(todo.id!, { completed: !todo.completed });
+                await updateTodo(todoId, { completed: true });
             } catch (error) {
-                setGroupedTodos(originalGroupedTodos);
-                onUpdate();
+                // Revert on failure
                 toast({
                     title: "خطأ",
                     description: "فشل في تحديث المهمة.",
                     variant: "destructive",
                 });
+                fetchTodos(); // Refetch to get the correct state
             }
-        }, 400); // Wait for all animations to finish
+        }, 500); // Duration should match your CSS animations
     };
 
     const handleDeleteTodo = async (todo: Todo) => {
@@ -201,13 +200,14 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
     );
 
     const renderTodoItem = (todo: Todo) => {
-      const isCompleting = completingTodo === todo.id;
+      if (!todo.id) return null;
+      const isCompleting = toggledTodos.includes(todo.id);
       return (
-        <li key={todo.id} className={cn("flex items-center gap-3 p-2 rounded-md bg-background/50 hover:bg-background transition-colors", exitingTodos.includes(todo.id!) && "slide-out-and-fade")}>
+        <li key={todo.id} className={cn("flex items-center gap-3 p-2 rounded-md bg-background/50 hover:bg-background transition-colors", isCompleting && "slide-out-and-fade")}>
             <Checkbox
                 id={`all-todo-${todo.id}`}
                 checked={todo.completed}
-                onCheckedChange={() => handleToggleTodo(todo)}
+                onCheckedChange={() => handleToggleTodo(todo.id!)}
                 className={cn(isCompleting && "completed-animation-checkbox")}
             />
             <label htmlFor={`all-todo-${todo.id}`} className={cn("flex-1 text-sm relative", isCompleting && "strikethrough-label")}>
@@ -260,7 +260,7 @@ export function AllTodosPanel({ onUpdate }: AllTodosPanelProps) {
                                     {domainName}
                                 </h3>
                                 <ul className="space-y-2">
-                                    {groupedTodos[domainName].filter(t => !t.completed).map(renderTodoItem)}
+                                    {groupedTodos[domainName].map(renderTodoItem)}
                                 </ul>
                             </div>
                         ))}

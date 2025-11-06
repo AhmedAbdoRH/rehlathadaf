@@ -34,22 +34,22 @@ const defaultTodos = [
 
 
 export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
-  const [todos, setTodos] = React.useState<Todo[]>(initialTodos);
+  const [todos, setTodos] = React.useState<Todo[]>([]);
   const [newTodo, setNewTodo] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [bulkLoading, setBulkLoading] = React.useState(false);
-  const [exitingTodos, setExitingTodos] = React.useState<string[]>([]);
-  const [completingTodo, setCompletingTodo] = React.useState<string | null>(null);
+  const [toggledTodos, setToggledTodos] = React.useState<string[]>([]);
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
   
   React.useEffect(() => {
     // Pre-load the audio
     if (typeof window !== 'undefined') {
-        audioRef.current = new Audio("data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tAnRABiFADgAANqiv//zFAREFVAAAAgAAA+jTEFImAAK4AABNEMkCSJ1YgJgAABRgAAAAnY1NTAVEAAAABAAAADkxBVkMAAAA5OC4xMDguMTAwAAAA//sQjxADeALgAABpAiv//wAAN9gAADCem8pXlRzYQCAAAAAAAAAAAAAFlVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVoA=");
+        audioRef.current = new Audio("data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjQ1LjEwMAAAAAAAAAAAAAAA//tAnRABiFADgAANqiv//zFAREFVAAAAgAAA+jTEFImAAK4AABNEMkCSJ1YgJgAABRgAAAAnY1NTAVEAAAABAAAADkxBVkMAAAA5OC4xMDguMTAwAAAA//sQjxADeALgAABpAiv//wAAN9gAADCem8pXlRzYQCAAAAAAAAAAAAAFlVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVoA=");
         audioRef.current.volume = 0.5;
     }
-    setTodos(initialTodos);
+    const uncompleted = initialTodos.filter(t => !t.completed);
+    setTodos(uncompleted);
   }, [initialTodos]);
 
 
@@ -67,8 +67,7 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
       createdAt: new Date().toISOString(),
     };
 
-    // Optimistic update
-    setTodos(prevTodos => [optimisticTodo, ...prevTodos].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+    setTodos(prevTodos => [optimisticTodo, ...prevTodos]);
     setNewTodo('');
 
     try {
@@ -77,13 +76,11 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
         text,
         completed: false,
       });
-      // Replace temporary todo with the real one from the server
       setTodos(prevTodos => 
         prevTodos.map(t => (t.id === tempId ? addedTodo : t))
       );
       onUpdate();
     } catch (error) {
-       // Revert optimistic update on error
       setTodos(prevTodos => prevTodos.filter(t => t.id !== tempId));
       console.error("Error adding todo:", error);
       toast({
@@ -121,29 +118,26 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
     }
   };
 
-  const handleToggleTodo = async (todoToToggle: Todo) => {
-    if (!todoToToggle.id || todoToToggle.id.startsWith('temp-') || exitingTodos.includes(todoToToggle.id)) return;
+  const handleToggleTodo = async (todoId: string) => {
+    if (!todoId || todoId.startsWith('temp-') || toggledTodos.includes(todoId)) return;
   
-    setCompletingTodo(todoToToggle.id);
+    // --- Immediate Visual Update ---
+    setToggledTodos(prev => [...prev, todoId]);
     audioRef.current?.play().catch(e => console.log("Audio play failed", e));
+    setTodos(prev => prev.map(t => t.id === todoId ? { ...t, completed: true } : t));
+    // --- End Immediate Visual Update ---
     
-    // Start exit animation after a short delay to let the strikethrough animation play
-    setTimeout(() => {
-        setExitingTodos(prev => [...prev, todoToToggle.id!]);
-    }, 200); // This delay should be roughly the duration of the strikethrough
-
-    // Wait for fade out animation to finish before removing from state and calling DB
+    // Wait for animations to finish before removing the item from the list
     setTimeout(async () => {
         const originalTodos = todos;
-        setTodos(prev => prev.filter(t => t.id !== todoToToggle.id));
-        setExitingTodos(prev => prev.filter(id => id !== todoToToggle.id));
-        setCompletingTodo(null);
+        setTodos(prev => prev.filter(t => t.id !== todoId));
+        setToggledTodos(prev => prev.filter(id => id !== todoId));
         onUpdate();
     
         try {
-            await updateTodo(todoToToggle.id!, { completed: !todoToToggle.completed });
+            await updateTodo(todoId, { completed: true });
         } catch (error) {
-            setTodos(originalTodos); // Revert on DB error
+            setTodos(originalTodos); 
             onUpdate();
             console.error("Error updating todo:", error);
             toast({
@@ -152,13 +146,12 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
                 variant: "destructive",
             });
         }
-    }, 400); // This duration should be strikethrough + fadeout
+    }, 500); // Duration should match your CSS animations
   };
   
   const handleDeleteTodo = async (todoId: string) => {
     if (!todoId || todoId.startsWith('temp-')) return;
   
-    // Optimistic update
     const originalTodos = todos;
     setTodos(prev => prev.filter(t => t.id !== todoId));
     onUpdate();
@@ -170,9 +163,7 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
         description: "تم حذف المهمة.",
         variant: "destructive"
       });
-      // No need to call onUpdate() again on success, it's already updated
     } catch (error) {
-      // Revert on error
       setTodos(originalTodos);
       onUpdate();
       console.error("Error deleting todo:", error);
@@ -193,8 +184,6 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
       selection.addRange(range);
     }
   };
-
-  const uncompletedTodos = todos.filter(todo => !todo.completed);
 
   return (
     <div className="space-y-4">
@@ -220,21 +209,22 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
         </div>
       ) : (
         <div className="space-y-2">
-          {uncompletedTodos.map(todo => {
-            const isCompleting = completingTodo === todo.id;
+          {todos.map(todo => {
+            if (!todo.id) return null;
+            const isCompleting = toggledTodos.includes(todo.id);
             return (
-              <div key={todo.id} className={cn("flex items-start gap-3 p-2 rounded-md bg-background/50 hover:bg-background transition-colors group", exitingTodos.includes(todo.id!) && "slide-out-and-fade")}>
+              <div key={todo.id} className={cn("flex items-start gap-3 p-2 rounded-md bg-background/50 hover:bg-background transition-colors group", isCompleting && "slide-out-and-fade")}>
                 <Checkbox
                   id={`todo-${todo.id}`}
                   checked={todo.completed}
-                  onCheckedChange={() => handleToggleTodo(todo)}
+                  onCheckedChange={() => handleToggleTodo(todo.id!)}
                   aria-label={todo.text}
                   className={cn("mt-1", isCompleting && "completed-animation-checkbox")}
                 />
                 <label 
                   htmlFor={`todo-${todo.id}`}
                   onClick={handleLabelClick}
-                  className={cn("flex-1 text-sm select-all whitespace-pre-wrap relative", isCompleting && "strikethrough-label", todo.completed ? 'line-through text-muted-foreground' : 'text-foreground' )}
+                  className={cn("flex-1 text-sm select-all whitespace-pre-wrap relative", isCompleting && "strikethrough-label", todo.completed ? 'text-muted-foreground' : 'text-foreground' )}
                 >
                   {todo.text}
                 </label>
@@ -247,7 +237,7 @@ export function TodoList({ domainId, initialTodos, onUpdate }: TodoListProps) {
               </div>
             )
           })}
-           {uncompletedTodos.length === 0 && (
+           {todos.length === 0 && (
              <p className="text-center text-muted-foreground py-4">لا توجد مهام حتى الآن.</p>
            )}
         </div>
