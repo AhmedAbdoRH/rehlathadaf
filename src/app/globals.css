@@ -132,9 +132,21 @@
   }
 
   @keyframes checkbox-pop {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
+    0% { 
+      transform: scale(1);
+      background-color: hsl(var(--primary));
+      border-color: hsl(var(--primary));
+    }
+    50% { 
+      transform: scale(1.2); 
+      background-color: hsl(var(--chart-2));
+      border-color: hsl(var(--chart-2));
+    }
+    100% { 
+      transform: scale(1); 
+      background-color: hsl(var(--chart-2));
+      border-color: hsl(var(--chart-2));
+    }
   }
 
   .strikethrough-label::after {
@@ -149,7 +161,10 @@
     transform: translateY(-50%);
   }
 
-  .completed-animation-checkbox {
-    animation: checkbox-pop 0.2s ease-out;
+  .completed-animation-checkbox[data-state="checked"] {
+    animation: checkbox-pop 0.2s ease-out forwards;
+    background-color: hsl(var(--chart-2));
+    border-color: hsl(var(--chart-2));
+    color: hsl(var(--primary-foreground));
   }
 }
