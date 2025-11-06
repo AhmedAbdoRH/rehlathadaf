@@ -15,9 +15,11 @@ import { getTodosForDomains } from '@/services/todoService';
 import { AllTodosPanel } from '@/components/all-todos-panel';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from '@/components/ui/button';
-import { ChevronDown, DollarSign, PiggyBank, ShieldAlert, Code2, User, Receipt } from 'lucide-react';
+import { ChevronDown, DollarSign, PiggyBank, ShieldAlert, Code2, User, Receipt, NotebookPen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FaultsSheet } from '@/components/faults-sheet';
+import { GeneralPaperSheet } from '@/components/general-paper-sheet';
+
 
 const StatCard = ({ title, value, icon, className }: { title: string, value: string, icon: React.ElementType, className?: string }) => {
     const Icon = icon;
@@ -45,6 +47,7 @@ export default function WebPage() {
   const [domainTodos, setDomainTodos] = React.useState<Record<string, Todo[]>>({});
   const [loading, setLoading] = React.useState(true);
   const [isFaultsSheetOpen, setFaultsSheetOpen] = React.useState(false);
+  const [isGeneralPaperSheetOpen, setGeneralPaperSheetOpen] = React.useState(false);
 
 
   const apiKeysData = [
@@ -177,6 +180,7 @@ export default function WebPage() {
       />
       
       <FaultsSheet open={isFaultsSheetOpen} onOpenChange={setFaultsSheetOpen} />
+      <GeneralPaperSheet open={isGeneralPaperSheetOpen} onOpenChange={setGeneralPaperSheetOpen} />
 
       <div className="min-h-screen bg-background text-foreground pb-4">
         <div className="container mx-auto p-4 sm:p-6 lg:p-8">
@@ -193,6 +197,15 @@ export default function WebPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-10 w-10 rounded-full bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                onClick={() => setGeneralPaperSheetOpen(true)}
+                title="الورقة العامة"
+                >
+                <NotebookPen className="h-5 w-5" />
+              </Button>
               <Link href="https://rhsales.netlify.app" target="_blank" rel="noopener noreferrer">
                 <Button 
                   variant="ghost" 
