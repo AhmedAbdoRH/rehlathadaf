@@ -121,7 +121,7 @@
   }
 
   .slide-out-and-fade {
-    animation: slideOutAndFade 0.2s ease-out forwards;
+    animation: slideOutAndFade 0.4s ease-out forwards;
     overflow: hidden;
   }
 
@@ -157,12 +157,12 @@
     width: 0;
     height: 2px;
     background: hsl(var(--chart-2));
-    animation: strike 0.2s ease-out forwards;
+    animation: strike 0.4s ease-out forwards;
     transform: translateY(-50%);
   }
 
   .completed-animation-checkbox[data-state="checked"] {
-    animation: checkbox-pop 0.2s ease-out forwards;
+    animation: checkbox-pop 0.4s ease-out forwards;
     background-color: hsl(var(--chart-2));
     border-color: hsl(var(--chart-2));
     color: hsl(var(--primary-foreground));
