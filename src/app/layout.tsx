@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: 'لوحة تحكم النطاقات',
   description: 'إدارة النطاقات وتتبع تواريخ التجديد والتكاليف بسهولة.',
   icons: {
-    icon: '/icon.svg',
+    icon: '/logo.png',
   },
 };
 
