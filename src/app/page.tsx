@@ -196,36 +196,16 @@ export default function WebPage() {
     <>
       <div 
         onClick={handleSecretClick} 
-        className="fixed left-0 top-0 h-full w-4 cursor-pointer z-10"
+        className="fixed left-0 top-0 h-full w-4 cursor-pointer z-20"
         title="Secret"
       />
       
       <FaultsSheet open={isFaultsSheetOpen} onOpenChange={setFaultsSheetOpen} />
       <GeneralPaperSheet open={isGeneralPaperSheetOpen} onOpenChange={setGeneralPaperSheetOpen} />
 
-      <div className="min-h-screen bg-background text-foreground pb-4">
-        <div className="container mx-auto p-4 sm:p-6 lg:p-8">
-          
-          <header 
-            className="mb-4 flex items-center justify-between gap-4 cursor-pointer"
-            onClick={() => {
-              if (typeof window !== 'undefined') {
-                localStorage.setItem('navVisible', 'true');
-                window.dispatchEvent(new Event('navVisibilityChanged'));
-              }
-            }}
-          >
-            <div className="flex items-center gap-4">
-              <div className="relative cursor-pointer" onClick={handleSecretClick}>
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
-                  <Icons.logo className="h-8 w-8 text-primary-foreground" />
-                </div>
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-foreground">لوحة  المواقع وتطبيقات الويب</h1>
-              </div>
-            </div>
-            <div className={`flex items-center gap-2 transition-opacity duration-200 ${buttonsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border/60">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+           <div className={`flex items-center justify-center gap-2 transition-opacity duration-300 h-14 ${buttonsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
               <Link href="/main-office-invoices">
                 <Button 
                   variant="ghost" 
@@ -305,6 +285,33 @@ export default function WebPage() {
                 <ShieldAlert className="h-5 w-5" />
               </Button>
             </div>
+        </div>
+      </div>
+
+
+      <div className="min-h-screen bg-background text-foreground pb-4">
+        <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+          
+          <header 
+            className="my-4 flex items-center justify-between gap-4 cursor-pointer"
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                localStorage.setItem('navVisible', 'true');
+                window.dispatchEvent(new Event('navVisibilityChanged'));
+              }
+            }}
+          >
+            <div className="flex items-center gap-4">
+              <div className="relative cursor-pointer" onClick={handleSecretClick}>
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
+                  <Icons.logo className="h-8 w-8 text-primary-foreground" />
+                </div>
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-foreground">لوحة  المواقع وتطبيقات الويب</h1>
+              </div>
+            </div>
+            
           </header>
 
           <Collapsible className="w-full mb-2">
