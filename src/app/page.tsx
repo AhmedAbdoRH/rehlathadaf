@@ -206,7 +206,7 @@ export default function WebPage() {
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border/60">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
            <div className={`flex items-center justify-center gap-2 transition-opacity duration-300 h-14 ${buttonsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-              <Link href="/main-office-invoices">
+              <Link href="https://rh-marketing.netlify.app/sys" target="_blank" rel="noopener noreferrer">
                 <Button 
                   variant="ghost" 
                   size="icon" 
@@ -216,7 +216,7 @@ export default function WebPage() {
                   <Building2 className="h-5 w-5" />
                 </Button>
               </Link>
-              <Link href="/online-finance">
+              <Link href="https://rh-marketing.netlify.app/oc" target="_blank" rel="noopener noreferrer">
                 <Button 
                   variant="ghost" 
                   size="icon" 
@@ -226,7 +226,7 @@ export default function WebPage() {
                   <LayoutGrid className="h-5 w-5" />
                 </Button>
               </Link>
-              <Link href="/international-transactions">
+              <Link href="https://rh-marketing.netlify.app/trns" target="_blank" rel="noopener noreferrer">
                 <Button 
                   variant="ghost" 
                   size="icon" 
